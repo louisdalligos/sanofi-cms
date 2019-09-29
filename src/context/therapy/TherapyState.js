@@ -14,22 +14,22 @@ import {
 
 const TherapyState = props => {
   const initialState = {
-    therapies: [
+    articles: [
       {
         id: 1,
-        title: "Article one title goes here",
+        title: "Article one title goes here xx",
         description: "Lorem ipsum",
         status: "draft"
       },
       {
         id: 2,
-        title: "Article two title goes here",
+        title: "Article two title goes here 33",
         description: "Lorem ipsum",
         status: "published"
       },
       {
         id: 3,
-        title: "Article one title goes here",
+        title: "Article one title goes here 22",
         description: "Lorem ipsum",
         status: "archived"
       }
@@ -51,7 +51,7 @@ const TherapyState = props => {
   return (
     <TherapyContext.Provider
       value={{
-        therapies: state.therapies
+        articles: state.articles
       }}
     >
       {props.children}
