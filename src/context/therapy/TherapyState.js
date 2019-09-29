@@ -45,7 +45,9 @@ const TherapyState = props => {
   };
 
   // Delete therapy article
-
+  const deleteArticle = id => {
+    dispatch({ type: DELETE_THERAPY, payload: id });
+  };
   // Set current therapy article
 
   // Clear current therapy article
@@ -56,7 +58,8 @@ const TherapyState = props => {
     <TherapyContext.Provider
       value={{
         articles: state.articles,
-        addArticle
+        addArticle,
+        deleteArticle
       }}
     >
       {props.children}

@@ -13,7 +13,13 @@ export default (state, action) => {
         ...state,
         articles: [...state.articles, action.payload]
       };
-
+    case DELETE_THERAPY:
+      return {
+        ...state,
+        articles: state.articles.filter(
+          article => article.id !== action.payload
+        )
+      };
     default:
       return state;
   }
