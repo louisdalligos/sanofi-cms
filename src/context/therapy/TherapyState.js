@@ -39,6 +39,10 @@ const TherapyState = props => {
   const [state, dispatch] = useReducer(therapyReducer, initialState);
 
   // Add therapy article
+  const addArticle = article => {
+    article.id = uuid.v4();
+    dispatch({ type: ADD_THERAPY, payload: article });
+  };
 
   // Delete therapy article
 
@@ -51,7 +55,8 @@ const TherapyState = props => {
   return (
     <TherapyContext.Provider
       value={{
-        articles: state.articles
+        articles: state.articles,
+        addArticle
       }}
     >
       {props.children}

@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from "react";
 import AuthContext from "Context/auth/authContext";
 
 import TherapyArticles from "Components/TherapyArticles/TherapyArticles";
+import ArticleForm from "Components/TherapyArticles/ArticleForm";
 
 const Dashboard = props => {
   const authContext = useContext(AuthContext);
@@ -26,6 +27,8 @@ const Dashboard = props => {
       <div>
         <TherapyArticles />
       </div>
+
+      <ArticleForm />
     </div>
   );
 };
