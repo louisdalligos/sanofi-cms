@@ -4,12 +4,17 @@ import TherapyContext from "Context/therapy/therapyContext";
 
 const TherapyItem = ({ article }) => {
   const therapyContext = useContext(TherapyContext);
-  const { deleteArticle } = therapyContext;
+  const {
+    deleteArticle,
+    setCurrentArticle,
+    clearCurrentArticle
+  } = therapyContext;
 
   const { id, title, description, status } = article;
 
   const handleDelete = () => {
     deleteArticle(id);
+    clearCurrentArticle(); // remove the current article on state
   };
 
   return (
@@ -19,7 +24,7 @@ const TherapyItem = ({ article }) => {
       <span>{status}</span>
 
       <div>
-        <button>Edit</button>
+        <button onClick={() => setCurrentArticle(article)}>Edit</button>
         <button onClick={handleDelete}>Delete</button>
       </div>
     </div>

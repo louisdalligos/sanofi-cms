@@ -33,7 +33,8 @@ const TherapyState = props => {
         description: "Lorem ipsum",
         status: "archived"
       }
-    ]
+    ],
+    current: null
   };
 
   const [state, dispatch] = useReducer(therapyReducer, initialState);
@@ -48,9 +49,16 @@ const TherapyState = props => {
   const deleteArticle = id => {
     dispatch({ type: DELETE_THERAPY, payload: id });
   };
+
   // Set current therapy article
+  const setCurrentArticle = article => {
+    dispatch({ type: SET_CURRENT, payload: article });
+  };
 
   // Clear current therapy article
+  const clearCurrentArticle = () => {
+    dispatch({ type: CLEAR_CURRENT });
+  };
 
   // Update therapy article
 
@@ -58,8 +66,11 @@ const TherapyState = props => {
     <TherapyContext.Provider
       value={{
         articles: state.articles,
+        current: state.current,
         addArticle,
-        deleteArticle
+        deleteArticle,
+        setCurrentArticle,
+        clearCurrentArticle
       }}
     >
       {props.children}
