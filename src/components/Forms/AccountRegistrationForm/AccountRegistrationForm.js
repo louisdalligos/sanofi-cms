@@ -1,4 +1,5 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+
 import AlertContext from "Context/alerts/alertContext";
 import AuthContext from "Context/auth/authContext";
 import Alerts from "Components/Alerts/Alerts";
@@ -7,8 +8,16 @@ const AccountRegistrationForm = props => {
   const authContext = useContext(AuthContext); // get our auth context
   const alertContext = useContext(AlertContext); // get our alert context
 
-  const { register } = authContext; // get values from the provider
+  const { register, error, clearErrors } = authContext; // get values from the provider
   const { setAlert } = alertContext; // get values from the provider
+
+  //@todo add id to error messages
+  useEffect(() => {
+    if (error === "User with that email already exists") {
+      setAlert(error, "error");
+      clearErrors(); // set error to null
+    }
+  }, [error]); // add error value as a dependency of useEffect
 
   // set our state
   const [user, setUser] = useState({
