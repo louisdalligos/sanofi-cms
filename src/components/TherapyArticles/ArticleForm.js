@@ -1,14 +1,32 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import TherapyContext from "Context/therapy/therapyContext";
 
 const ArticleForm = () => {
   const therapyContext = useContext(TherapyContext);
+  const {
+    addArticle,
+    updateArticle,
+    current,
+    clearCurrentArticle
+  } = therapyContext;
 
   const [article, setArticle] = useState({
     title: "",
     description: "",
     status: "draft"
   });
+
+  useEffect(() => {
+    if (current !== null) {
+      setArticle(current);
+    } else {
+      setArticle({
+        title: "",
+        description: "",
+        status: "draft"
+      });
+    }
+  }, [therapyContext, current]);
 
   const { title, description, status } = article;
 
@@ -18,18 +36,19 @@ const ArticleForm = () => {
   const handleSubmit = e => {
     e.preventDefault();
 
-    therapyContext.addArticle(article);
+    if (current === null) {
+      addArticle(article); // call addArticle function
+    } else {
+      // call update article action
+      updateArticle(article);
+    }
 
-    setArticle({
-      title: "",
-      description: "",
-      status: "draft"
-    });
+    clearCurrentArticle(); // reset form
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>New Article</h2>
+      <h2>{current ? "Edit" : "Add"} Article</h2>
       <input
         type="text"
         placeholder="Enter your article title"
@@ -46,7 +65,7 @@ const ArticleForm = () => {
         value={description}
       />
 
-      <button type="submit">Add article</button>
+      <button type="submit">Save draft</button>
     </form>
   );
 };

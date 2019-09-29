@@ -18,19 +18,19 @@ const TherapyState = props => {
       {
         id: 1,
         title: "Article one title goes here xx",
-        description: "Lorem ipsum",
+        description: "Lorem ipsum asdfasdf ",
         status: "draft"
       },
       {
         id: 2,
         title: "Article two title goes here 33",
-        description: "Lorem ipsum",
+        description: "Lorem ipsumhgfjghjg dfgdfgh",
         status: "published"
       },
       {
         id: 3,
         title: "Article one title goes here 22",
-        description: "Lorem ipsum",
+        description: "Lorem ipsu 3fasdf3ras m",
         status: "archived"
       }
     ],
@@ -61,6 +61,9 @@ const TherapyState = props => {
   };
 
   // Update therapy article
+  const updateArticle = article => {
+    dispatch({ type: UPDATE_THERAPY, payload: article });
+  };
 
   return (
     <TherapyContext.Provider
@@ -70,7 +73,8 @@ const TherapyState = props => {
         addArticle,
         deleteArticle,
         setCurrentArticle,
-        clearCurrentArticle
+        clearCurrentArticle,
+        updateArticle
       }}
     >
       {props.children}

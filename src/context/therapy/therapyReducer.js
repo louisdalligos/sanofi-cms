@@ -13,6 +13,13 @@ export default (state, action) => {
         ...state,
         articles: [...state.articles, action.payload]
       };
+    case UPDATE_THERAPY:
+      return {
+        ...state,
+        articles: state.articles.map(article =>
+          article.id === action.payload.id ? action.payload : article
+        )
+      };
     case DELETE_THERAPY:
       return {
         ...state,
