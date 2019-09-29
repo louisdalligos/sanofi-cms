@@ -1,0 +1,5 @@
+export const ADD_THERAPY = "ADD_THERAPY";
+export const DELETE_THERAPY = "DELETE_THERAPY";
+export const SET_CURRENT = "SET_CURRENT";
+export const CLEAR_CURRENT = "CLEAR_CURRENT";
+export const UPDATE_THERAPY = "UPDATE_THERAPY";
