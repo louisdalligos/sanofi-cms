@@ -19,19 +19,20 @@ const TherapyState = props => {
         id: 1,
         title: "Article one title goes here xx",
         description: "Lorem ipsum asdfasdf ",
-        status: "draft"
+        status: "draft",
+        createdAt: Date.now()
       },
       {
         id: 2,
         title: "Article two title goes here 33",
         description: "Lorem ipsumhgfjghjg dfgdfgh",
-        status: "published"
+        createdAt: Date.now()
       },
       {
         id: 3,
         title: "Article one title goes here 22",
         description: "Lorem ipsu 3fasdf3ras m",
-        status: "archived"
+        createdAt: Date.now()
       }
     ],
     current: null

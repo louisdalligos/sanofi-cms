@@ -14,16 +14,10 @@ const { Header, Content } = Layout;
 const Dashboard = props => {
   const authContext = useContext(AuthContext);
 
-  const { isAuthenticated, logout, user } = authContext;
-
   useEffect(() => {
     authContext.loadUser();
     // eslint-disable-next-line
   }, []);
-
-  const onLogout = () => {
-    logout();
-  };
 
   return (
     <Layout>
@@ -41,8 +35,6 @@ const Dashboard = props => {
         <AppBreadcrumb />
         <div style={{ background: "#fff", marginTop: 50, minHeight: 380 }}>
           <h1>Dashboard</h1>
-          <p>Hello, welcome {user && user.name}</p>
-          <button onClick={onLogout}>Logout</button>
 
           <div>
             <TherapyArticles />

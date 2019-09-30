@@ -15,7 +15,7 @@ const MyProfileMenu = () => {
   return (
     <div className="profileMenu">
       <Avatar size="small" icon="user" />
-      <p>Hello, welcome {user && user.name}</p>
+      <span>Hello, welcome {user && user.name}</span>
       <Button type="link" onClick={onLogout}>
         Logout
       </Button>
