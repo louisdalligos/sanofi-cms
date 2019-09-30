@@ -11,8 +11,8 @@ import {
   CLEAR_CURRENT,
   UPDATE_THERAPY,
   FETCH_THERAPIES,
-  CLEAR_THERAPIES,
-  THERAPY_ERROR
+  THERAPY_ERROR,
+  CLEAR_ARTICLES
 } from "./types";
 
 const TherapyState = props => {
@@ -41,6 +41,13 @@ const TherapyState = props => {
     }
   };
 
+  // Clear all articles on the state
+  const clearArticles = () => {
+    dispatch({
+      type: CLEAR_ARTICLES
+    });
+  };
+
   // Add therapy article
   const addArticle = async article => {
     const config = {
@@ -62,8 +69,6 @@ const TherapyState = props => {
         payload: error.response.msg
       });
     }
-
-    dispatch({ type: ADD_THERAPY, payload: article });
   };
 
   // Delete therapy article
@@ -82,8 +87,20 @@ const TherapyState = props => {
   };
 
   // Update therapy article
-  const updateArticle = article => {
-    dispatch({ type: UPDATE_THERAPY, payload: article });
+  const updateArticle = async article => {
+    try {
+      const res = await axios.post("/api/therapies", article);
+
+      dispatch({
+        type: UPDATE_THERAPY,
+        payload: res.data
+      });
+    } catch (error) {
+      dispatch({
+        type: THERAPY_ERROR,
+        payload: error.response.msg
+      });
+    }
   };
 
   return (
@@ -93,6 +110,7 @@ const TherapyState = props => {
         current: state.current,
         error: state.error,
         fetchArticles,
+        clearArticles,
         addArticle,
         deleteArticle,
         setCurrentArticle,

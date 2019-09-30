@@ -1,47 +1,51 @@
-import React, { Fragment, useContext, useEffect } from "react";
+import React, { Fragment, useContext, useState, useEffect } from "react";
 import { Table, Tag, Divider, Button } from "antd";
-import TherapyItem from "./TherapyItem";
+//import TherapyItem from "./TherapyItem";
 
 // context
 import TherapyContext from "Context/therapy/therapyContext";
 
-const columns = [
-  {
-    title: "Status",
-    dataIndex: "status",
-    key: "status"
-  },
-  {
-    title: "Title",
-    dataIndex: "age",
-    key: "title"
-  },
-  {
-    title: "Description",
-    dataIndex: "desccription",
-    key: "description"
-  },
-  {
-    title: "Date Created",
-    dataIndex: "createdAt",
-    key: "createdAt"
-  },
-  {
-    title: "Action",
-    key: "action",
-    render: (text, record) => (
-      <span>
-        <Button type="primary">Edit</Button>
-        <Divider type="vertical" />
-        <a>Delete</a>
-      </span>
-    )
-  }
-];
-
 const TherapyArticles = () => {
   const therapyContext = useContext(TherapyContext);
-  const { articles, fetchArticles, loading } = therapyContext;
+
+  const {
+    articles,
+    fetchArticles,
+    setCurrentArticle,
+    deleteArticle,
+    clearCurrentArticle,
+    loading
+  } = therapyContext;
+
+  const [columns, setColumns] = useState([
+    {
+      title: "Status",
+      dataIndex: "status",
+      sorter: true
+    },
+    {
+      title: "Title",
+      dataIndex: "title"
+    },
+    {
+      title: "Description",
+      dataIndex: "description"
+    },
+    {
+      title: "Date Created",
+      dataIndex: "createdAt"
+    },
+    {
+      title: "Action",
+      render: (text, record) => (
+        <span>
+          <Button type="primary">Edit</Button>
+          <Divider type="vertical" />
+          <Button type="danger">Delete</Button>
+        </span>
+      )
+    }
+  ]);
 
   useEffect(() => {
     fetchArticles();

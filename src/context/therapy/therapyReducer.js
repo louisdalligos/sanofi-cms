@@ -5,7 +5,8 @@ import {
   CLEAR_CURRENT,
   UPDATE_THERAPY,
   THERAPY_ERROR,
-  FETCH_THERAPIES
+  FETCH_THERAPIES,
+  CLEAR_ARTICLES
 } from "./types";
 
 export default (state, action) => {
@@ -15,6 +16,13 @@ export default (state, action) => {
         ...state,
         articles: action.payload,
         loading: false
+      };
+    case CLEAR_ARTICLES:
+      return {
+        ...state,
+        articles: null,
+        error: null,
+        current: null
       };
     case ADD_THERAPY:
       return {
@@ -26,7 +34,7 @@ export default (state, action) => {
       return {
         ...state,
         articles: state.articles.map(article =>
-          article.id === action.payload.id ? action.payload : article
+          article._id === action.payload._id ? action.payload : article
         ),
         loading: false
       };
