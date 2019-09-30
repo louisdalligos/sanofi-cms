@@ -1,6 +1,6 @@
 import React, { useReducer } from "react";
+import axios from "axios";
 
-import uuid from "uuid";
 import TherapyContext from "./therapyContext";
 import therapyReducer from "./therapyReducer";
 
@@ -9,40 +9,60 @@ import {
   DELETE_THERAPY,
   SET_CURRENT,
   CLEAR_CURRENT,
-  UPDATE_THERAPY
+  UPDATE_THERAPY,
+  FETCH_THERAPIES,
+  CLEAR_THERAPIES,
+  THERAPY_ERROR
 } from "./types";
 
 const TherapyState = props => {
   const initialState = {
-    articles: [
-      {
-        id: 1,
-        title: "Article one title goes here xx",
-        description: "Lorem ipsum asdfasdf ",
-        status: "draft",
-        createdAt: Date.now()
-      },
-      {
-        id: 2,
-        title: "Article two title goes here 33",
-        description: "Lorem ipsumhgfjghjg dfgdfgh",
-        createdAt: Date.now()
-      },
-      {
-        id: 3,
-        title: "Article one title goes here 22",
-        description: "Lorem ipsu 3fasdf3ras m",
-        createdAt: Date.now()
-      }
-    ],
-    current: null
+    articles: [],
+    current: null,
+    error: null,
+    loading: false
   };
 
   const [state, dispatch] = useReducer(therapyReducer, initialState);
 
+  // Fetch articles from database
+  const fetchArticles = async () => {
+    try {
+      const res = await axios.get("api/therapies");
+      dispatch({
+        type: FETCH_THERAPIES,
+        payload: res.data
+      });
+    } catch (error) {
+      dispatch({
+        type: THERAPY_ERROR,
+        payload: error.response.msg
+      });
+    }
+  };
+
   // Add therapy article
-  const addArticle = article => {
-    article.id = uuid.v4();
+  const addArticle = async article => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+
+    try {
+      const res = await axios.post("/api/therapies", article, config);
+
+      dispatch({
+        type: ADD_THERAPY,
+        payload: res.data
+      });
+    } catch (error) {
+      dispatch({
+        type: THERAPY_ERROR,
+        payload: error.response.msg
+      });
+    }
+
     dispatch({ type: ADD_THERAPY, payload: article });
   };
 
@@ -71,6 +91,8 @@ const TherapyState = props => {
       value={{
         articles: state.articles,
         current: state.current,
+        error: state.error,
+        fetchArticles,
         addArticle,
         deleteArticle,
         setCurrentArticle,

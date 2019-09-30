@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from "react";
+import React, { Fragment, useContext, useEffect } from "react";
 import { Table, Tag, Divider, Button } from "antd";
 import TherapyItem from "./TherapyItem";
 
@@ -39,29 +39,27 @@ const columns = [
   }
 ];
 
-const data = [
-  {
-    key: "1",
-    title: "John Brown",
-    age: 32,
-    address: "New York No. 1 Lake Park",
-    tags: ["nice", "developer"]
-  }
-];
-
 const TherapyArticles = () => {
   const therapyContext = useContext(TherapyContext);
+  const { articles, fetchArticles, loading } = therapyContext;
 
-  const { articles } = therapyContext;
+  useEffect(() => {
+    fetchArticles();
+    //eslint-disable-next-line
+  }, []);
 
-  console.log(therapyContext.articles);
   return (
     // <Fragment>
     //   {articles.map(article => (
     //     <TherapyItem key={article.id} article={article} />
     //   ))}
     // </Fragment>
-    <Table columns={columns} dataSource={articles} />
+    <Fragment>
+      <Button type="primary" style={{ float: "right" }}>
+        New Article
+      </Button>
+      <Table columns={columns} dataSource={articles} />
+    </Fragment>
   );
 };
 
