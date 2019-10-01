@@ -15,8 +15,7 @@ const LoginForm = props => {
   //@todo
   useEffect(() => {
     if (isAuthenticated) {
-      //<Redirect push to="/" />;
-      alert("authenticated");
+      props.history.push("/");
     }
 
     if (error === "Invalid Credentials") {
