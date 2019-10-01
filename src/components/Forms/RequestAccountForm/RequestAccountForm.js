@@ -4,26 +4,30 @@ import { Link } from "react-router-dom";
 import AlertContext from "Context/alerts/alertContext";
 import Alerts from "Components/Alerts/Alerts";
 
-const ForgotPasswordForm = props => {
+const RequestAccountForm = props => {
   const alertContext = useContext(AlertContext); // get our alert context
   const { setAlert } = alertContext; // get values from the provider
 
   const [user, setUser] = useState({
-    email: ""
+    email: "",
+    department: ""
   });
 
-  const { email } = user;
+  const { email, department } = user;
 
-  const handleChange = e => setUser({ [e.target.name]: e.target.value });
+  const handleChange = e =>
+    setUser({ ...user, [e.target.name]: e.target.value });
 
   const handleSubmit = e => {
     e.preventDefault();
 
-    if (email === "") {
+    if (email === "" || department === "") {
       setAlert("Please fill in the fields", "error");
     } else {
+      console.log(user);
+
       setAlert(
-        "Instructions have been sent to email if the account exists.  If you have not received the instructions within 5 minutes, please try again.",
+        "Your request was sent to the MDCorner Administrator who may create your account. Please allow up to 2 business days, please reach out to another MDCorner Administrator to assist you.",
         "info"
       );
       //   login({
@@ -35,7 +39,7 @@ const ForgotPasswordForm = props => {
 
   return (
     <div style={{ margin: "50px auto 0", width: "300px" }}>
-      <h2>Forgot Password</h2>
+      <h2>Request New Account</h2>
 
       <Alerts />
 
@@ -46,7 +50,7 @@ const ForgotPasswordForm = props => {
             className="ant-form-item-required"
             title="email"
           >
-            Email
+            Your Sanofi Email
           </label>
           <input
             type="email"
@@ -57,21 +61,33 @@ const ForgotPasswordForm = props => {
           />
         </div>
 
+        <div className="ant-form-item-control">
+          <label
+            htmlFor="email"
+            className="ant-form-item-required"
+            title="email"
+          >
+            Your Department
+          </label>
+          <input
+            type="text"
+            name="department"
+            value={department}
+            className="ant-input"
+            onChange={handleChange}
+          />
+        </div>
+
         <button
           type="submit"
           className="ant-btn ant-btn-primary ant-btn-block"
           style={{ marginTop: 20, marginBottom: 20 }}
         >
-          Request Password Reset
+          Send Request
         </button>
-
-        <Link to="/login">Login</Link>
-        <Link to="/request-account" style={{ float: "right" }}>
-          Request account
-        </Link>
       </form>
     </div>
   );
 };
 
-export default ForgotPasswordForm;
+export default RequestAccountForm;

@@ -103,7 +103,7 @@ const LoginForm = props => {
 
         <Link to="/forgot-password">Forgot password</Link>
         <Link to="/request-account" style={{ float: "right" }}>
-          Request account
+          Request new account
         </Link>
       </form>
     </div>

@@ -21,6 +21,7 @@ import ForgotPasswordForm from "Components/Forms/ForgotPasswordForm/ForgotPasswo
 
 // load token into global headers
 import setAuthToken from "Utils/setAuthToken";
+import RequestAccountForm from "./components/Forms/RequestAccountForm/RequestAccountForm";
 
 if (localStorage.token) {
   setAuthToken(localStorage.token);
@@ -47,6 +48,11 @@ const App = props => {
                 exact
                 path={"/forgot-password"}
                 component={ForgotPasswordForm}
+              />
+              <Route
+                exact
+                path={"/request-account"}
+                component={RequestAccountForm}
               />
             </Switch>
           </Router>
