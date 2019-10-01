@@ -17,6 +17,7 @@ import Dashboard from "Pages/Dashboard/Dashboard";
 // Components
 import LoginForm from "Components/Forms/LoginForm/LoginForm";
 import AccountRegistrationForm from "Components/Forms/AccountRegistrationForm/AccountRegistrationForm";
+import ForgotPasswordForm from "Components/Forms/ForgotPasswordForm/ForgotPasswordForm";
 
 // load token into global headers
 import setAuthToken from "Utils/setAuthToken";
@@ -42,6 +43,11 @@ const App = props => {
                 component={AccountRegistrationForm}
               />
               <Route exact path={"/login"} component={LoginForm} />
+              <Route
+                exact
+                path={"/forgot-password"}
+                component={ForgotPasswordForm}
+              />
             </Switch>
           </Router>
         </AlertState>
