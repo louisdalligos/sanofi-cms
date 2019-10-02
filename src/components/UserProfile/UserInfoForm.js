@@ -24,8 +24,9 @@ const UserInfoForm = ({ form, form: { getFieldDecorator, resetFields } }) => {
   const { setAlert } = alertContext;
 
   const check = () => {
-    form.validateFields(err => {
+    form.validateFieldsAndScroll((err, values) => {
       if (!err) {
+        console.log("Received values of form: ", values);
         setAlert("Changes saved!.", "success");
         resetFields();
       } else {
@@ -78,7 +79,7 @@ const UserInfoForm = ({ form, form: { getFieldDecorator, resetFields } }) => {
       </Form.Item>
       <Form.Item {...formTailLayout}>
         <Button type="primary" onClick={check}>
-          Check
+          Save
         </Button>
       </Form.Item>
     </Form>

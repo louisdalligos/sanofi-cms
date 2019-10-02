@@ -1,6 +1,7 @@
 import React, { Fragment } from "react";
 import { Tabs } from "antd";
 import WrappedUserInfoForm from "./UserInfoForm";
+import WrappedChangePasswordForm from "./ChangePasswordForm";
 
 const { TabPane } = Tabs;
 
@@ -15,7 +16,7 @@ const UserProfile = () => {
         </TabPane>
 
         <TabPane tab="Change Password" key="2">
-          Content of Tab 2
+          <WrappedChangePasswordForm />
         </TabPane>
       </Tabs>
     </Fragment>
