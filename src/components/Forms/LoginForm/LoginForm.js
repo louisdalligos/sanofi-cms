@@ -1,23 +1,46 @@
-import React, { Fragment, useState } from "react";
+import React, { useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
+import { connect } from "react-redux";
 
 import { Form, Icon, Input, Button } from "antd";
 
-//import { login } from "Services/redux/actions/authActions";
-import { fetchArticles } from "Services/redux/actions/articleActions";
+import { login, clearErrors } from "Services/redux/actions/authActions";
 
-const LoginForm = ({ form, form: { getFieldDecorator }, store }) => {
-  const [loading] = useState(false);
+import AlertContext from "Context/alerts/alertContext";
+import Alerts from "Components/Alerts/Alerts";
+
+const LoginForm = ({
+  form,
+  form: { getFieldDecorator },
+  auth: { loading, error, isAuthenticated },
+  login,
+  clearErrors,
+  history
+}) => {
+  const alertContext = useContext(AlertContext); // get our alert context
+  const { setAlert } = alertContext;
+
+  //@todo
+  useEffect(() => {
+    if (isAuthenticated) {
+      history.push("/");
+    }
+
+    if (error === "Invalid Credentials") {
+      setAlert(error, "error");
+      clearErrors(); // set error to null
+    }
+    // eslint-disable-next-line
+  }, [error, isAuthenticated, history]); // add error value as a dependency of useEffect
+
   const handleSubmit = e => {
     e.preventDefault();
     form.validateFields((err, values) => {
       if (!err) {
         console.log("Received values of form: ", values);
-        //login(values);
-        store.dispatch(fetchArticles());
+        login(values);
       } else {
         alert("error");
-        console.log(store);
       }
     });
   };
@@ -26,7 +49,7 @@ const LoginForm = ({ form, form: { getFieldDecorator }, store }) => {
     <Form onSubmit={handleSubmit} className="login-form">
       <h2>Login to your account</h2>
       <Form.Item label="Email">
-        {getFieldDecorator("username", {
+        {getFieldDecorator("email", {
           rules: [
             {
               type: "email",
@@ -75,4 +98,13 @@ const LoginForm = ({ form, form: { getFieldDecorator }, store }) => {
 
 const WrappedLoginForm = Form.create({ name: "login" })(LoginForm);
 
-export default WrappedLoginForm;
+const mapStateToProps = state => {
+  return {
+    auth: state.authState
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  { login, clearErrors }
+)(WrappedLoginForm);

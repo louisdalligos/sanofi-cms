@@ -29,16 +29,18 @@ export const loadUser = () => async dispatch => {
 };
 
 // Login User
-export const login = async formData => {
-  setLoading(); // loading state
-
-  const config = {
-    headers: {
-      "Content-Type": "application/json"
-    }
-  };
-
+export const login = formData => async dispatch => {
   try {
+    setLoading(); // loading state
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+
+    console.log(formData);
+    debugger;
     const res = await axios.post("/api/auth", formData, config);
 
     dispatch({
@@ -56,10 +58,14 @@ export const login = async formData => {
 };
 
 // Logout
-export const logout = () => dispatch({ type: LOGOUT });
+//export const logout = () => dispatch({ type: LOGOUT });
 
 // Clear Errors
-export const clearErrors = () => dispatch({ type: CLEAR_ERRORS });
+export const clearErrors = () => {
+  return {
+    type: CLEAR_ERRORS
+  };
+};
 
 // Set Loading
 export const setLoading = () => {
