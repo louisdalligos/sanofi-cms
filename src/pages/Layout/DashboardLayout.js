@@ -29,7 +29,6 @@ export default class DashboardLayout extends Component {
 
             {this.props.contentArea}
           </Content>
-          >
         </Layout>
       </Fragment>
     );

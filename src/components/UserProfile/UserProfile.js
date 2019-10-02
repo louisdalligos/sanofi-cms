@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 import { Tabs } from "antd";
-import WrappedUserInfoForm from "./UserInfo";
+import WrappedUserInfoForm from "./UserInfoForm";
 
 const { TabPane } = Tabs;
 

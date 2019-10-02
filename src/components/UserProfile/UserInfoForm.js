@@ -1,10 +1,17 @@
-import React from "react";
+import React, { useContext } from "react";
 
-import { Form, Input, Icon, Select, Row, Col, Checkbox, Button } from "antd";
+import { Form, Input, Button } from "antd";
+
+import AlertContext from "Context/alerts/alertContext";
+import Alerts from "Components/Alerts/Alerts";
+
+const alertLayout = {
+  wrapperCol: { span: 12 }
+};
 
 const formItemLayout = {
-  labelCol: { span: 4 },
-  wrapperCol: { span: 8 }
+  labelCol: { span: 3 },
+  wrapperCol: { span: 9 }
 };
 
 const formTailLayout = {
@@ -12,17 +19,27 @@ const formTailLayout = {
   wrapperCol: { span: 8, offset: 4 }
 };
 
-const UserInfoForm = ({ form, form: { getFieldDecorator } }) => {
+const UserInfoForm = ({ form, form: { getFieldDecorator, resetFields } }) => {
+  const alertContext = useContext(AlertContext); // get our alert context
+  const { setAlert } = alertContext;
+
   const check = () => {
     form.validateFields(err => {
       if (!err) {
-        console.info("success");
+        setAlert("Changes saved!.", "success");
+        resetFields();
+      } else {
+        setAlert("There were some problems in your entries.", "error");
       }
     });
   };
 
   return (
     <Form>
+      <Form.Item {...alertLayout}>
+        <Alerts />
+      </Form.Item>
+
       <Form.Item {...formItemLayout} label="Work Email">
         <Input value={"Johndoe@gmail.com"} disabled />
       </Form.Item>
@@ -36,7 +53,6 @@ const UserInfoForm = ({ form, form: { getFieldDecorator } }) => {
           ]
         })(<Input placeholder="First name" />)}
       </Form.Item>
-
       <Form.Item {...formItemLayout} label="Last Name">
         {getFieldDecorator("lastName", {
           rules: [
@@ -47,7 +63,6 @@ const UserInfoForm = ({ form, form: { getFieldDecorator } }) => {
           ]
         })(<Input placeholder="Last name" />)}
       </Form.Item>
-
       <Form.Item {...formItemLayout} label="Department">
         {getFieldDecorator("department", {
           rules: [
@@ -58,11 +73,9 @@ const UserInfoForm = ({ form, form: { getFieldDecorator } }) => {
           ]
         })(<Input placeholder="Department" />)}
       </Form.Item>
-
       <Form.Item {...formItemLayout} label="Role">
         <Input value={"administrator"} disabled />
       </Form.Item>
-
       <Form.Item {...formTailLayout}>
         <Button type="primary" onClick={check}>
           Check

@@ -6,3 +6,8 @@
   padding: 30px 50px;
   margin: 20px 0;
 }
+
+/* @tode - better css not global target */
+.ant-form-item-label {
+  text-align: left;
+}
