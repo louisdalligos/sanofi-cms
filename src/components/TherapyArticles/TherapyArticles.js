@@ -2,13 +2,15 @@ import React, { Fragment, useContext, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { Table, Divider, Button, Spin } from "antd";
+import { Table, Divider, Button, Spin, Icon } from "antd";
 //import TherapyItem from "./TherapyItem";
 
 // redux actions import
 import { fetchArticles } from "Services/redux/actions/articleActions";
 
-const TherapyArticles = ({ article: { articles, loading }, fetchArticles }) => {
+const customIconLoading = <Icon type="loading" style={{ fontSize: 24 }} spin />;
+
+const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
   const [columns, setColumns] = useState([
     {
       title: "Status",
@@ -39,10 +41,20 @@ const TherapyArticles = ({ article: { articles, loading }, fetchArticles }) => {
     }
   ]);
 
+  console.log(loading, article);
+
   useEffect(() => {
     fetchArticles();
     //eslint-disable-next-line
   }, []);
+
+  if (loading || article === null) {
+    return (
+      <div className="loading-container">
+        <Spin indicator={customIconLoading} />
+      </div>
+    );
+  }
 
   return (
     // <Fragment>
@@ -54,7 +66,7 @@ const TherapyArticles = ({ article: { articles, loading }, fetchArticles }) => {
       <Button type="primary" style={{ float: "right" }}>
         New Article
       </Button>
-      {loading ? <Spin /> : <Table columns={columns} dataSource={articles} />}
+      <Table columns={columns} dataSource={article} />
     </Fragment>
   );
 };
