@@ -1,4 +1,9 @@
-import { SET_LOADING, ARTICLE_ERROR, FETCH_ARTICLES } from "../actions/types";
+import {
+  SET_LOADING,
+  ARTICLE_ERROR,
+  FETCH_ARTICLES,
+  CLEAR_ARTICLES
+} from "../actions/types";
 
 const initialState = {
   article: null,
@@ -14,6 +19,13 @@ export default (state = initialState, action) => {
         ...state,
         article: action.payload,
         loading: false
+      };
+    case CLEAR_ARTICLES:
+      return {
+        ...state,
+        article: null,
+        error: null,
+        current: null
       };
     case ARTICLE_ERROR:
       console.log(action.payload);

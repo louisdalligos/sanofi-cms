@@ -1,4 +1,9 @@
-import { FETCH_ARTICLES, SET_LOADING, ARTICLE_ERROR } from "./types";
+import {
+  FETCH_ARTICLES,
+  SET_LOADING,
+  ARTICLE_ERROR,
+  CLEAR_ARTICLES
+} from "./types";
 import axios from "axios";
 
 export const fetchArticles = () => async dispatch => {
@@ -19,6 +24,12 @@ export const fetchArticles = () => async dispatch => {
       payload: error.response
     });
   }
+};
+
+export const clearArticles = () => {
+  return {
+    type: CLEAR_ARTICLES
+  };
 };
 
 export const setLoading = () => {

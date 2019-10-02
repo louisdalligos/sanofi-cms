@@ -1,20 +1,24 @@
 import React, { useContext } from "react";
+import { connect } from "react-redux";
 
 import AuthContext from "Context/auth/authContext";
-import TherapyContext from "Context/therapy/therapyContext";
+//import TherapyContext from "Context/therapy/therapyContext";
 
 import { Avatar, Button } from "antd";
 
-const MyProfileMenu = () => {
+// redux action imports
+import { clearArticles } from "Services/redux/actions/articleActions";
+
+const MyProfileMenu = ({ clearArticles }) => {
   const authContext = useContext(AuthContext);
-  const therapyContext = useContext(TherapyContext);
+  //const therapyContext = useContext(TherapyContext);
 
   const { isAuthenticated, logout, user } = authContext;
-  const { clearArticles } = therapyContext;
+  //const { clearArticles } = therapyContext;
 
   const onLogout = () => {
-    logout();
     clearArticles();
+    logout();
   };
 
   return (
@@ -28,4 +32,12 @@ const MyProfileMenu = () => {
   );
 };
 
-export default MyProfileMenu;
+const mapStateToProps = state => {
+  return {
+    article: state.articleState
+  };
+};
+export default connect(
+  mapStateToProps,
+  { clearArticles }
+)(MyProfileMenu);
