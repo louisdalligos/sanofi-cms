@@ -41,8 +41,6 @@ const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
     }
   ]);
 
-  console.log(loading, article);
-
   useEffect(() => {
     fetchArticles();
     //eslint-disable-next-line

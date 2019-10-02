@@ -11,3 +11,8 @@
 .ant-form-item-label {
   text-align: left;
 }
+
+.login-form {
+  max-width: 300px;
+  margin: 50px auto;
+}

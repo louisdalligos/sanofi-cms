@@ -17,7 +17,7 @@ import Dashboard from "Pages/Dashboard";
 import Profile from "Pages/Profile";
 
 // Components
-import LoginForm from "Components/Forms/LoginForm/LoginForm";
+import WrappedLoginForm from "Components/Forms/LoginForm/LoginForm";
 import AccountRegistrationForm from "Components/Forms/AccountRegistrationForm/AccountRegistrationForm";
 import ForgotPasswordForm from "Components/Forms/ForgotPasswordForm/ForgotPasswordForm";
 
@@ -47,7 +47,7 @@ const App = props => {
                   path={"/register"}
                   component={AccountRegistrationForm}
                 />
-                <Route exact path={"/login"} component={LoginForm} />
+                <Route exact path={"/login"} component={WrappedLoginForm} />
                 <Route
                   exact
                   path={"/forgot-password"}

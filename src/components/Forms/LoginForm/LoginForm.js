@@ -1,112 +1,78 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { Fragment, useState } from "react";
 import { Link } from "react-router-dom";
 
-import AlertContext from "Context/alerts/alertContext";
-import AuthContext from "Context/auth/authContext";
-import Alerts from "Components/Alerts/Alerts";
+import { Form, Icon, Input, Button } from "antd";
 
-const LoginForm = props => {
-  const authContext = useContext(AuthContext); // get our auth context
-  const alertContext = useContext(AlertContext); // get our alert context
+//import { login } from "Services/redux/actions/authActions";
+import { fetchArticles } from "Services/redux/actions/articleActions";
 
-  const { login, error, clearErrors, isAuthenticated } = authContext; // get values from the provider
-  const { setAlert } = alertContext; // get values from the provider
-
-  //@todo
-  useEffect(() => {
-    if (isAuthenticated) {
-      props.history.push("/");
-    }
-
-    if (error === "Invalid Credentials") {
-      setAlert(error, "error");
-      clearErrors(); // set error to null
-    }
-    // eslint-disable-next-line
-  }, [error, isAuthenticated, props.history]); // add error value as a dependency of useEffect
-
-  const [user, setUser] = useState({
-    email: "",
-    password: ""
-  });
-
-  // destructure our state
-  const { email, password } = user;
-
-  const handleChange = e =>
-    setUser({ ...user, [e.target.name]: e.target.value });
-
+const LoginForm = ({ form, form: { getFieldDecorator }, store }) => {
+  const [loading] = useState(false);
   const handleSubmit = e => {
     e.preventDefault();
-
-    if (email === "" || password === "") {
-      setAlert("Please fill in the fields", "error");
-    } else {
-      login({
-        email,
-        password
-      }); // call login method
-    }
+    form.validateFields((err, values) => {
+      if (!err) {
+        console.log("Received values of form: ", values);
+        //login(values);
+        store.dispatch(fetchArticles());
+      } else {
+        alert("error");
+        console.log(store);
+      }
+    });
   };
 
   return (
-    <div style={{ margin: "50px auto 0", width: "300px" }}>
+    <Form onSubmit={handleSubmit} className="login-form">
       <h2>Login to your account</h2>
-
-      <Alerts />
-
-      <form onSubmit={handleSubmit}>
-        <div className="ant-form-item-control">
-          <label
-            htmlFor="email"
-            className="ant-form-item-required"
-            title="email"
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={email}
-            className="ant-input"
-            onChange={handleChange}
+      <Form.Item label="Email">
+        {getFieldDecorator("username", {
+          rules: [
+            {
+              type: "email",
+              message: "Please enter a valid e-mail"
+            },
+            { required: true, message: "Please input your email" }
+          ]
+        })(
+          <Input
+            prefix={<Icon type="user" style={{ color: "rgba(0,0,0,.25)" }} />}
+            placeholder="Email"
           />
-        </div>
-
-        <div className="ant-form-item-control">
-          <label
-            htmlFor="password"
-            className="ant-form-item-required"
-            title="email"
-          >
-            Password
-          </label>
-          <span className="ant-input-password ant-input-affix-wrapper">
-            <input
-              name="password"
-              type="password"
-              className="ant-input"
-              value={password}
-              onChange={handleChange}
-            />
-          </span>
-        </div>
-
-        <button
-          type="submit"
-          className="ant-btn ant-btn-primary ant-btn-block"
-          style={{ marginTop: 20, marginBottom: 20 }}
+        )}
+      </Form.Item>
+      <Form.Item label="Password">
+        {getFieldDecorator("password", {
+          rules: [{ required: true, message: "Please input your Password!" }]
+        })(
+          <Input
+            prefix={<Icon type="lock" style={{ color: "rgba(0,0,0,.25)" }} />}
+            type="password"
+            placeholder="Password"
+          />
+        )}
+      </Form.Item>
+      <Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          className="login-form-button"
+          block
+          loading={loading}
         >
           Login
-        </button>
-
+        </Button>
+      </Form.Item>
+      <Form.Item>
         <Link to="/forgot-password">Forgot password</Link>
         <Link to="/request-account" style={{ float: "right" }}>
           Request new account
         </Link>
-      </form>
-    </div>
+      </Form.Item>
+    </Form>
   );
 };
 
-export default LoginForm;
+const WrappedLoginForm = Form.create({ name: "login" })(LoginForm);
+
+export default WrappedLoginForm;
