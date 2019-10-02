@@ -1,6 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { createBrowserHistory } from "history";
+import { Provider } from "react-redux";
+import store from "Services/redux/store";
 
 // Route
 import PrivateRoute from "Routes/PrivateRoute";
@@ -32,33 +34,35 @@ const history = createBrowserHistory();
 // Our MAIN APP wrapper
 const App = props => {
   return (
-    <AuthState>
-      <TherapyState>
-        <AlertState>
-          <Router history={history}>
-            <Switch>
-              <PrivateRoute exact path={"/"} component={Dashboard} />
-              <Route
-                exact
-                path={"/register"}
-                component={AccountRegistrationForm}
-              />
-              <Route exact path={"/login"} component={LoginForm} />
-              <Route
-                exact
-                path={"/forgot-password"}
-                component={ForgotPasswordForm}
-              />
-              <Route
-                exact
-                path={"/request-account"}
-                component={RequestAccountForm}
-              />
-            </Switch>
-          </Router>
-        </AlertState>
-      </TherapyState>
-    </AuthState>
+    <Provider store={store}>
+      <AuthState>
+        <TherapyState>
+          <AlertState>
+            <Router history={history}>
+              <Switch>
+                <PrivateRoute exact path={"/"} component={Dashboard} />
+                <Route
+                  exact
+                  path={"/register"}
+                  component={AccountRegistrationForm}
+                />
+                <Route exact path={"/login"} component={LoginForm} />
+                <Route
+                  exact
+                  path={"/forgot-password"}
+                  component={ForgotPasswordForm}
+                />
+                <Route
+                  exact
+                  path={"/request-account"}
+                  component={RequestAccountForm}
+                />
+              </Switch>
+            </Router>
+          </AlertState>
+        </TherapyState>
+      </AuthState>
+    </Provider>
   );
 };
 
