@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { connect } from "react-redux";
 
 import AuthContext from "Context/auth/authContext";
-//import TherapyContext from "Context/therapy/therapyContext";
 
 import { Avatar, Button } from "antd";
 
@@ -11,10 +10,8 @@ import { clearArticles } from "Services/redux/actions/articleActions";
 
 const MyProfileMenu = ({ clearArticles }) => {
   const authContext = useContext(AuthContext);
-  //const therapyContext = useContext(TherapyContext);
 
   const { isAuthenticated, logout, user } = authContext;
-  //const { clearArticles } = therapyContext;
 
   const onLogout = () => {
     clearArticles();

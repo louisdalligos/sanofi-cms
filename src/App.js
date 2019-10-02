@@ -13,8 +13,8 @@ import AlertState from "Context/alerts/AlertState";
 import TherapyState from "Context/therapy/TherapyState";
 
 // Pages
-import Dashboard from "Pages/Dashboard/Dashboard";
-//import RegisterPage from "Pages/Register";
+import Dashboard from "Pages/Dashboard";
+import Profile from "Pages/Profile";
 
 // Components
 import LoginForm from "Components/Forms/LoginForm/LoginForm";
@@ -41,6 +41,7 @@ const App = props => {
             <Router history={history}>
               <Switch>
                 <PrivateRoute exact path={"/"} component={Dashboard} />
+                <PrivateRoute exact path={"/profile/:id"} component={Profile} />
                 <Route
                   exact
                   path={"/register"}

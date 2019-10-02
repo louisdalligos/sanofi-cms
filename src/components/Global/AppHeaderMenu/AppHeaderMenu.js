@@ -18,7 +18,9 @@ const AppHeaderMenu = () => {
         mode="horizontal"
         style={{ background: "#FFF" }}
       >
-        <Menu.Item key="dashboard">Dashboard</Menu.Item>
+        <Menu.Item key="dashboard">
+          <Link to="/">Dashboard</Link>
+        </Menu.Item>
         <SubMenu title={<span className="submenu-title-wrapper">Users</span>}>
           <Menu.Item key="doctors">Doctors</Menu.Item>
           <Menu.Item key="cpd-management">CPD Management</Menu.Item>
