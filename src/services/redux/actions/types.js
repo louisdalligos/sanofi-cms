@@ -1,0 +1,3 @@
+export const FETCH_ARTICLES = "FETCH_ARTICLES";
+export const SET_LOADING = "SET_LOADING";
+export const ARTICLE_ERROR = "ARTICLE_ERROR";

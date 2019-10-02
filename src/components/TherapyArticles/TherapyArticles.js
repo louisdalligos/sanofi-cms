@@ -1,22 +1,14 @@
 import React, { Fragment, useContext, useState, useEffect } from "react";
-import { Table, Tag, Divider, Button } from "antd";
+import { connect } from "react-redux";
+import PropTypes from "prop-types";
+
+import { Table, Divider, Button, Spin } from "antd";
 //import TherapyItem from "./TherapyItem";
 
-// context
-import TherapyContext from "Context/therapy/therapyContext";
+// redux actions import
+import { fetchArticles } from "Services/redux/actions/articleActions";
 
-const TherapyArticles = () => {
-  const therapyContext = useContext(TherapyContext);
-
-  const {
-    articles,
-    fetchArticles,
-    setCurrentArticle,
-    deleteArticle,
-    clearCurrentArticle,
-    loading
-  } = therapyContext;
-
+const TherapyArticles = ({ article: { articles, loading }, fetchArticles }) => {
   const [columns, setColumns] = useState([
     {
       title: "Status",
@@ -62,9 +54,22 @@ const TherapyArticles = () => {
       <Button type="primary" style={{ float: "right" }}>
         New Article
       </Button>
-      <Table columns={columns} dataSource={articles} />
+      {loading ? <Spin /> : <Table columns={columns} dataSource={articles} />}
     </Fragment>
   );
 };
 
-export default TherapyArticles;
+const mapStateToProps = state => {
+  return {
+    article: state.articleState
+  };
+};
+
+TherapyArticles.protoTypes = {
+  article: PropTypes.object.isRequired
+};
+
+export default connect(
+  mapStateToProps,
+  { fetchArticles }
+)(TherapyArticles);
