@@ -1,18 +1,12 @@
 import React, { useContext } from "react";
 import { connect } from "react-redux";
-
-import AuthContext from "Context/auth/authContext";
-
 import { Avatar, Button } from "antd";
 
 // redux action imports
 import { clearArticles } from "Services/redux/actions/articleActions";
+import { logout } from "Services/redux/actions/authActions";
 
-const MyProfileMenu = ({ clearArticles }) => {
-  const authContext = useContext(AuthContext);
-
-  const { isAuthenticated, logout, user } = authContext;
-
+const MyProfileMenu = ({ clearArticles, logout }) => {
   const onLogout = () => {
     clearArticles();
     logout();
@@ -21,7 +15,7 @@ const MyProfileMenu = ({ clearArticles }) => {
   return (
     <div className="profileMenu">
       <Avatar size="small" icon="user" />
-      <span>Hello, welcome {user && user.name}</span>
+      <span>Hello, welcome admin</span>
       <Button type="link" onClick={onLogout}>
         Logout
       </Button>
@@ -36,5 +30,5 @@ const mapStateToProps = state => {
 };
 export default connect(
   mapStateToProps,
-  { clearArticles }
+  { clearArticles, logout }
 )(MyProfileMenu);

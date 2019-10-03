@@ -1,25 +1,22 @@
 import React, { useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-
+import PropTypes from "prop-types";
 import { Form, Icon, Input, Button } from "antd";
 
+// redux actions
 import { login, clearErrors } from "Services/redux/actions/authActions";
-
-import AlertContext from "Context/alerts/alertContext";
-import Alerts from "Components/Alerts/Alerts";
 
 const LoginForm = ({
   form,
-  form: { getFieldDecorator },
-  auth: { loading, error, isAuthenticated },
+  form: { getFieldDecorator }, // these are props from antd form
+  isAuthenticated,
+  loading,
+  error,
   login,
   clearErrors,
-  history
+  history // props from react router
 }) => {
-  const alertContext = useContext(AlertContext); // get our alert context
-  const { setAlert } = alertContext;
-
   //@todo
   useEffect(() => {
     if (isAuthenticated) {
@@ -27,7 +24,6 @@ const LoginForm = ({
     }
 
     if (error === "Invalid Credentials") {
-      setAlert(error, "error");
       clearErrors(); // set error to null
     }
     // eslint-disable-next-line
@@ -100,9 +96,13 @@ const WrappedLoginForm = Form.create({ name: "login" })(LoginForm);
 
 const mapStateToProps = state => {
   return {
-    auth: state.authState
+    isAuthenticated: state.authState.isAuthenticated,
+    loading: state.authState.loading,
+    error: state.authState.error
   };
 };
+
+WrappedLoginForm.protoTypes = {};
 
 export default connect(
   mapStateToProps,
