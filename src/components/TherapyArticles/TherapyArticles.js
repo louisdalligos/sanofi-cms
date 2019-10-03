@@ -52,6 +52,8 @@ const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
 
   useEffect(() => {
     fetchArticles();
+
+    console.log(article);
     //eslint-disable-next-line
   }, []);
 
@@ -99,7 +101,11 @@ const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
       >
         New Article
       </Button>
-      <Table columns={columns} dataSource={article} />
+      <Table
+        rowKey={record => record._id}
+        columns={columns}
+        dataSource={article}
+      />
       <Modal
         title="Add new therapy"
         visible={visible}

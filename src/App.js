@@ -16,6 +16,7 @@ import TherapyState from "Context/therapy/TherapyState";
 import Dashboard from "Pages/Dashboard";
 import Profile from "Pages/Profile";
 import Users from "Pages/Users";
+import Admins from "Pages/Admins";
 import TherapyAreas from "Pages/TherapyAreas";
 
 // Components
@@ -47,6 +48,8 @@ const App = props => {
 
                 {/* Users(Top Level) Route*/}
                 <Route exact path={"/users"} component={Users} />
+
+                <Route exact path={"/admins"} component={Admins} />
 
                 {/* Content(Top Level) Route*/}
                 <Route exact path={"/therapyareas"} component={TherapyAreas} />
