@@ -41,7 +41,7 @@ const App = props => {
             <Router history={history}>
               <Switch>
                 <PrivateRoute exact path={"/"} component={Dashboard} />
-                <PrivateRoute exact path={"/profile/:id"} component={Profile} />
+                <Route exact path={"/profile/:id"} component={Profile} />
                 <Route
                   exact
                   path={"/register"}

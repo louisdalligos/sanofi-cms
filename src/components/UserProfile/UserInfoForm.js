@@ -10,13 +10,13 @@ const alertLayout = {
 };
 
 const formItemLayout = {
-  labelCol: { span: 3 },
-  wrapperCol: { span: 9 }
+  labelCol: { span: 4 },
+  wrapperCol: { span: 8 }
 };
 
 const formTailLayout = {
-  labelCol: { span: 3 },
-  wrapperCol: { span: 9, offset: 3 }
+  labelCol: { span: 4 },
+  wrapperCol: { span: 8, offset: 4 }
 };
 
 const UserInfoForm = ({ form, form: { getFieldDecorator, resetFields } }) => {

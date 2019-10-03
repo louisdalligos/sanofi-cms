@@ -10,13 +10,13 @@ const alertLayout = {
 };
 
 const formItemLayout = {
-  labelCol: { span: 4 },
-  wrapperCol: { span: 8 }
+  labelCol: { span: 5 },
+  wrapperCol: { span: 7 }
 };
 
 const formTailLayout = {
-  labelCol: { span: 4 },
-  wrapperCol: { span: 8, offset: 4 }
+  labelCol: { span: 5 },
+  wrapperCol: { span: 7, offset: 5 }
 };
 
 const ChangePasswordForm = ({
