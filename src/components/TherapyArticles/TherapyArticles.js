@@ -2,8 +2,11 @@ import React, { Fragment, useContext, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { Table, Divider, Button, Spin, Icon } from "antd";
+import { Table, Button, Spin, Icon, Modal } from "antd";
 //import TherapyItem from "./TherapyItem";
+
+// import our form
+import NewArticleForm from "Components/TherapyArticles/NewArticleForm";
 
 // redux actions import
 import { fetchArticles } from "Services/redux/actions/articleActions";
@@ -52,6 +55,9 @@ const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
     //eslint-disable-next-line
   }, []);
 
+  const [visible, setVisible] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
   if (loading || article === null) {
     return (
       <div className="loading-container">
@@ -60,6 +66,25 @@ const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
     );
   }
 
+  const handleOk = () => {
+    setConfirmLoading(true);
+
+    setTimeout(() => {
+      setVisible(false);
+      setConfirmLoading(false);
+    }, 2000);
+  };
+
+  const handleCancel = () => {
+    console.log("Clicked cancel button");
+    setVisible(false);
+  };
+
+  const showModal = () => {
+    console.log(showModal);
+    setVisible(true);
+  };
+
   return (
     // <Fragment>
     //   {articles.map(article => (
@@ -67,10 +92,23 @@ const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
     //   ))}
     // </Fragment>
     <Fragment>
-      <Button type="primary" style={{ float: "right" }}>
+      <Button
+        type="primary"
+        onClick={showModal}
+        style={{ float: "right", zIndex: 500 }}
+      >
         New Article
       </Button>
       <Table columns={columns} dataSource={article} />
+      <Modal
+        title="Add new therapy"
+        visible={visible}
+        onOk={handleOk}
+        confirmLoading={confirmLoading}
+        onCancel={handleCancel}
+      >
+        <NewArticleForm />
+      </Modal>
     </Fragment>
   );
 };

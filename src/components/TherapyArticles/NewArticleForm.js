@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import TherapyContext from "Context/therapy/therapyContext";
 
-const ArticleForm = () => {
+const NewArticleForm = () => {
   const therapyContext = useContext(TherapyContext);
   const {
     addArticle,
@@ -48,7 +48,6 @@ const ArticleForm = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>{current ? "Edit" : "Add"} Article</h2>
       <input
         type="text"
         placeholder="Enter your article title"
@@ -70,4 +69,4 @@ const ArticleForm = () => {
   );
 };
 
-export default ArticleForm;
+export default NewArticleForm;
