@@ -39,8 +39,6 @@ export const login = formData => async dispatch => {
       }
     };
 
-    console.log(formData);
-    debugger;
     const res = await axios.post("/api/auth", formData, config);
 
     dispatch({

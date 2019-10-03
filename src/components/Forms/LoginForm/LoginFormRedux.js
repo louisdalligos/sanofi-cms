@@ -1,18 +1,22 @@
 import React, { useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
+import { connect } from "react-redux";
+import PropTypes from "prop-types";
 import { Form, Icon, Input, Button } from "antd";
 
-import AlertContext from "Context/alerts/alertContext";
-import AuthContext from "Context/auth/authContext";
-import Alerts from "Components/Alerts/Alerts";
+// redux actions
+import { login, clearErrors } from "Services/redux/actions/authActions";
 
-const LoginForm = ({ form, form: { getFieldDecorator }, history }) => {
-  const authContext = useContext(AuthContext); // get our auth context
-  const alertContext = useContext(AlertContext); // get our alert context
-
-  const { login, error, clearErrors, isAuthenticated, loading } = authContext; // get values from the provider
-  const { setAlert } = alertContext; // get values from the provider
-
+const LoginForm = ({
+  form,
+  form: { getFieldDecorator }, // these are props from antd form
+  isAuthenticated,
+  loading,
+  error,
+  login,
+  clearErrors,
+  history // props from react router
+}) => {
   //@todo
   useEffect(() => {
     if (isAuthenticated) {
@@ -20,7 +24,6 @@ const LoginForm = ({ form, form: { getFieldDecorator }, history }) => {
     }
 
     if (error === "Invalid Credentials") {
-      setAlert(error, "error");
       clearErrors(); // set error to null
     }
     // eslint-disable-next-line
@@ -28,12 +31,11 @@ const LoginForm = ({ form, form: { getFieldDecorator }, history }) => {
 
   const handleSubmit = e => {
     e.preventDefault();
-
     form.validateFields((err, values) => {
       if (!err) {
         login(values);
       } else {
-        setAlert("Please fill in the fields", "error");
+        alert("error");
       }
     });
   };
@@ -41,8 +43,6 @@ const LoginForm = ({ form, form: { getFieldDecorator }, history }) => {
   return (
     <Form onSubmit={handleSubmit} className="login-form">
       <h2>Login to your account</h2>
-      <Alerts />
-
       <Form.Item label="Email">
         {getFieldDecorator("email", {
           rules: [
@@ -70,7 +70,7 @@ const LoginForm = ({ form, form: { getFieldDecorator }, history }) => {
           />
         )}
       </Form.Item>
-      <Form.Item style={{ marginTop: 20 }}>
+      <Form.Item>
         <Button
           type="primary"
           htmlType="submit"
@@ -93,4 +93,17 @@ const LoginForm = ({ form, form: { getFieldDecorator }, history }) => {
 
 const WrappedLoginForm = Form.create({ name: "login" })(LoginForm);
 
-export default WrappedLoginForm;
+const mapStateToProps = state => {
+  return {
+    isAuthenticated: state.authState.isAuthenticated,
+    loading: state.authState.loading,
+    error: state.authState.error
+  };
+};
+
+WrappedLoginForm.protoTypes = {};
+
+export default connect(
+  mapStateToProps,
+  { login, clearErrors }
+)(WrappedLoginForm);

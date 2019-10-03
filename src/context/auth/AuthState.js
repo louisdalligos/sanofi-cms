@@ -14,14 +14,15 @@ import {
   LOGIN_SUCCESS,
   LOGIN_FAILURE,
   LOGOUT,
-  CLEAR_ERRORS
+  CLEAR_ERRORS,
+  SET_LOADING
 } from "./types";
 
 const AuthState = props => {
   const initialState = {
     token: localStorage.getItem("token"),
     isAuthenticated: null,
-    loading: true,
+    loading: false,
     user: null,
     error: null
   };
@@ -71,6 +72,8 @@ const AuthState = props => {
 
   // Login User
   const login = async formData => {
+    setLoading();
+
     const config = {
       headers: {
         "Content-Type": "application/json"
@@ -93,6 +96,9 @@ const AuthState = props => {
       });
     }
   };
+
+  // Set loading
+  const setLoading = () => dispatch({ type: SET_LOADING });
 
   // Logout
   const logout = () => dispatch({ type: LOGOUT });

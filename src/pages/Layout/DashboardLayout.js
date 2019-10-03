@@ -1,36 +1,50 @@
-import React, { Component, Fragment } from "react";
+import React, { Fragment, useEffect, useContext, useMemo } from "react";
 import { Layout } from "antd";
 
 import AppBreadcrumb from "Components/Global/AppBreadcrumb/AppBreadcrumb";
 import AppHeader from "Components/Global/AppHeader/AppHeader";
 
+//@todo refactor to use redux
+import AuthContext from "Context/auth/authContext";
+
 const { Header, Content } = Layout;
 
-export default class DashboardLayout extends Component {
-  shouldComponentUpdate() {
-    return false;
-  }
-  render() {
-    return (
-      <Fragment>
-        <Layout>
-          <Header
-            style={{
-              position: "fixed",
-              zIndex: 1,
-              width: "100%",
-              background: "#FFF"
-            }}
-          >
-            <AppHeader />
-          </Header>
-          <Content style={{ padding: "0 50px", marginTop: 64 }}>
-            <AppBreadcrumb />
+const DashboardLayout = React.memo(({ contentArea }) => {
+  // shouldComponentUpdate() {
+  //   return false;
+  // }
 
-            {this.props.contentArea}
-          </Content>
-        </Layout>
-      </Fragment>
-    );
-  }
-}
+  useMemo(() => {
+    return false;
+  });
+
+  const authContext = useContext(AuthContext);
+
+  useEffect(() => {
+    authContext.loadUser();
+    // eslint-disable-next-line
+  }, []);
+
+  return (
+    <Fragment>
+      <Layout>
+        <Header
+          style={{
+            position: "fixed",
+            zIndex: 1,
+            width: "100%",
+            background: "#FFF"
+          }}
+        >
+          <AppHeader />
+        </Header>
+        <Content style={{ padding: "0 50px", marginTop: 64 }}>
+          <AppBreadcrumb />
+          {contentArea}
+        </Content>
+      </Layout>
+    </Fragment>
+  );
+});
+
+export default DashboardLayout;
