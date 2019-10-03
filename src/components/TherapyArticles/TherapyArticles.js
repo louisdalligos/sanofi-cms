@@ -21,7 +21,7 @@ const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
       sorter: true
     },
     {
-      title: "Action",
+      title: "Edit",
       render: (text, record) => (
         <Button type="link">
           <Icon type="edit" />
@@ -41,7 +41,7 @@ const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
       dataIndex: "createdAt"
     },
     {
-      title: "Action",
+      title: "Archive",
       render: (text, record) => (
         <Button type="link">
           <Icon type="delete" />

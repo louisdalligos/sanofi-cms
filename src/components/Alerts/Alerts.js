@@ -9,7 +9,12 @@ const Alerts = () => {
   return (
     alertContext.alerts.length > 0 &&
     alertContext.alerts.map(alert => (
-      <Alert key={alert.id} message={alert.message} type={alert.type} />
+      <Alert
+        key={alert.id}
+        message={alert.message}
+        type={alert.type}
+        showIcon
+      />
     ))
   );
 };
