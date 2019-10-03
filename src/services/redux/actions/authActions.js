@@ -48,8 +48,7 @@ export const login = formData => async dispatch => {
       payload: res.data
     });
 
-    // loadUser(); // load the user
-    // debugger;
+    loadUser(); // load the user
   } catch (error) {
     dispatch({
       type: LOGIN_FAILURE,

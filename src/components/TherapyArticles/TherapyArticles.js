@@ -18,6 +18,14 @@ const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
       sorter: true
     },
     {
+      title: "Action",
+      render: (text, record) => (
+        <Button type="link">
+          <Icon type="edit" />
+        </Button>
+      )
+    },
+    {
       title: "Title",
       dataIndex: "title"
     },
@@ -32,11 +40,9 @@ const TherapyArticles = ({ article: { article, loading }, fetchArticles }) => {
     {
       title: "Action",
       render: (text, record) => (
-        <span>
-          <Button type="primary">Edit</Button>
-          <Divider type="vertical" />
-          <Button type="danger">Delete</Button>
-        </span>
+        <Button type="link">
+          <Icon type="delete" />
+        </Button>
       )
     }
   ]);
