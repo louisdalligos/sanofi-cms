@@ -21,15 +21,25 @@ const AppHeaderMenu = () => {
         <Menu.Item key="dashboard">
           <Link to="/">Dashboard</Link>
         </Menu.Item>
-        <SubMenu title={<span className="submenu-title-wrapper">Users</span>}>
-          <Menu.Item key="doctors">Doctors</Menu.Item>
+        <SubMenu
+          title={
+            <span className="submenu-title-wrapper">
+              <Link to="/users">Users</Link>
+            </span>
+          }
+        >
+          <Menu.Item key="doctors">
+            <Link to="/doctors">Doctors</Link>
+          </Menu.Item>
           <Menu.Item key="cpd-management">CPD Management</Menu.Item>
-          <Menu.Item key="site-admins">Site Admins</Menu.Item>
+          <Menu.Item key="site-admins">
+            <Link to="/admins">Site Admins</Link>
+          </Menu.Item>
         </SubMenu>
         <SubMenu title={<span className="submenu-title-wrapper">Content</span>}>
           <Menu.Item key="general-settings">General Settings</Menu.Item>
           <li className="ant-menu-item">
-            <Link to="/therapy-areas">Therapy Areas</Link>
+            <Link to="/therapyareas">Therapy Areas</Link>
           </li>
         </SubMenu>
         <SubMenu

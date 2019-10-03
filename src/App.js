@@ -15,6 +15,8 @@ import TherapyState from "Context/therapy/TherapyState";
 // Pages
 import Dashboard from "Pages/Dashboard";
 import Profile from "Pages/Profile";
+import Users from "Pages/Users";
+import TherapyAreas from "Pages/TherapyAreas";
 
 // Components
 import WrappedLoginForm from "Components/Forms/LoginForm/LoginForm";
@@ -42,6 +44,14 @@ const App = props => {
               <Switch>
                 <PrivateRoute exact path={"/"} component={Dashboard} />
                 <Route exact path={"/profile/:id"} component={Profile} />
+
+                {/* Users(Top Level) Route*/}
+                <Route exact path={"/users"} component={Users} />
+
+                {/* Content(Top Level) Route*/}
+                <Route exact path={"/therapyareas"} component={TherapyAreas} />
+
+                {/* Public Route */}
                 <Route
                   exact
                   path={"/register"}

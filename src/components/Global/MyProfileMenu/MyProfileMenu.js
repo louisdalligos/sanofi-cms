@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { connect } from "react-redux";
 import { Avatar, Button } from "antd";
+import { Link } from "react-router-dom";
 
 import AuthContext from "Context/auth/authContext";
 
@@ -21,7 +22,9 @@ const MyProfileMenu = ({ clearArticles }) => {
   return (
     <div className="profileMenu">
       <Avatar size="small" icon="user" />
-      <span>Hello, welcome {user && user.name}</span>
+      <span>
+        Hello, welcome <Link to="/profile/1">{user && user.name}</Link>
+      </span>
       <Button type="link" onClick={onLogout}>
         Logout
       </Button>

@@ -5,12 +5,9 @@ import WrappedChangePasswordForm from "./ChangePasswordForm";
 
 const { TabPane } = Tabs;
 
-const UserProfile = ({ id }) => {
-  console.log(id);
+const UserProfile = () => {
   return (
     <Fragment>
-      <h2>User profile</h2>
-
       <Tabs tabPosition={"left"}>
         <TabPane tab="User Information" key="1">
           <WrappedUserInfoForm />

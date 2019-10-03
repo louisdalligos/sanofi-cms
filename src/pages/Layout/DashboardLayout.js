@@ -9,7 +9,7 @@ import AuthContext from "Context/auth/authContext";
 
 const { Header, Content } = Layout;
 
-const DashboardLayout = React.memo(({ contentArea }) => {
+const DashboardLayout = React.memo(({ contentArea, pageTitle }) => {
   // shouldComponentUpdate() {
   //   return false;
   // }
@@ -40,6 +40,7 @@ const DashboardLayout = React.memo(({ contentArea }) => {
         </Header>
         <Content style={{ padding: "0 50px", marginTop: 64 }}>
           <AppBreadcrumb />
+          <h2>{pageTitle}</h2>
           {contentArea}
         </Content>
       </Layout>
