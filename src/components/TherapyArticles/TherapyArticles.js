@@ -9,7 +9,7 @@ import { Table, Button, Spin, Icon, Modal } from "antd";
 import NewArticleForm from "Components/TherapyArticles/NewArticleForm";
 
 // redux actions import
-import { fetchArticles } from "Services/redux/actions/articleActions";
+import { fetchArticles } from "Actions/articleActions";
 
 const customIconLoading = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 

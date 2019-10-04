@@ -1,9 +1,4 @@
-import {
-  FETCH_ARTICLES,
-  SET_LOADING,
-  ARTICLE_ERROR,
-  CLEAR_ARTICLES
-} from "./types";
+import * as types from "./index";
 import axios from "axios";
 
 export const fetchArticles = () => async dispatch => {
@@ -15,12 +10,12 @@ export const fetchArticles = () => async dispatch => {
 
     // Dispatch to article reducer so it can change the our app state
     dispatch({
-      type: FETCH_ARTICLES,
+      type: types.FETCH_ARTICLES,
       payload: res.data
     });
   } catch (error) {
     dispatch({
-      type: ARTICLE_ERROR,
+      type: types.ARTICLE_ERROR,
       payload: error.response
     });
   }
@@ -28,12 +23,12 @@ export const fetchArticles = () => async dispatch => {
 
 export const clearArticles = () => {
   return {
-    type: CLEAR_ARTICLES
+    type: types.CLEAR_ARTICLES
   };
 };
 
 export const setLoading = () => {
   return {
-    type: SET_LOADING
+    type: types.SET_LOADING
   };
 };

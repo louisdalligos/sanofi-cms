@@ -1,9 +1,4 @@
-import {
-  SET_LOADING,
-  ARTICLE_ERROR,
-  FETCH_ARTICLES,
-  CLEAR_ARTICLES
-} from "../actions/types";
+import * as types from "Actions";
 
 const initialState = {
   article: null,
@@ -14,26 +9,26 @@ const initialState = {
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case FETCH_ARTICLES:
+    case types.FETCH_ARTICLES:
       return {
         ...state,
         article: action.payload,
         loading: false
       };
-    case CLEAR_ARTICLES:
+    case types.CLEAR_ARTICLES:
       return {
         ...state,
         article: null,
         error: null,
         current: null
       };
-    case ARTICLE_ERROR:
+    case types.ARTICLE_ERROR:
       console.log(action.payload);
       return {
         ...state,
         error: action.payload
       };
-    case SET_LOADING:
+    case types.SET_LOADING:
       return {
         ...state,
         loading: true

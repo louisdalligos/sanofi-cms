@@ -1,15 +1,4 @@
-import {
-  REGISTER_SUCCESS,
-  REGISTER_FAILURE,
-  USER_LOADED,
-  CLEAR_CURRENT,
-  AUTH_ERROR,
-  LOGIN_SUCCESS,
-  LOGIN_FAILURE,
-  LOGOUT,
-  CLEAR_ERRORS,
-  SET_LOADING_USER
-} from "../actions/types";
+import * as types from "Actions";
 
 const initialState = {
   token: localStorage.getItem("token"),
@@ -21,7 +10,7 @@ const initialState = {
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case USER_LOADED:
+    case types.USER_LOADED:
       console.log(action.payload);
       debugger;
       return {
@@ -30,7 +19,7 @@ export default (state = initialState, action) => {
         loading: false,
         user: action.payload
       };
-    case LOGIN_SUCCESS:
+    case types.LOGIN_SUCCESS:
       localStorage.setItem("token", action.payload.token); // put the token we get back inside of localstorage
       return {
         ...state,
@@ -39,9 +28,9 @@ export default (state = initialState, action) => {
         loading: false
       };
 
-    case LOGIN_FAILURE:
-    case AUTH_ERROR:
-    case LOGOUT:
+    case types.LOGIN_FAILURE:
+    case types.AUTH_ERROR:
+    case types.LOGOUT:
       localStorage.removeItem("token");
       return {
         ...state,
@@ -51,12 +40,12 @@ export default (state = initialState, action) => {
         user: null,
         error: action.payload
       };
-    case CLEAR_ERRORS:
+    case types.CLEAR_ERRORS:
       return {
         ...state,
         error: null
       };
-    case SET_LOADING_USER:
+    case types.SET_LOADING_USER:
       return {
         ...state,
         loading: true

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import AuthContext from "Context/auth/authContext";
 
 // redux action imports
-import { clearArticles } from "Services/redux/actions/articleActions";
+import { clearArticles } from "Actions/articleActions";
 //import { logout } from "Services/redux/actions/authActions";
 
 const MyProfileMenu = ({ clearArticles }) => {
