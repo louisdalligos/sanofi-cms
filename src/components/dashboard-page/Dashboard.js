@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { Timeline, Button, Layout, PageHeader } from "antd";
+import { Timeline, Button, Layout, PageHeader, Card } from "antd";
 import Navbar from "../main-navigation/Navbar";
 
 const { Content } = Layout;
@@ -9,10 +9,6 @@ const Dashboard = props => {
 
   const pageTitle = "Dashboard";
 
-  const handleClick = () => {
-    setReverse({ reverse: !reverse });
-  };
-
   return (
     <Fragment>
       <Navbar {...props} />
@@ -21,20 +17,16 @@ const Dashboard = props => {
         <PageHeader title={pageTitle} />
 
         <div>
-          <Timeline pending="Recording..." reverse={reverse}>
-            <Timeline.Item>Create a services site 2015-09-01</Timeline.Item>
-            <Timeline.Item>
-              Solve initial network problems 2015-09-01
-            </Timeline.Item>
-            <Timeline.Item>Technical testing 2015-09-01</Timeline.Item>
-          </Timeline>
-          <Button
-            type="primary"
-            style={{ marginTop: 16 }}
-            onClick={handleClick}
+          <Card
+            size="small"
+            title="Small size card"
+            extra={<a href="#">More</a>}
+            style={{ width: 300 }}
           >
-            Toggle Reverse
-          </Button>
+            <p>Card content</p>
+            <p>Card content</p>
+            <p>Card content</p>
+          </Card>
         </div>
       </Content>
     </Fragment>

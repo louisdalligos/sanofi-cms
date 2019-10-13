@@ -65,7 +65,11 @@ const Navbar = ({ logout }) => {
         </Menu>
       </div>
       <div className="profileMenu">
-        <Avatar size="small" icon="user" style={{ marginRight: 10 }} />
+        <Avatar
+          size="small"
+          src="https://randomuser.me/api/portraits/women/68.jpg"
+          style={{ marginRight: 10 }}
+        />
         <span>
           Logged in
           <Link to="/profile">Admin</Link>

@@ -26,7 +26,7 @@ const App = props => {
   return (
     <div className="wrapper">
       <Switch location={props.history.location}>
-        <PrivateRoute
+        <Route
           exact
           authenticated={props.isLoggedIn}
           path={"/"}
