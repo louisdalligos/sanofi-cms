@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Form, Input, Button, message } from "antd";
-
+import { Form, Input, Button, message, Layout, Row } from "antd";
 import { register } from "../../redux/actions/auth-actions/authActions";
+import logo from "../../assets/logo.png";
+const { Content } = Layout;
 
 const CompleteRegistrationForm = ({
   form,
@@ -54,62 +55,74 @@ const CompleteRegistrationForm = ({
   };
 
   return (
-    <div style={{ margin: "50px auto 0", width: "300px" }}>
-      <Form onSubmit={handleSubmit} className="auth-form">
-        <h2>Complete your registration</h2>
-
-        <p>Enter a password for your account</p>
-
-        {console.log(notifs, "Notifs availabe")}
-        <Form.Item label="Password" hasFeedback>
-          {getFieldDecorator("password", {
-            rules: [
-              {
-                required: true,
-                message: "Please input a password!"
-              },
-              {
-                validator: validateToNextPassword
-              }
-            ]
-          })(<Input.Password />)}
-        </Form.Item>
-        <Form.Item label="Confirm Password" hasFeedback>
-          {getFieldDecorator("confirm", {
-            rules: [
-              {
-                required: true,
-                message: "Please confirm the password!"
-              },
-              {
-                validator: compareToFirstPassword
-              }
-            ]
-          })(<Input.Password onBlur={handleConfirmBlur} />)}
-        </Form.Item>
-
-        <Form.Item label="Position">
-          {getFieldDecorator("position", {
-            rules: [
-              {
-                required: true,
-                message: "Please input your position!"
-              }
-            ]
-          })(<Input type="text" placeholder="Enter your position" />)}
-        </Form.Item>
-
-        <Form.Item style={{ marginTop: 20 }}>
-          <Button
-            type="primary"
-            htmlType="submit"
-            block
-            loading={requestInProgress}
+    <div className="full-page-layout">
+      <Layout>
+        <Content>
+          <Row
+            type="flex"
+            justify="center"
+            align="middle"
+            style={{ minHeight: "100vh" }}
           >
-            Complete Registration
-          </Button>
-        </Form.Item>
-      </Form>
+            <Form onSubmit={handleSubmit} className="auth-form">
+              <div className="heading">
+                <img src={logo} alt="" />
+                <h3>Complete your registration</h3>
+              </div>
+
+              {console.log(notifs, "Notifs availabe")}
+              <Form.Item label="Password" hasFeedback>
+                {getFieldDecorator("password", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "Please input a password!"
+                    },
+                    {
+                      validator: validateToNextPassword
+                    }
+                  ]
+                })(<Input.Password />)}
+              </Form.Item>
+              <Form.Item label="Confirm Password" hasFeedback>
+                {getFieldDecorator("confirm", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "Please confirm the password!"
+                    },
+                    {
+                      validator: compareToFirstPassword
+                    }
+                  ]
+                })(<Input.Password onBlur={handleConfirmBlur} />)}
+              </Form.Item>
+
+              <Form.Item label="Position">
+                {getFieldDecorator("position", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "Please input your position!"
+                    }
+                  ]
+                })(<Input type="text" placeholder="Enter your position" />)}
+              </Form.Item>
+
+              <Form.Item style={{ marginTop: 20 }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
+                  loading={requestInProgress}
+                >
+                  Complete Registration
+                </Button>
+              </Form.Item>
+            </Form>
+          </Row>
+        </Content>
+      </Layout>
     </div>
   );
 };
