@@ -154,5 +154,5 @@
       "pre-commit": "pretty-quick --staged"
     }
   },
-  "proxy": "http://localhost:8000"
+  "proxy": "https://sanofi-qa.nuworks.ph/api/v1/admin"
 }
