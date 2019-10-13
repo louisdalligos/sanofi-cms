@@ -9,6 +9,7 @@ import store from "./stores/store-dev";
 import App from "./container/App";
 import "antd/dist/antd.min.css";
 import { message } from "antd";
+import "./app.scss";
 
 import {
   connectTheUser,

@@ -1,0 +1,112 @@
+body {
+  color: #626262;
+}
+.ant-layout {
+  background: rgb(240, 240, 240);
+}
+
+.application-navigation-bar {
+  position: "fixed";
+  z-index: 1;
+  width: "100%";
+  background: "#FFF";
+  height: 64px;
+  padding: 0 50px;
+  line-height: 64px;
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0px 10px 30px 0px rgba(82, 63, 105, 0.08);
+
+  .logoSection {
+    img {
+      height: 64px;
+      padding: 10px 0px 18px;
+    }
+  }
+
+  .menuSection {
+    text-align: center;
+  }
+
+  .ant-menu {
+    line-height: 62px;
+    border-bottom: 0;
+  }
+}
+
+.ant-layout-content {
+  padding: 0 2%;
+
+  .ant-page-header {
+    padding: 0;
+    margin-bottom: 50px;
+  }
+}
+
+.loading-container {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  margin-bottom: 20px;
+  padding: 30px 50px;
+  margin: 20px 0;
+}
+
+/* @tode - better css not global target */
+.ant-form-item-label {
+  text-align: left;
+}
+
+.auth-form {
+  min-width: 350px;
+  margin: 50px auto !important;
+  background: #fff;
+  padding: 30px;
+  border-radius: 5px;
+
+  .heading {
+    text-align: center;
+    margin-bottom: 20px;
+
+    h3 {
+      position: relative;
+      top: 15px;
+    }
+  }
+  .ant-input-affix-wrapper .ant-input {
+    min-height: auto !important;
+  }
+}
+
+.ant-layout-header {
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0px 10px 30px 0px rgba(82, 63, 105, 0.08);
+
+  .logoSection {
+    img {
+      height: 64px;
+      padding: 10px 0px 18px;
+    }
+  }
+
+  .menuSection {
+    text-align: center;
+  }
+
+  .ant-menu {
+    line-height: 62px;
+    border-bottom: 0;
+  }
+}
+
+.ant-input-affix-wrapper .ant-input {
+  min-height: auto !important;
+}
+
+.ant-tabs-nav .ant-tabs-tab {
+  height: auto !important;
+}
