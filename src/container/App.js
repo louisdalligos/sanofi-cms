@@ -1,14 +1,23 @@
-import React from "react";
+import React, { useEffect, useState, Fragment } from "react";
+import { withRouter, Route, Switch } from "react-router-dom";
 import { connect } from "react-redux";
-import { withRouter, Route, Redirect, Switch } from "react-router-dom";
+import PrivateRoute from "../routes/PrivateRoute";
+import PublicRoute from "../routes/PublicRoute";
 
 // Pages
 import Dashboard from "../components/dashboard-page/Dashboard";
 import ProfileManagement from "../components/profile-management-page/ProfileManagement";
 import SiteAdminManagement from "../components/site-admins-management-page/SiteAdminManagement";
-import CreateAdminPage from "../components/site-admins-management-page/CreateAdminPage";
-import UpdateAdminPage from "../components/site-admins-management-page/UpdateAdminPage";
-//import TherapyAreas from "../components/therapy-areas-management-page/TherapyAreas";
+import WrappedCreateAdminForm from "../components/site-admins-management-page/CreateAdminForm";
+import WrappedUpdateAdminForm from "../components/site-admins-management-page/UpdateAdminForm";
+import UserManagement from "../components/users-management-page/UserManagement";
+import TherapyAreasManagement from "../components/therapy-areas-management-page/TherapyAreasManagement";
+import WrappedCreateUserForm from "../components/users-management-page/CreateUserForm";
+import WrappedViewUserForm from "../components/users-management-page/ViewUserForm";
+import CategoriesManagement from "../components/categories-management-page/CategoriesManagement";
+import SubCategoriesManagement from "../components/sub-categories-management-page/SubCategoriesManagement";
+
+// 404
 import NotFound from "../components/404-page/NotFound";
 
 // Components as smart container
@@ -16,118 +25,136 @@ import WrappedLoginForm from "../components/login-page/LoginForm";
 import WrappedRequestAccountForm from "../components/request-account-page/RequestAccountForm";
 import WrappedForgotPasswordForm from "../components/forgot-password-page/ForgotPasswordForm";
 import WrappedCompleteRegistrationForm from "../components/complete-registration-page/CompleteRegistrationForm";
+import WrappedResetPasswordForm from "../components/reset-password-page/ResetPasswordForm";
+import CreateArticleForm from "../components/therapy-areas-management-page/new-article/CreateArticleForm";
+import UpdateArticleForm from "../components/therapy-areas-management-page/update-article/UpdateArticleForm";
 
-//import WrappedUpdateAdminForm from "../components/site-admins-management-page/UpdateAdminForm";
-
-import { logout } from "../redux/actions/auth-actions/authActions";
+import { Role } from "../utils/role";
+import { getAuthUser } from "../redux/actions/auth-actions/authActions";
+import store from "../stores/store-dev";
+import { message } from "antd";
+const token = sessionStorage.getItem("access_token");
 
 // Our MAIN APP wrapper
-const App = props => {
+const App = ({ auth, ...props }) => {
+  useEffect(() => {
+    //console.log(props);
+    //console.log(auth, "Auth store from app");
+    //console.log(store, "Store from app");
+    //console.log(Role.SuperAdmin, "role config");
+
+    if (token) {
+      //console.log("has token");
+      store.dispatch(getAuthUser());
+    }
+  }, [token]);
+
   return (
-    <div className="wrapper">
-      <Switch location={props.history.location}>
-        <PrivateRoute
-          exact
-          authenticated={props.isLoggedIn}
-          path={"/"}
-          component={Dashboard}
-        />
-        <PrivateRoute
-          authenticated={props.isLoggedIn}
-          path="/profile"
-          component={ProfileManagement}
-        />
-        <PrivateRoute
-          authenticated={props.isLoggedIn}
-          path="/admins"
-          component={SiteAdminManagement}
-        />
-        <PrivateRoute
-          authenticated={props.isLoggedIn}
-          path="/create-admin"
-          component={CreateAdminPage}
-        />
-        <PrivateRoute
-          authenticated={props.isLoggedIn}
-          path="/update-admin/:id"
-          component={UpdateAdminPage}
-        />
-        {/*<PrivateRoute
-                    authenticated={props.isLoggedIn}
-                    path={"/therapyareas"}
-                    component={TherapyAreas}
-                />*/}
-        <GuestRoute
-          authenticated={props.isLoggedIn}
-          path="/request-account"
-          component={WrappedRequestAccountForm}
-        />
-        <GuestRoute
-          authenticated={props.isLoggedIn}
-          path="/login"
-          component={WrappedLoginForm}
-        />
-        <GuestRoute
-          authenticated={props.isLoggedIn}
-          path="/forgot-password"
-          component={WrappedForgotPasswordForm}
-        />
-        <GuestRoute
-          authenticated={props.isLoggedIn}
-          path="/register"
-          component={WrappedCompleteRegistrationForm}
-        />
-        <Route component={NotFound} />
-      </Switch>
-    </div>
+    <Fragment>
+      {token && auth.isLoadingUser ? (
+        message.info("Please wait a moment...", 1)
+      ) : (
+        <div className="wrapper">
+          <Switch location={props.history.location}>
+            <PrivateRoute exact path={"/"} component={Dashboard} />
+            <PrivateRoute exact path="/profile" component={ProfileManagement} />
+            <PrivateRoute
+              exact
+              path="/admins"
+              component={SiteAdminManagement}
+              roles={[Role.SuperAdmin]} // set what role can access this route - can be an array of users
+            />
+            <PrivateRoute
+              path="/admins/create"
+              component={WrappedCreateAdminForm}
+              roles={[Role.SuperAdmin]}
+            />
+            <PrivateRoute
+              path="/admins/:id"
+              component={WrappedUpdateAdminForm}
+              roles={[Role.SuperAdmin]}
+            />
+            <PrivateRoute
+              exact
+              path="/doctors"
+              component={UserManagement}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              path="/doctors/create"
+              component={WrappedCreateUserForm}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              path="/doctors/:id"
+              component={WrappedViewUserForm}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
+              path="/therapy-areas"
+              component={TherapyAreasManagement}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              path="/therapy-areas/create"
+              component={CreateArticleForm}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
+              path="/therapy-areas/:id"
+              component={UpdateArticleForm}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              path="/categories"
+              component={CategoriesManagement}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              path="/sub-categories"
+              component={SubCategoriesManagement}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PublicRoute
+              exact
+              path="/request-account"
+              component={WrappedRequestAccountForm}
+            />
+            <PublicRoute exact path="/login" component={WrappedLoginForm} />
+            <PublicRoute
+              exact
+              path="/forgot-password"
+              component={WrappedForgotPasswordForm}
+            />
+            <PublicRoute
+              exact
+              path="/register"
+              component={WrappedCompleteRegistrationForm}
+            />
+            <PublicRoute
+              exact
+              path="/reset-password"
+              component={WrappedResetPasswordForm}
+            />
+            <Route component={NotFound} />
+          </Switch>
+        </div>
+      )}
+    </Fragment>
   );
 };
 
-// define our routes here:
-function PrivateRoute({ component: Component, authenticated, ...rest }) {
-  return (
-    <Route
-      {...rest}
-      exact
-      render={props =>
-        authenticated ? (
-          <Component {...props} />
-        ) : (
-          <Redirect
-            to={{
-              pathname: "/login",
-              state: { from: props.location }
-            }}
-          />
-        )
-      }
-    />
-  );
-}
-
-function GuestRoute({ component: Component, authenticated, ...rest }) {
-  return (
-    <Route
-      {...rest}
-      exact
-      render={props =>
-        !authenticated ? <Component {...props} /> : <Redirect to="/" />
-      }
-    />
-  );
-}
-
-const mapStateToProps = reduxStore => {
+const mapStateToProps = state => {
   return {
-    isLoggedIn: reduxStore.authReducer.isLoggedIn,
-    user: reduxStore.authReducer.user,
-    isLoadingUser: reduxStore.authReducer.isLoadingUser
+    auth: state.authReducer
   };
 };
 
 export default withRouter(
   connect(
     mapStateToProps,
-    { logout }
+    { getAuthUser }
   )(App)
 );

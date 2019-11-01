@@ -9,7 +9,7 @@ function fetchCurrentUserRequest() {
 
 function changePasswordRequest(body) {
   return axiosInstance({
-    method: "post",
+    method: "put",
     url: "/profile/change-password",
     data: body
   });
@@ -23,7 +23,7 @@ function updateProfileRequest(body) {
   });
 }
 
-function resetPasswordRequest(body) {
+function forgotPasswordEmailRequest(body) {
   return axiosInstance({
     method: "post",
     url: "/request-reset-password",
@@ -31,11 +31,19 @@ function resetPasswordRequest(body) {
   });
 }
 
+function passwordNotificationRequest() {
+  return axiosInstance({
+    method: "get",
+    url: "/profile/password-notification"
+  });
+}
+
 const UserMaintenanceServices = {
   fetchCurrentUserRequest,
   changePasswordRequest,
   updateProfileRequest,
-  resetPasswordRequest
+  forgotPasswordEmailRequest,
+  passwordNotificationRequest
 };
 
 export default UserMaintenanceServices;

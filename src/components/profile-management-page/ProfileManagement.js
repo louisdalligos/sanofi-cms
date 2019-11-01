@@ -1,6 +1,5 @@
-import React, { Fragment, useEffect } from "react";
-import { connect } from "react-redux";
-import { Layout, PageHeader, Tabs, Row } from "antd";
+import React, { Fragment } from "react";
+import { Layout, PageHeader, Tabs, Row, Col } from "antd";
 
 import Navbar from "../main-navigation/Navbar";
 import WrappedUserInfoForm from "./UserInfoForm";
@@ -12,34 +11,29 @@ const { TabPane } = Tabs;
 const ProfileManagement = props => {
   const pageTitle = "User Profile Management";
 
-  useEffect(() => {}, []);
-
   return (
     <Fragment>
       <Navbar {...props} />
 
-      <Content style={{ padding: "0 50px", marginTop: 64 }}>
+      <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
 
         <Row>
-          <Tabs tabPosition={"left"}>
-            <TabPane tab="User Information" key="1">
-              <WrappedUserInfoForm />
-            </TabPane>
+          <Col>
+            <Tabs tabPosition={"left"}>
+              <TabPane tab="User Information" key="1">
+                <WrappedUserInfoForm />
+              </TabPane>
 
-            <TabPane tab="Change Password" key="2">
-              <WrappedChangePasswordForm />
-            </TabPane>
-          </Tabs>
+              <TabPane tab="Change Password" key="2">
+                <WrappedChangePasswordForm />
+              </TabPane>
+            </Tabs>
+          </Col>
         </Row>
-      </Content>
+      </div>
     </Fragment>
   );
 };
 
-const mapStateToProps = state => {
-  return {
-    user: state.userMaintenanceReducer.user
-  };
-};
-export default connect(mapStateToProps)(ProfileManagement);
+export default ProfileManagement;

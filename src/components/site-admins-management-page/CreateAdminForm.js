@@ -1,77 +1,53 @@
-import React, { useEffect, useContext, Fragment } from "react";
+import React, { useEffect, Fragment } from "react";
 import { connect } from "react-redux";
-import { Form, Icon, Input, Button, Table, Spin, message, Select } from "antd";
-
 import {
-  fetchAdminRequestList,
-  createAdmin
-} from "../../redux/actions/admin-actions/superAdminActions";
+  Form,
+  Input,
+  Button,
+  message,
+  Select,
+  Row,
+  PageHeader,
+  Breadcrumb
+} from "antd";
+import { Link } from "react-router-dom";
+
+import { createAdmin } from "../../redux/actions/admin-actions/superAdminActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
-const { Option } = Select;
-const customIconLoading = <Icon type="loading" style={{ fontSize: 24 }} spin />;
+import Navbar from "../main-navigation/Navbar";
 
-const columns = [
-  {
-    title: "Name",
-    dataIndex: "fullname",
-    key: "fullname",
-    sorter: true
-  },
-  {
-    title: "Department",
-    dataIndex: "department",
-    key: "department",
-    sorter: true
-  },
-  {
-    title: "Email",
-    dataIndex: "email",
-    key: "email",
-    sorter: true
-  },
-  {
-    title: "Action",
-    render: (text, record) => <Button type="primary">Resend Invitation</Button>,
-    key: "action"
-  }
-];
+const { Option } = Select;
+const pageTitle = "Create an admin";
 
 const CreateAdminForm = ({
   form,
   form: { getFieldDecorator, resetFields },
   requestInProgress,
-  adminRequestList,
-  fetchAdminRequestList,
   clearNotifications,
   createAdmin,
-  notifs,
-  notifId
+  notifs: {
+    notifications: { error, success },
+    id
+  },
+  ...props
 }) => {
   useEffect(() => {
-    fetchAdminRequestList();
-
-    if (notifId) {
-      // if (notifId === "CREATE_ADMIN_FAILED") {
-      //     notifs.notifications.error
-      //         ? message.error(notifs.notifications.error)
-      //         : null;
-      // } else if (notifId === "CREATE_ADMIN_SUCCESS") {
-      //     message.success(notifs.notifications.success);
-      // } else {
-      //     return;
-      // }
+    switch (id) {
+      case "CREATE_ADMIN_FAILED":
+        message.error(error ? error : null);
+        clearNotifications();
+        break;
+      case "CREATE_ADMIN_SUCCESS":
+        message.success(success);
+        clearNotifications();
+        resetFields(); // reset the fields on the form on success creation
+        break;
+      default:
+        return;
     }
     //eslint-disable-next-line
-  }, [notifId]);
-
-  if (requestInProgress || adminRequestList === null) {
-    return (
-      <div className="loading-container">
-        <Spin indicator={customIconLoading} />
-      </div>
-    );
-  }
+  }, [id]);
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -80,91 +56,109 @@ const CreateAdminForm = ({
       if (!err) {
         console.log(values);
         createAdmin(values);
-        resetFields();
-        clearNotifications(); // always clear notifications
       }
     });
   };
 
   return (
     <Fragment>
-      {/* <Table dataSource={adminRequestList} columns={columns} /> */}
+      <Navbar {...props} />
+      <div className="box-layout-custom">
+        <PageHeader title={pageTitle} />
+        <div className="page-breadcrumb">
+          <div>
+            <Breadcrumb>
+              <Breadcrumb.Item key="users">Users</Breadcrumb.Item>
+              <Breadcrumb.Item key="admins">
+                <Link to="/admins">Site Admins</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item key="admins-create">
+                Create Admin
+              </Breadcrumb.Item>
+            </Breadcrumb>
+          </div>
 
-      <Form
-        onSubmit={handleSubmit}
-        className=""
-        style={{
-          width: 400,
-          background: "#EEE",
-          padding: "20px",
-          border: "1px solid #CCC"
-        }}
-      >
-        <h3 style={{ marginTop: 30, marginBotom: 20 }}>Account Information</h3>
-        <Form.Item label="Name">
-          {getFieldDecorator("fullname", {
-            rules: [
-              {
-                required: true,
-                message: "Please enter the fullname"
-              }
-            ]
-          })(<Input />)}
-        </Form.Item>
-        <Form.Item label="Email">
-          {getFieldDecorator("email", {
-            rules: [
-              {
-                type: "email",
-                message: "Please enter a valid e-mail"
-              },
-              { required: true, message: "Please input an email" }
-            ]
-          })(<Input placeholder="Enter an email" />)}
-        </Form.Item>
-
-        <Form.Item label="Department">
-          {getFieldDecorator("department", {
-            rules: [
-              {
-                required: true,
-                message: "Please enter the department"
-              }
-            ]
-          })(<Input />)}
-        </Form.Item>
-        <Form.Item label="Role">
-          {getFieldDecorator(
-            "role",
-            { initialValue: "superadmin" },
-            {
+          <div>
+            <Button type="primary">
+              <Link to="/admins">Back to admins table</Link>
+            </Button>
+          </div>
+        </div>
+        <Form onSubmit={handleSubmit} className="single-form">
+          <Form.Item label="Name">
+            {getFieldDecorator("fullname", {
               rules: [
                 {
                   required: true,
-                  message: "Please select the role"
+                  message: "Please enter the fullname"
                 }
               ]
-            }
-          )(
-            <Select>
-              <Option value="superadmin">superadmin</Option>
-              <Option value="admin">admin</Option>
-              <Option value="contenteditor">contenteditor</Option>
-            </Select>
-          )}
-        </Form.Item>
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            block
-            shape="round"
-            loading={requestInProgress}
-          >
-            Save &amp; Send Invitation
-          </Button>
-        </Form.Item>
-      </Form>
+            })(<Input placeholder="Enter fullname" />)}
+          </Form.Item>
+          <Form.Item label="Email">
+            {getFieldDecorator("email", {
+              rules: [
+                {
+                  type: "email",
+                  message: "Please enter a valid e-mail"
+                },
+                {
+                  required: true,
+                  message: "Please input an email"
+                }
+              ]
+            })(<Input placeholder="Enter an email" />)}
+          </Form.Item>
+
+          <Form.Item label="Department">
+            {getFieldDecorator("department", {
+              rules: [
+                {
+                  required: true,
+                  message: "Please enter the department"
+                }
+              ]
+            })(
+              <Select placeholder="Select your department">
+                <Option value="BOSD">BOSD</Option>
+                <Option value="Marketing">Marketing</Option>
+                <Option value="Sales">Sales</Option>
+                <Option value="ITS">ITS</Option>
+                <Option value="Others">Others</Option>
+              </Select>
+            )}
+          </Form.Item>
+          <Form.Item label="Role">
+            {getFieldDecorator(
+              "role",
+              { initialValue: "superadmin" },
+              {
+                rules: [
+                  {
+                    required: true,
+                    message: "Please select the role"
+                  }
+                ]
+              }
+            )(
+              <Select>
+                <Option value="superadmin">Super Admin</Option>
+                <Option value="admin">Admin</Option>
+                <Option value="editor">Content Editor</Option>
+              </Select>
+            )}
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={requestInProgress}
+            >
+              Save &amp; Send Invitation
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
     </Fragment>
   );
 };
@@ -175,14 +169,12 @@ const WrappedCreateAdminForm = Form.create({ name: "create_admin" })(
 
 const mapStateToProps = state => {
   return {
-    adminRequestList: state.superadmin.adminRequestList,
     requestInProgress: state.superadmin.requestInProgress,
-    notifs: state.notificationReducer,
-    notifId: state.notificationReducer.id
+    notifs: state.notificationReducer
   };
 };
 
 export default connect(
   mapStateToProps,
-  { fetchAdminRequestList, createAdmin, clearNotifications }
+  { createAdmin, clearNotifications }
 )(WrappedCreateAdminForm);

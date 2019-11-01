@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Form, Input, Button, Alert, message } from "antd";
+import { Form, Input, Button, Select, Alert, message } from "antd";
 
 import { updateProfileInfo } from "../../redux/actions/user-maintenance-actions/userMaintenanceActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
+
+const { Option } = Select;
 
 const formItemLayout = {
   labelCol: { span: 5 },
@@ -18,10 +20,9 @@ const formTailLayout = {
 const UserInfoForm = ({
   form,
   form: { getFieldDecorator },
+  notifs,
   updateProfileInfo,
   requestInProgress,
-  notifs,
-  notifId,
   currentUser
 }) => {
   const [name, setName] = useState(null);
@@ -30,28 +31,32 @@ const UserInfoForm = ({
   const [department, setDepartment] = useState(null);
 
   useEffect(() => {
-    if (notifId) {
-      if (notifId === "UPDATE_PROFILE_FAILED") {
-        message.error(notifs.notifications.error);
-      } else if (notifId === "UPDATE_PROFILE_SUCCESS") {
+    switch (notifs.id) {
+      case "UPDATE_PROFILE_FAILED":
+        notifs.notifications.error
+          ? message.error(notifs.notifications.error)
+          : message.error("There was an error in processing your request");
+        break;
+      case "UPDATE_PROFILE_SUCCESS":
         message.success(notifs.notifications.success);
-      } else {
+        break;
+      default:
         return;
-      }
     }
+    // eslint-disable-next-line
+  }, [notifs.id]);
 
-    clearNotifications();
-
+  useEffect(() => {
     if (currentUser) {
       setEmail(currentUser.email);
       setName(currentUser.fullname);
       setDepartment(currentUser.department);
-      setRole(currentUser.role);
+      setRole(currentUser.role_type);
     }
 
-    console.log("Current user: ", currentUser);
+    console.log("Current user from profile page: ", currentUser);
     // eslint-disable-next-line
-  }, [notifId, currentUser]); // add error value as a dependency of useEffect
+  }, [currentUser]);
 
   const check = () => {
     form.validateFieldsAndScroll((err, values) => {
@@ -86,16 +91,6 @@ const UserInfoForm = ({
           }
         )(<Input />)}
       </Form.Item>
-      {/* <Form.Item {...formItemLayout} label="Last Name">
-                {getFieldDecorator("lastName", {
-                    rules: [
-                        {
-                            required: true,
-                            message: "Please input your last name"
-                        }
-                    ]
-                })(<Input placeholder="Last name" />)}
-            </Form.Item> */}
       <Form.Item {...formItemLayout} label="Department">
         {getFieldDecorator(
           "department",
@@ -104,11 +99,22 @@ const UserInfoForm = ({
             rules: [
               {
                 required: true,
-                message: "Please input your department"
+                message: "Please select your department"
               }
             ]
           }
-        )(<Input />)}
+        )(
+          <Select
+            placeholder="Select your department"
+            //   onChange={thandleSelectChange}
+          >
+            <Option value="BOSD">BOSD</Option>
+            <Option value="Marketing">Marketing</Option>
+            <Option value="Sales">Sales</Option>
+            <Option value="ITS">ITS</Option>
+            <Option value="Others">Others</Option>
+          </Select>
+        )}
       </Form.Item>
       <Form.Item {...formItemLayout} label="Role">
         {getFieldDecorator("role", { initialValue: role })(<Input disabled />)}
@@ -126,9 +132,8 @@ const WrappedUserInfoForm = Form.create({ name: "user_info" })(UserInfoForm);
 
 const mapStateToProps = state => {
   return {
-    requestInProgress: state.userMaintenanceReducer.requestInProgress,
     notifs: state.notificationReducer,
-    notifId: state.notificationReducer.id,
+    requestInProgress: state.userMaintenanceReducer.requestInProgress,
     currentUser: state.authReducer.user
   };
 };

@@ -1,23 +1,22 @@
 import React, { Fragment } from "react";
 import { Layout, PageHeader } from "antd";
-
 import Navbar from "../main-navigation/Navbar";
-import WrappedCreateAdminForm from "./CreateAdminForm";
+import TherapyAreasTable from "./TherapyAreasTable";
 
 const { Content } = Layout;
 
-const CreateAdminsPage = props => {
-  const pageTitle = "Create an admin";
+const TherapyAreasManagement = props => {
+  const pageTitle = "Therapy Areas";
 
   return (
     <Fragment>
       <Navbar {...props} />
-      <Content style={{ padding: "0 50px", marginTop: 64 }}>
+      <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
-        <WrappedCreateAdminForm />
-      </Content>
+        <TherapyAreasTable />
+      </div>
     </Fragment>
   );
 };
 
-export default CreateAdminsPage;
+export default TherapyAreasManagement;

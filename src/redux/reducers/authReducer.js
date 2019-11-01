@@ -15,7 +15,14 @@ import {
   GET_AUTH_SUCCESS,
   GET_AUTH_FAILURE,
   LOGOUT_FAILED,
-  LOGOUT_SUCCESS
+  LOGOUT_SUCCESS,
+  VERIFY_REGISTRATION_TOKEN_SUCCESS,
+  VERIFY_REGISTRATION_TOKEN_FAILED,
+  VERIFY_REGISTRATION_TOKEN_REQUEST,
+  GET_TOKEN_PARAMS,
+  RESEND_EMAIL_LINK_REQUEST,
+  RESEND_EMAIL_LINK_FAILED,
+  RESEND_EMAIL_LINK_SUCCESS
 } from "../actions/auth-actions/types";
 
 const initialState = {
@@ -23,11 +30,47 @@ const initialState = {
   isLoggedIn: false,
   isLoadingUser: false,
   access_token: null,
-  requestInProgress: null
+  requestInProgress: null,
+  registration_token: null,
+  isRegistrationTokenVerified: true,
+  loading: true
 };
 
 const authReducer = (state = initialState, action) => {
   switch (action.type) {
+    case GET_TOKEN_PARAMS:
+      return {
+        ...state,
+        loading: true,
+        registration_token: action.payload
+      };
+    case VERIFY_REGISTRATION_TOKEN_REQUEST:
+      return {
+        ...state
+      };
+    case VERIFY_REGISTRATION_TOKEN_SUCCESS:
+      return {
+        ...state,
+        isRegistrationTokenVerified: true,
+        loading: false
+      };
+    case VERIFY_REGISTRATION_TOKEN_FAILED:
+      return {
+        ...state,
+        isRegistrationTokenVerified: false,
+        loading: false
+      };
+    case RESEND_EMAIL_LINK_REQUEST:
+      return {
+        ...state,
+        requestInProgress: true
+      };
+    case RESEND_EMAIL_LINK_SUCCESS:
+    case RESEND_EMAIL_LINK_FAILED:
+      return {
+        ...state,
+        requestInProgress: false
+      };
     case GET_AUTH_REQUEST:
       return {
         ...state,
@@ -95,8 +138,8 @@ const authReducer = (state = initialState, action) => {
     case REGISTER_SUCCESS:
       return {
         ...state,
-        isLoggedIn: true,
-        requestInProgress: false
+        requestInProgress: false,
+        access_token: action.payload
       };
     case REGISTER_ERROR:
       return {

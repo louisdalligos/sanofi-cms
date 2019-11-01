@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Form, Input, Button, Alert, Layout, Row } from "antd";
+import { Form, Input, Button, Alert, Layout, Row, Select } from "antd";
 
 import { requestAccount } from "../../redux/actions/auth-actions/authActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 import logo from "../../assets/logo.png";
 const { Content } = Layout;
-
-// @todo helper
+const { Option } = Select;
 
 const RequestAccountForm = ({
   form,
@@ -24,7 +23,6 @@ const RequestAccountForm = ({
 
   useEffect(() => {
     if (notifId) {
-      console.log("Notifications has changed");
       if (notifId === "REQUEST_ACCOUNT_ERROR") {
         setAlert(notifs.notifications.error);
         setAlertType(notifs.uiType);
@@ -41,6 +39,7 @@ const RequestAccountForm = ({
 
   const handleSubmit = e => {
     e.preventDefault();
+    clearNotifications();
 
     form.validateFields((err, values) => {
       if (!err) {
@@ -48,8 +47,6 @@ const RequestAccountForm = ({
         resetFields();
       }
     });
-
-    clearNotifications();
   };
 
   const onCloseAlert = e => {
@@ -107,16 +104,29 @@ const RequestAccountForm = ({
                   ]
                 })(<Input placeholder="Email" />)}
               </Form.Item>
+
               <Form.Item label="Department">
                 {getFieldDecorator("department", {
                   rules: [
                     {
                       required: true,
-                      message: "Please input your department!"
+                      message: "Please select your department"
                     }
                   ]
-                })(<Input type="text" placeholder="Enter your department" />)}
+                })(
+                  <Select
+                    placeholder="Select your department"
+                    //   onChange={thandleSelectChange}
+                  >
+                    <Option value="BOSD">BOSD</Option>
+                    <Option value="Marketing">Marketing</Option>
+                    <Option value="Sales">Sales</Option>
+                    <Option value="ITS">ITS</Option>
+                    <Option value="Others">Others</Option>
+                  </Select>
+                )}
               </Form.Item>
+
               <Form.Item style={{ marginTop: 20 }}>
                 <Button
                   type="primary"

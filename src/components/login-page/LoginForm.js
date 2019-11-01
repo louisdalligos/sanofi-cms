@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
-import { Form, Icon, Input, Button, Alert, Layout, Row, Col } from "antd";
+import { Form, Icon, Input, Button, Alert, Layout, Row, message } from "antd";
 
-import { signin } from "../../redux/actions/auth-actions/authActions";
+import {
+  signin,
+  getAuthUser
+} from "../../redux/actions/auth-actions/authActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 import logo from "../../assets/logo.png";
@@ -14,49 +16,45 @@ const { Content } = Layout;
 const LoginForm = ({
   form,
   form: { getFieldDecorator },
-  history,
-  isLoggedIn,
-  signin,
-  requestInProgress,
-  clearNotifications,
+  auth: { isLoggedIn, requestInProgress, user },
   notifs,
-  notifId
+  history,
+  signin,
+  clearNotifications
 }) => {
   const [alert, setAlert] = useState(null);
   const [alertType, setAlertType] = useState(null);
 
   useEffect(() => {
-    if (isLoggedIn) {
-      history.push("/");
-    }
-
-    if (notifId) {
-      if (notifId === "SIGNIN_FAILURE") {
-        console.log("Reach failed login");
-
-        setAlert(notifs.notifications.error);
+    switch (notifs.id) {
+      case "SIGNIN_SUCCESS":
+        history.push("/");
+        clearNotifications();
+        break;
+      case "SIGNIN_FAILURE":
+        setAlert(
+          notifs.notifications.error
+            ? notifs.notifications.error
+            : notifs.notifications.message
+        );
         setAlertType(notifs.uiType);
-      } else if (notifId === "SIGNIN_SUCCESS") {
-        setAlert(notifs.notifications.success);
-        setAlertType(notifs.uiType);
-      } else {
+        break;
+      default:
         setAlert(null);
-      }
+        return;
     }
     // eslint-disable-next-line
-  }, [notifId, isLoggedIn, history]); // add error value as a dependency of useEffect
+  }, [notifs.id]);
 
   const handleSubmit = e => {
     e.preventDefault();
+    clearNotifications();
 
     form.validateFields((err, values) => {
       if (!err) {
         signin(values);
-        // we can reset fields here
       }
     });
-
-    clearNotifications();
   };
 
   const onCloseAlert = e => {
@@ -105,7 +103,12 @@ const LoginForm = ({
                 })(
                   <Input
                     prefix={
-                      <Icon type="user" style={{ color: "rgba(0,0,0,.25)" }} />
+                      <Icon
+                        type="user"
+                        style={{
+                          color: "rgba(0,0,0,.25)"
+                        }}
+                      />
                     }
                     placeholder="Email"
                   />
@@ -122,7 +125,12 @@ const LoginForm = ({
                 })(
                   <Input
                     prefix={
-                      <Icon type="lock" style={{ color: "rgba(0,0,0,.25)" }} />
+                      <Icon
+                        type="lock"
+                        style={{
+                          color: "rgba(0,0,0,.25)"
+                        }}
+                      />
                     }
                     type="password"
                     placeholder="Password"
@@ -154,22 +162,12 @@ const LoginForm = ({
   );
 };
 
-LoginForm.propTypes = {
-  signin: PropTypes.func.isRequired,
-  requestInProgress: PropTypes.bool,
-  isLoggedIn: PropTypes.bool,
-  status: PropTypes.number
-};
-
 const WrappedLoginForm = Form.create({ name: "login" })(LoginForm);
 
 const mapStatetoProps = state => {
   return {
-    isLoggedin: state.authReducer.isLoggedin,
-    isLoadingUser: state.authReducer.isLoadingUser,
-    requestInProgress: state.authReducer.requestInProgress,
-    notifs: state.notificationReducer,
-    notifId: state.notificationReducer.id
+    auth: state.authReducer,
+    notifs: state.notificationReducer
   };
 };
 

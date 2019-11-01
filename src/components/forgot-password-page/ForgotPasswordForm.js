@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Form, Icon, Input, Button, Alert, Layout, Row } from "antd";
 
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
-import { resetPassword } from "../../redux/actions/user-maintenance-actions/userMaintenanceActions";
+import { forgotPasswordEmail } from "../../redux/actions/user-maintenance-actions/userMaintenanceActions";
 
 import logo from "../../assets/logo.png";
 const { Content } = Layout;
@@ -14,42 +14,44 @@ const ForgotPasswordForm = ({
   form: { getFieldDecorator, resetFields },
   requestInProgress,
   clearNotifications,
-  notifs,
-  notifId,
-  resetPassword
+  notifs: {
+    notifications: { error, success },
+    id,
+    uiType
+  },
+  forgotPasswordEmail
 }) => {
   const [alert, setAlert] = useState(null);
   const [alertType, setAlertType] = useState(null);
 
   useEffect(() => {
-    if (notifId) {
-      console.log("Notifications has changed");
-      if (notifId === "RESET_PASSWORD_ERROR") {
-        setAlert(notifs.notifications.error);
-        setAlertType(notifs.uiType);
-      } else if (notifId === "RESET_PASSWORD_SUCCESS") {
-        setAlert(notifs.notifications.success);
-        setAlertType(notifs.uiType);
-      } else {
+    switch (id) {
+      case "FORGOT_PASSWORD_EMAIL_FAILED":
+        setAlert(error);
+        setAlertType(uiType);
+        break;
+      case "FORGOT_PASSWORD_EMAIL_SUCCESS":
+        setAlert(success);
+        setAlertType(uiType);
+        break;
+      default:
         setAlert(null);
-      }
+        return;
     }
-
     // eslint-disable-next-line
-  }, [notifId]);
+  }, [id]);
 
   const handleSubmit = e => {
     e.preventDefault();
+    clearNotifications();
 
     form.validateFields((err, values) => {
       if (!err) {
         console.log(values);
-        resetPassword(values);
+        forgotPasswordEmail(values);
         resetFields();
       }
     });
-
-    clearNotifications();
   };
 
   const onCloseAlert = e => {
@@ -98,7 +100,12 @@ const ForgotPasswordForm = ({
                 })(
                   <Input
                     prefix={
-                      <Icon type="user" style={{ color: "rgba(0,0,0,.25)" }} />
+                      <Icon
+                        type="user"
+                        style={{
+                          color: "rgba(0,0,0,.25)"
+                        }}
+                      />
                     }
                     placeholder="Email"
                   />
@@ -136,12 +143,11 @@ const WrappedForgotPasswordForm = Form.create({ name: "forgot_password" })(
 const mapStatetoProps = state => {
   return {
     requestInProgress: state.userMaintenanceReducer.requestInProgress,
-    notifs: state.notificationReducer,
-    notifId: state.notificationReducer.id
+    notifs: state.notificationReducer
   };
 };
 
 export default connect(
   mapStatetoProps,
-  { resetPassword, clearNotifications }
+  { forgotPasswordEmail, clearNotifications }
 )(WrappedForgotPasswordForm);

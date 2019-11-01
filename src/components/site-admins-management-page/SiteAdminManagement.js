@@ -10,7 +10,7 @@ const SiteAdminManagement = props => {
   return (
     <Fragment>
       <Navbar {...props} />
-      <div style={{ padding: "0 50px", marginTop: 64 }}>
+      <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
         <AdminsTable />
       </div>

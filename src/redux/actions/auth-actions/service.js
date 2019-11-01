@@ -16,14 +16,6 @@ function requestAccountService(body) {
   });
 }
 
-function registerRequest(body) {
-  return axiosInstance({
-    method: "post",
-    url: "/registration",
-    data: body
-  });
-}
-
 function getAuthUserRequest(body) {
   return axiosInstance({
     method: "get",
@@ -43,7 +35,6 @@ function getAuthUserRequest(body) {
 const AuthServices = {
   signinRequest,
   requestAccountService,
-  registerRequest,
   //logoutRequest,
   getAuthUserRequest
 };

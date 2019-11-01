@@ -1,5 +1,7 @@
 import UserMaintenanceServices from "./service";
+import { API } from "../../../utils/api";
 import { returnNotifications } from "../notification-actions/notificationActions";
+import axios from "axios";
 
 import {
   FETCH_CURRENT_USER_REQUEST,
@@ -10,9 +12,21 @@ import {
   CHANGE_PASSWORD_REQUEST,
   CHANGE_PASSWORD_SUCCESS,
   CHANGE_PASSWORD_FAILED,
-  RESET_PASSWORD_REQUEST,
-  RESET_PASSWORD_SUCCESS,
-  RESET_PASSWORD_ERROR
+  FORGOT_PASSWORD_EMAIL_REQUEST,
+  FORGOT_PASSWORD_EMAIL_SUCCESS,
+  FORGOT_PASSWORD_EMAIL_FAILED,
+  GET_RESET_PASSWORD_TOKEN_PARAMS,
+  VERIFY_RESET_PASSWORD_TOKEN_REQUEST,
+  VERIFY_RESET_PASSWORD_TOKEN_SUCCESS,
+  VERIFY_RESET_PASSWORD_TOKEN_FAILED,
+  PASSWORD_RESET_REQUEST,
+  PASSWORD_RESET_SUCCESS,
+  PASSWORD_RESET_FAILED,
+  RESEND_PASSWORD_RESET_EMAIL_LINK_REQUEST,
+  RESEND_PASSWORD_RESET_EMAIL_LINK_SUCCESS,
+  RESEND_PASSWORD_RESET_EMAIL_LINK_FAILED,
+  PASSWORD_NOTIFICATION_REQUEST,
+  PASSWORD_NOTIFICATION_SUCCESS
 } from "./types";
 
 // Fetch current user
@@ -101,22 +115,24 @@ export function changePassword(body) {
   };
 }
 
-// Forgot password
-export function resetPassword(body) {
+// Forgot password request
+export function forgotPasswordEmail(body) {
   return async dispatch => {
-    dispatch({ type: RESET_PASSWORD_REQUEST });
+    dispatch({ type: FORGOT_PASSWORD_EMAIL_REQUEST });
     try {
       // POST request
-      const response = await UserMaintenanceServices.resetPasswordRequest(body);
+      const response = await UserMaintenanceServices.forgotPasswordEmailRequest(
+        body
+      );
       dispatch({
-        type: RESET_PASSWORD_SUCCESS
+        type: FORGOT_PASSWORD_EMAIL_SUCCESS
       });
       dispatch(
         returnNotifications(
           response.data,
           "success",
           response.status,
-          "RESET_PASSWORD_SUCCESS"
+          "FORGOT_PASSWORD_EMAIL_SUCCESS"
         )
       );
     } catch (err) {
@@ -125,10 +141,170 @@ export function resetPassword(body) {
           err.response.data,
           "error",
           err.response.status,
-          "RESET_PASSWORD_ERROR"
+          "FORGOT_PASSWORD_EMAIL_FAILED"
         )
       );
-      dispatch({ type: RESET_PASSWORD_ERROR });
+      dispatch({ type: FORGOT_PASSWORD_EMAIL_FAILED });
+    }
+  };
+}
+
+// Get password reset token from params
+export function getResetPasswordTokenFromParams(token) {
+  return dispatch => {
+    sessionStorage.setItem("password_reset_token", token);
+    dispatch({
+      type: GET_RESET_PASSWORD_TOKEN_PARAMS,
+      payload: token
+    });
+  };
+}
+
+// Verify password reset token
+export function verifyPasswordResetToken(token) {
+  return async dispatch => {
+    await dispatch({
+      type: VERIFY_RESET_PASSWORD_TOKEN_REQUEST
+    });
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        "password-reset-token": token
+      }
+    };
+
+    try {
+      await axios.get(`${API}/check-password-reset-token`, config);
+
+      dispatch({
+        type: VERIFY_RESET_PASSWORD_TOKEN_SUCCESS
+      });
+    } catch (err) {
+      dispatch(
+        returnNotifications(
+          err.response.data,
+          "error",
+          err.response.status,
+          "VERIFY_RESET_PASSWORD_TOKEN_FAILED"
+        )
+      );
+      dispatch({ type: VERIFY_RESET_PASSWORD_TOKEN_FAILED });
+    }
+  };
+}
+
+// Update password action from verified registration email
+export function passwordReset(values, token) {
+  return async dispatch => {
+    dispatch({ type: PASSWORD_RESET_REQUEST });
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        "password-reset-token": token
+      }
+    };
+
+    try {
+      const response = await axios.post(
+        `${API}/reset-password`,
+        values,
+        config
+      );
+
+      dispatch({
+        type: PASSWORD_RESET_SUCCESS
+      });
+
+      dispatch(
+        returnNotifications(
+          response.data,
+          "success",
+          response.status,
+          "PASSWORD_RESET_SUCCESS"
+        )
+      );
+    } catch (err) {
+      dispatch(
+        returnNotifications(
+          "There was an error in processing your request",
+          "error",
+          err.response.status,
+          "PASSWORD_RESET_FAILED"
+        )
+      );
+      dispatch({ type: PASSWORD_RESET_FAILED });
+    }
+  };
+}
+
+// Resend email if password_reset_token is expired/invalid
+export function resendPasswordResetLink(token) {
+  return async dispatch => {
+    await dispatch({
+      type: RESEND_PASSWORD_RESET_EMAIL_LINK_REQUEST
+    });
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        "password-reset-token": token
+      }
+    };
+    try {
+      const res = await axios.post(
+        `${API}/resend-password-reset-link`,
+        null,
+        config
+      );
+      dispatch(
+        returnNotifications(
+          res.data,
+          "success",
+          res.status,
+          "RESEND_PASSWORD_RESET_EMAIL_LINK_SUCCESS"
+        )
+      );
+      dispatch({
+        type: RESEND_PASSWORD_RESET_EMAIL_LINK_SUCCESS
+      });
+    } catch (err) {
+      dispatch(
+        returnNotifications(
+          "There was an error in processing your request",
+          "error",
+          err.response.status,
+          "RESEND_PASSWORD_RESET_EMAIL_LINK_FAILED"
+        )
+      );
+      dispatch({ type: RESEND_PASSWORD_RESET_EMAIL_LINK_FAILED });
+    }
+  };
+}
+
+// Fetch current user
+export function passwordNotification() {
+  return async dispatch => {
+    dispatch({ type: PASSWORD_NOTIFICATION_REQUEST });
+
+    try {
+      const response = await UserMaintenanceServices.passwordNotificationRequest();
+
+      dispatch({
+        type: PASSWORD_NOTIFICATION_SUCCESS,
+        payload: response.data
+      });
+
+      dispatch(
+        returnNotifications(
+          response.data,
+          "success",
+          response.status,
+          "PASSWORD_NOTIFICATION_SUCCESS"
+        )
+      );
+    } catch (err) {
+      console.log(err);
     }
   };
 }
