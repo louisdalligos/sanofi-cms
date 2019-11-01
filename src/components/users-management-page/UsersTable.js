@@ -241,7 +241,7 @@ const UsersTable = ({
   ];
 
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(loading ? true : false);
+  const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
