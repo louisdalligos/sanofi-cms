@@ -21,6 +21,7 @@ import { API } from "../../utils/api";
 
 // redux actions import
 import {
+  fetchSpecializations,
   fetchCategories,
   fetchSubCategories,
   archiveArticle,
@@ -36,6 +37,7 @@ const TherapyAreasTable = ({
   notifs,
   clearNotifications,
   postManagement,
+  fetchSpecializations,
   fetchCategories,
   fetchSubCategories,
   archiveArticle,
@@ -118,11 +120,13 @@ const TherapyAreasTable = ({
   const [pageNumber, setPageNumber] = useState(1);
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+  const [specializations, setSpecializations] = useState([]);
 
   useEffect(() => {
     fetch(); // fetch initial
     fetchCategories(); // fetch categories
     fetchSubCategories();
+    fetchSpecializations();
   }, []);
 
   // Table event handlers
@@ -189,6 +193,9 @@ const TherapyAreasTable = ({
 
   useEffect(() => {
     switch (notifs.id) {
+      case "FETCH_SPECIALIZATIONS_SUCCESS":
+        setSpecializations(postManagement.specializations);
+        break;
       case "FETCH_SUBCATEGORIES_SUCCESS":
         setSubCategories(postManagement.subCategories.results);
         break;
@@ -288,6 +295,11 @@ const TherapyAreasTable = ({
     filterFetch({ ...obj });
   }
 
+  function onFilterSpecialization(e) {
+    let obj = { specializations: e };
+    filterFetch({ ...obj });
+  }
+
   // handle table sort
   const handleTableChange = (pagination, filters, sorter) => {
     console.log(filters);
@@ -334,8 +346,20 @@ const TherapyAreasTable = ({
                         </Form.Item> */}
 
             <Form.Item label="">
-              <Select defaultValue="All specializations" style={{ width: 150 }}>
-                <Option value="1">Specialization 1</Option>
+              <Select
+                defaultValue="All specializations"
+                placeholder="Select a specialization"
+                onChange={onFilterSpecialization}
+                style={{ width: 150 }}
+              >
+                <Option value="">All specializations</Option>
+                {specializations
+                  ? specializations.map(c => (
+                      <Option key={c.id} value={c.title}>
+                        {c.title}
+                      </Option>
+                    ))
+                  : "No results found"}
               </Select>
             </Form.Item>
 
@@ -432,6 +456,7 @@ export default connect(
   mapStateToProps,
   {
     clearNotifications,
+    fetchSpecializations,
     fetchSubCategories,
     fetchCategories,
     archiveArticle,
