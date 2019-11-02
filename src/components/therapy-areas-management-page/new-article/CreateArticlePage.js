@@ -1,5 +1,4 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { connect } from "react-redux";
 import { Button, PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
@@ -9,10 +8,11 @@ import CreateArticleForm from "./CreateArticleForm";
 const pageTitle = "Create a new article";
 
 // Component
-const CreateArticlePage = ({ categoryData, subCategoryData, ...props }) => {
+const CreateArticlePage = ({ ...props }) => {
   const [formData, setFormData] = useState({
     category_id: "",
     subcategory_id: "",
+    specializations: null,
     headline: "",
     short_details: "",
     zinc_code: "",
@@ -25,10 +25,6 @@ const CreateArticlePage = ({ categoryData, subCategoryData, ...props }) => {
   useEffect(() => {
     console.log("article page mounted");
   }, []);
-
-  const submitForm = (values, action) => {
-    console.log(values);
-  };
 
   return (
     <Fragment>
@@ -55,27 +51,9 @@ const CreateArticlePage = ({ categoryData, subCategoryData, ...props }) => {
           </div>
         </div>
 
-        <CreateArticleForm
-          submitForm={submitForm}
-          data={formData}
-          categoryOptions={categoryData ? categoryData.results : []}
-          subCategoryOptions={subCategoryData ? subCategoryData.results : []}
-        />
+        <CreateArticleForm data={formData} />
       </div>
     </Fragment>
   );
 };
-
-const mapStateToProps = state => {
-  return {
-    postManagement: state.postManagementReducer,
-    categoryData: state.postManagementReducer.categories,
-    subCategoryData: state.postManagementReducer.subCategories,
-    notifs: state.notificationReducer
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  {}
-)(CreateArticlePage);
+export default CreateArticlePage;
