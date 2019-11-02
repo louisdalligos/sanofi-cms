@@ -23,7 +23,8 @@ import { API } from "../../utils/api";
 import {
   fetchCategories,
   fetchSubCategories,
-  archiveArticle
+  archiveArticle,
+  changeArticleStatus
 } from "../../redux/actions/post-management-actions/postManagementActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
@@ -38,6 +39,7 @@ const TherapyAreasTable = ({
   fetchCategories,
   fetchSubCategories,
   archiveArticle,
+  changeArticleStatus,
   auth
 }) => {
   const columns = [
@@ -428,5 +430,11 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  { clearNotifications, fetchSubCategories, fetchCategories, archiveArticle }
+  {
+    clearNotifications,
+    fetchSubCategories,
+    fetchCategories,
+    archiveArticle,
+    changeArticleStatus
+  }
 )(TherapyAreasTable);

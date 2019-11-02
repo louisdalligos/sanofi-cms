@@ -63,6 +63,14 @@ function archiveArticleRequest(id) {
   });
 }
 
+function changeArticleStatusRequest(id, status) {
+  return axiosInstance({
+    method: "put",
+    url: `/therapy-areas/change-status/${id}`,
+    data: status
+  });
+}
+
 const PostManagementServices = {
   fetchSpecializationsRequest,
   fetchCategoriesRequest,
@@ -71,7 +79,8 @@ const PostManagementServices = {
   addSubCategoryRequest,
   createArticleRequest,
   archiveArticleRequest,
-  fetchCurrentArticleRequest
+  fetchCurrentArticleRequest,
+  changeArticleStatusRequest
 };
 
 export default PostManagementServices;

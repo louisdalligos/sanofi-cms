@@ -22,7 +22,10 @@ import {
   ARCHIVE_ARTICLE_FAILED,
   FETCH_CURRENT_ARTICLE_REQUEST,
   FETCH_CURRENT_ARTICLE_SUCCESS,
-  FETCH_CURRENT_ARTICLE_FAILED
+  FETCH_CURRENT_ARTICLE_FAILED,
+  CHANGE_ARTICLE_STATUS_REQUEST,
+  CHANGE_ARTICLE_STATUS_SUCCESS,
+  CHANGE_ARTICLE_STATUS_FAILED
 } from "../actions/post-management-actions/types";
 
 const initialState = {
@@ -43,6 +46,7 @@ export default (state = initialState, action) => {
     case ARCHIVE_ARTICLE_REQUEST:
     case FETCH_CURRENT_ARTICLE_REQUEST:
     case FETCH_SPECIALIZATIONS_REQUEST:
+    case CHANGE_ARTICLE_STATUS_REQUEST:
       return {
         ...state,
         requestInProgress: true
@@ -67,6 +71,8 @@ export default (state = initialState, action) => {
     case ARCHIVE_ARTICLE_SUCCESS:
     case ARCHIVE_ARTICLE_FAILED:
     case FETCH_CURRENT_ARTICLE_FAILED:
+    case CHANGE_ARTICLE_STATUS_SUCCESS:
+    case CHANGE_ARTICLE_STATUS_FAILED:
       return {
         ...state,
         requestInProgress: false

@@ -25,7 +25,10 @@ import {
   FETCH_CURRENT_ARTICLE_FAILED,
   UPDATE_ARTICLE_REQUEST,
   UPDATE_ARTICLE_SUCCESS,
-  UPDATE_ARTICLE_FAILED
+  UPDATE_ARTICLE_FAILED,
+  CHANGE_ARTICLE_STATUS_REQUEST,
+  CHANGE_ARTICLE_STATUS_SUCCESS,
+  CHANGE_ARTICLE_STATUS_FAILED
 } from "./types";
 
 import PostManagementServices from "./service";
@@ -349,6 +352,44 @@ export function fetchCurrentArticle(id) {
       );
       dispatch({
         type: FETCH_CURRENT_ARTICLE_FAILED
+      });
+    }
+  };
+}
+
+// Change article status
+export function changeArticleStatus(id) {
+  return async dispatch => {
+    await dispatch({
+      type: CHANGE_ARTICLE_STATUS_REQUEST
+    });
+    try {
+      const res = await PostManagementServices.changeArticleStatusRequest(id); // PUT request
+
+      await dispatch({
+        type: CHANGE_ARTICLE_STATUS_SUCCESS,
+        payload: res.data
+      });
+
+      dispatch(
+        returnNotifications(
+          res.data,
+          "success",
+          res.status,
+          "CHANGE_ARTICLE_STATUS_SUCCESS"
+        )
+      );
+    } catch (err) {
+      dispatch(
+        returnNotifications(
+          err.response.data,
+          "error",
+          err.response.status,
+          "CHANGE_ARTICLE_STATUS_FAILED"
+        )
+      );
+      dispatch({
+        type: CHANGE_ARTICLE_STATUS_FAILED
       });
     }
   };
