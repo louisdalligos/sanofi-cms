@@ -3,19 +3,21 @@ import { connect } from "react-redux";
 import { message } from "antd";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import { Row, Col, Button, PageHeader, Breadcrumb } from "antd";
+import { Link } from "react-router-dom";
+
+import Navbar from "../../main-navigation/Navbar";
+import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
+
+// Get our components
 //import Thumb from "./Thumb";
 //import RichTextEditor from "./RichTextEditor";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import ImageUploader from "./ImageUploader";
-
-import { Row, Col, Button, PageHeader, Breadcrumb } from "antd";
-import { Link } from "react-router-dom";
-import Navbar from "../../main-navigation/Navbar";
 import CategorySelect from "./CategorySelect";
-import SpecializationSelect from "./SpecializationSelect";
-
-import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
+//import SpecializationSelect from "./SpecializationSelect";
+import TextFormField from "../../smart-form/TextFormField";
 
 // redux actions
 import { createArticle } from "../../../redux/actions/post-management-actions/postManagementActions";
@@ -181,21 +183,10 @@ const CreateArticleForm = ({
                                     /> */}
                 </Col>
                 <Col span={8}>
-                  <div
-                    className={
-                      errors.short_details && touched.short_details
-                        ? "has-feedback has-error ant-form-item-control"
-                        : "ant-form-item-control"
-                    }
-                  >
-                    <label>Short Description</label>
-                    <Field name="short_details" className="ant-input" />
-                    {errors.short_details && touched.short_details ? (
-                      <div className="ant-form-explain">
-                        {errors.short_details}
-                      </div>
-                    ) : null}
-                  </div>
+                  <TextFormField
+                    name="short_details"
+                    component={TextFormField}
+                  />
 
                   <div
                     className={
