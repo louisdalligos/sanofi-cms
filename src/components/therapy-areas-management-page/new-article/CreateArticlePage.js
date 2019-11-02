@@ -1,16 +1,27 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
+import { connect } from "react";
 import { Button, PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
 import Navbar from "../../main-navigation/Navbar";
 import CreateArticleForm from "./CreateArticleForm";
+
 const pageTitle = "Create a new article";
 
 // Component
-const CreateArticlePage = props => {
+const CreateArticlePage = ({ ...props }) => {
+  const [formData, setFormData] = useState({
+    headline: "",
+    short_details: "",
+    zinc_code: ""
+  });
   useEffect(() => {
-    console.log("component mounted");
+    console.log("article page mounted");
   }, []);
+
+  const submitForm = (values, action) => {
+    console.log(values);
+  };
 
   return (
     <Fragment>
@@ -34,13 +45,22 @@ const CreateArticlePage = props => {
             <Button type="primary">
               <Link to="/therapy-areas">Back to articles</Link>
             </Button>
-
-            <CreateArticleForm />
           </div>
         </div>
+
+        <CreateArticleForm submitForm={submitForm} data={formData} />
       </div>
     </Fragment>
   );
+};
+
+const mapStateToProps = state => {
+  return {
+    postManagement: state.postManagementReducer,
+    categoryData: state.postManagementReducer.categories,
+    subCategoryData: state.postManagementReducer.subCategories,
+    notifs: state.notificationReducer
+  };
 };
 
 export default CreateArticlePage;

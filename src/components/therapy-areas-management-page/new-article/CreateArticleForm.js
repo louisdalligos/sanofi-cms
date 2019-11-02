@@ -1,12 +1,13 @@
-import React from "react";
-import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Button } from "antd";
+import React, { useEffect } from "react";
+import { Formik, Form } from "formik";
+import { Button, Row, Col } from "antd";
 import * as yup from "yup";
 import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 
 // Form elements
 import TextFormField from "../../smart-form/TextFormField";
 
+// validation schema
 const schema = yup.object().shape({
   //   category_id: yup.string().required("This field is required"),
   //   subcategory_id: yup.string().required("This field is required"),
@@ -15,16 +16,16 @@ const schema = yup.object().shape({
     .string()
     .min(2, "Description is too short")
     .max(150, "Headline is too long")
+    .required("This field is required"),
+  headline: yup
+    .string()
+    .min(2, "Title is too short")
+    .max(150, "Headline is too long")
+    .required("This field is required"),
+  zinc_code: yup
+    .number()
+    .positive("Positive numbers only")
     .required("This field is required")
-  //   headline: yup
-  //     .string()
-  //     .min(2, "Title is too short")
-  //     .max(150, "Headline is too long")
-  //     .required("This field is required"),
-  //   zinc_code: yup
-  //     .number()
-  //     .positive("Positive numbers only")
-  //     .required("This field is required"),
   //   page_title: yup
   //     .string()
   //     .min(2, "Title is too short")
@@ -37,30 +38,47 @@ const schema = yup.object().shape({
   //text_editor: yup.string().required("This field is required")
 });
 
-const CreateArticleForm = () => {
-  const submitForm = (values, action) => {
-    console.log(values);
-    action.setSubmitting(false);
-  };
+const CreateArticleForm = ({ submitForm, data }) => {
+  useEffect(() => {
+    console.log("Form mounting");
+    console.log("Form data from page: ", data);
+  }, []);
 
   return (
     <Formik
       validateOnChange={false}
-      initialValues={{ short_details: "" }}
+      enableReinitialize={true}
+      initialValues={data}
       onSubmit={submitForm}
       validationSchema={schema}
     >
       {props => (
         <Form>
-          <TextFormField
-            name="short_details"
-            type="text"
-            label="Short Details"
-          />
-          <Button htmlType="submit" type="primary">
-            Submit
-          </Button>
-          <DisplayFormikState {...props} />
+          <Row gutter={16} className="form-section">
+            <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
+
+            <Col span={8}>1</Col>
+            <Col span={8}>2</Col>
+            <Col span={8}>
+              <TextFormField
+                name="short_details"
+                type="text"
+                label="Short Details"
+              />
+              <TextFormField name="headline" type="text" label="Headline" />
+              <TextFormField name="zinc_code" type="text" label="Zinc Code" />
+            </Col>
+          </Row>
+
+          <Row>
+            <DisplayFormikState {...props} />
+          </Row>
+
+          <div className="form-actions">
+            <Button htmlType="submit" type="primary">
+              Submit
+            </Button>
+          </div>
         </Form>
       )}
     </Formik>
