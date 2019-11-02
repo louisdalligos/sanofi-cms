@@ -26,7 +26,7 @@ import WrappedRequestAccountForm from "../components/request-account-page/Reques
 import WrappedForgotPasswordForm from "../components/forgot-password-page/ForgotPasswordForm";
 import WrappedCompleteRegistrationForm from "../components/complete-registration-page/CompleteRegistrationForm";
 import WrappedResetPasswordForm from "../components/reset-password-page/ResetPasswordForm";
-import CreateArticleForm from "../components/therapy-areas-management-page/new-article/CreateArticleForm";
+import CreateArticlePage from "../components/therapy-areas-management-page/new-article/CreateArticlePage";
 import UpdateArticleForm from "../components/therapy-areas-management-page/update-article/UpdateArticleForm";
 
 import { Role } from "../utils/role";
@@ -98,7 +98,7 @@ const App = ({ auth, ...props }) => {
             />
             <PrivateRoute
               path="/therapy-areas/create"
-              component={CreateArticleForm}
+              component={CreateArticlePage}
               roles={[Role.SuperAdmin, Role.Admin]}
             />
             <PrivateRoute
@@ -152,9 +152,7 @@ const mapStateToProps = state => {
   };
 };
 
-export default withRouter(
-  connect(
-    mapStateToProps,
-    { getAuthUser }
-  )(App)
-);
+export default connect(
+  mapStateToProps,
+  { getAuthUser }
+)(withRouter(App));

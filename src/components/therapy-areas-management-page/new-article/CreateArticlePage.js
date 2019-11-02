@@ -1,25 +1,12 @@
 import React, { Fragment, useEffect } from "react";
-import { connect } from "react-redux";
 import { Button, PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
 import Navbar from "../../main-navigation/Navbar";
-
-// redux actions
-import { createArticle } from "../../../redux/actions/post-management-actions/postManagementActions";
-
 const pageTitle = "Create a new article";
 
 // Component
-const CreateArticleForm = ({
-  categoryData,
-  subCategoryData,
-  createArticle,
-  notifs,
-  postManagement,
-  history,
-  ...props
-}) => {
+const CreateArticlePage = props => {
   useEffect(() => {
     console.log("component mounted");
   }, []);
@@ -53,16 +40,4 @@ const CreateArticleForm = ({
   );
 };
 
-const mapStateToProps = state => {
-  return {
-    postManagement: state.postManagementReducer,
-    categoryData: state.postManagementReducer.categories,
-    subCategoryData: state.postManagementReducer.subCategories,
-    notifs: state.notificationReducer
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  { createArticle }
-)(CreateArticleForm);
+export default CreateArticlePage;
