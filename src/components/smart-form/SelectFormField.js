@@ -5,6 +5,12 @@ const { Option } = Select;
 
 const SelectFormField = ({ label, options, ...props }) => {
   const [field, meta] = useField(props);
+  const name = field.name;
+
+  const handleSelectChange = value => {
+    console.log(value);
+    props.onChange(name, value);
+  };
 
   return (
     <div
@@ -15,15 +21,20 @@ const SelectFormField = ({ label, options, ...props }) => {
       }
     >
       <label>{label} </label>
-      <select {...field} {...props}>
+      <Select
+        {...field}
+        {...props}
+        onChange={handleSelectChange}
+        notFoundContent="No results found"
+      >
         {options
           ? options.map(c => (
-              <option key={c.id} value={c.id}>
+              <Option key={c.id} value={c.id}>
                 {c.name}
-              </option>
+              </Option>
             ))
           : []}
-      </select>
+      </Select>
 
       {meta.touched && meta.error ? (
         <div className="ant-form-explain">{meta.error}</div>

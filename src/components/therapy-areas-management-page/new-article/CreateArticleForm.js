@@ -47,7 +47,6 @@ const CreateArticleForm = ({
 
   return (
     <Formik
-      validateOnChange={false}
       enableReinitialize={true}
       initialValues={data}
       onSubmit={submitForm}
@@ -63,11 +62,13 @@ const CreateArticleForm = ({
                 options={categoryOptions}
                 label="Category"
                 name="category_id"
+                onChange={props.setFieldValue}
               />
               <SelectFormField
                 options={subCategoryOptions}
                 label="Sub Category"
                 name="subcategory_id"
+                onChange={props.setFieldValue}
               />
             </Col>
             <Col span={8}>2nd column</Col>
