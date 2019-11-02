@@ -1,4 +1,7 @@
 import {
+  FETCH_SPECIALIZATIONS_REQUEST,
+  FETCH_SPECIALIZATIONS_SUCCESS,
+  FETCH_SPECIALIZATIONS_FAILED,
   FETCH_CATEGORIES_REQUEST,
   FETCH_CATEGORIES_SUCCESS,
   FETCH_CATEGORIES_FAILED,
@@ -28,6 +31,38 @@ import {
 import PostManagementServices from "./service";
 
 import { returnNotifications } from "../notification-actions/notificationActions";
+
+// Fetch specializations
+export function fetchSpecializations() {
+  return async dispatch => {
+    await dispatch({
+      type: FETCH_SPECIALIZATIONS_REQUEST
+    });
+
+    try {
+      const res = await PostManagementServices.fetchSpecializationsRequest(); // GET request
+
+      await dispatch({
+        type: FETCH_SPECIALIZATIONS_SUCCESS,
+        payload: res.data
+      });
+
+      dispatch(
+        returnNotifications(
+          res.data,
+          "success",
+          res.status,
+          "FETCH_SPECIALIZATIONS_SUCCESS"
+        )
+      );
+    } catch (err) {
+      console.log(err);
+      dispatch({
+        type: FETCH_SPECIALIZATIONS_FAILED
+      });
+    }
+  };
+}
 
 // Fetch categories
 export function fetchCategories() {
@@ -195,13 +230,16 @@ export function createArticle(values) {
         )
       );
     } catch (err) {
+      console.log(err);
       dispatch({
         type: CREATE_ARTICLE_FAILED
       });
       dispatch(
         returnNotifications(
-          err.data,
-          "success",
+          err.response.data.errors
+            ? err.response.data.errors
+            : err.response.data.error,
+          "error",
           err.status,
           "CREATE_ARTICLE_FAILED"
         )

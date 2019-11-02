@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { Formik, Form } from "formik";
-import { Button, Row, Col } from "antd";
+import { Formik, Field, Form } from "formik";
+import { Button, Row, Col, message } from "antd";
+import ReactQuill from "react-quill";
 import * as Yup from "yup";
 import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 
 import {
+  createArticle,
   fetchCategories,
-  fetchSubCategories
+  fetchSubCategories,
+  fetchSpecializations
 } from "../../../redux/actions/post-management-actions/postManagementActions";
 
 // Form elements
 import TextFormField from "../../smart-form/TextFormField";
 import SelectFormField from "../../smart-form/SelectFormField";
 import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
+import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
 
 // validation schema
 const schema = Yup.object().shape({
@@ -37,8 +41,8 @@ const schema = Yup.object().shape({
     .required("This field is required"),
   meta_description: Yup.string()
     .max(150, "Meta description is too long")
-    .required("This field is required")
-  //text_editor: Yup.string().required("This field is required")
+    .required("This field is required"),
+  body: Yup.string().required("This field is required")
 });
 
 const CreateArticleForm = ({
@@ -46,25 +50,38 @@ const CreateArticleForm = ({
   postManagement,
   fetchCategories,
   fetchSubCategories,
-  categoryData,
-  subCategoryData,
+  fetchSpecializations,
+  createArticle,
   data
 }) => {
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+  const [specializations, setSpecializations] = useState([]);
 
   useEffect(() => {
     fetchCategories();
     fetchSubCategories();
+    fetchSpecializations();
   }, []);
 
   useEffect(() => {
     switch (notifs.id) {
+      case "FETCH_SPECIALIZATIONS_SUCCESS":
+        setSpecializations(postManagement.specializations);
+        break;
       case "FETCH_SUBCATEGORIES_SUCCESS":
         setSubCategories(postManagement.subCategories.results);
         break;
       case "FETCH_CATEGORIES_SUCCESS":
         setCategories(postManagement.categories.results);
+        break;
+      case "CREATE_ARTICLE_SUCCESS":
+        clearNotifications();
+        message.success(notifs.notifications.success);
+        break;
+      case "CREATE_ARTICLE_FAILED":
+        clearNotifications();
+        message.error(notifs.notifications);
         break;
       default:
         return;
@@ -74,8 +91,9 @@ const CreateArticleForm = ({
 
   const submitForm = (values, action) => {
     console.log(values);
-    console.log(action);
-    action.resetForm(); // rest form action
+    createArticle(values);
+    action.setSubmitting(false);
+    //action.resetForm(); // rest form action
   };
 
   return (
@@ -86,7 +104,7 @@ const CreateArticleForm = ({
       validationSchema={schema}
     >
       {props => (
-        <Form>
+        <Form className="create-article-form">
           <Row gutter={16} className="form-section">
             <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
 
@@ -108,7 +126,7 @@ const CreateArticleForm = ({
             </Col>
             <Col span={8}>
               <SelectTagsFormField
-                options={subCategories}
+                options={specializations}
                 label="Specializations"
                 name="specializations"
                 onChange={props.setFieldValue}
@@ -176,9 +194,34 @@ const CreateArticleForm = ({
             </Col>
           </Row>
 
-          <Row>
-            <DisplayFormikState {...props} />
+          {/* 3nd row */}
+          <Row gutter={16} className="form-section last">
+            <Col span={8}>
+              <h3>Feature Image</h3>
+
+              {/* <ImageUploader /> */}
+            </Col>
+            <Col span={16}>
+              <h3>Article Body</h3>
+
+              <Field name="body">
+                {({ field }) => (
+                  <ReactQuill
+                    theme="snow"
+                    placeholder="Write something..."
+                    modules={CreateArticleForm.modules}
+                    formats={CreateArticleForm.formats}
+                    value={field.value}
+                    onChange={field.onChange(field.name)}
+                  />
+                )}
+              </Field>
+            </Col>
           </Row>
+
+          {/* <Row>
+            <DisplayFormikState {...props} />
+          </Row> */}
 
           <div className="form-actions">
             <Button htmlType="submit" type="primary">
@@ -191,16 +234,51 @@ const CreateArticleForm = ({
   );
 };
 
+CreateArticleForm.modules = {
+  toolbar: [
+    [{ header: "1" }, { header: "2" }, { font: [] }],
+    [{ size: [] }],
+    ["bold", "italic", "underline", "strike", "blockquote"],
+    [
+      { list: "ordered" },
+      { list: "bullet" },
+      { indent: "-1" },
+      { indent: "+1" }
+    ],
+    ["link", "image", "video"],
+    ["clean"]
+  ],
+  clipboard: {
+    // toggle to add extra line breaks when pasting HTML:
+    matchVisual: false
+  }
+};
+
+CreateArticleForm.formats = [
+  "header",
+  "font",
+  "size",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "blockquote",
+  "list",
+  "bullet",
+  "indent",
+  "link",
+  "image",
+  "video"
+];
+
 const mapStateToProps = state => {
   return {
     postManagement: state.postManagementReducer,
-    categoryData: state.postManagementReducer.categories,
-    subCategoryData: state.postManagementReducer.subCategories,
     notifs: state.notificationReducer
   };
 };
 
 export default connect(
   mapStateToProps,
-  { fetchCategories, fetchSubCategories }
+  { createArticle, fetchSpecializations, fetchCategories, fetchSubCategories }
 )(CreateArticleForm);

@@ -1,6 +1,14 @@
 import axiosInstance from "../../../utils/axiosInstance";
 import axiosInstanceFormData from "../../../utils/axiosInstanceFormData";
 
+function fetchSpecializationsRequest(body) {
+  return axiosInstance({
+    method: "get",
+    baseURL: "https://sanofi-qa.nuworks.ph:8443/api/v1/specializations",
+    data: body
+  });
+}
+
 function fetchCategoriesRequest(body) {
   return axiosInstance({
     method: "get",
@@ -34,7 +42,7 @@ function addSubCategoryRequest(body) {
 }
 
 function createArticleRequest(body) {
-  return axiosInstanceFormData({
+  return axiosInstance({
     method: "post",
     url: "/therapy-areas/create",
     data: body
@@ -56,6 +64,7 @@ function archiveArticleRequest(id) {
 }
 
 const PostManagementServices = {
+  fetchSpecializationsRequest,
   fetchCategoriesRequest,
   addCategoryRequest,
   fetchSubCategoriesRequest,

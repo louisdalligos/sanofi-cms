@@ -19,7 +19,8 @@ const CreateArticlePage = ({ ...props }) => {
     page_title: "",
     meta_description: "",
     page_slug: "",
-    meta_keywords: ""
+    meta_keywords: "",
+    body: ""
   });
 
   useEffect(() => {

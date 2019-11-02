@@ -1,4 +1,7 @@
 import {
+  FETCH_SPECIALIZATIONS_REQUEST,
+  FETCH_SPECIALIZATIONS_SUCCESS,
+  FETCH_SPECIALIZATIONS_FAILED,
   FETCH_CATEGORIES_REQUEST,
   FETCH_CATEGORIES_SUCCESS,
   FETCH_CATEGORIES_FAILED,
@@ -28,7 +31,8 @@ const initialState = {
   requestInProgress: null,
   loading: false,
   modal: false,
-  currentArticle: null
+  currentArticle: null,
+  specializations: null
 };
 
 export default (state = initialState, action) => {
@@ -38,9 +42,16 @@ export default (state = initialState, action) => {
     case CREATE_ARTICLE_REQUEST:
     case ARCHIVE_ARTICLE_REQUEST:
     case FETCH_CURRENT_ARTICLE_REQUEST:
+    case FETCH_SPECIALIZATIONS_REQUEST:
       return {
         ...state,
         requestInProgress: true
+      };
+    case FETCH_SPECIALIZATIONS_SUCCESS:
+      return {
+        ...state,
+        specializations: action.payload,
+        requestInProgress: false
       };
     case FETCH_CATEGORIES_SUCCESS:
       return {
@@ -48,6 +59,7 @@ export default (state = initialState, action) => {
         categories: action.payload,
         requestInProgress: false
       };
+    case FETCH_SPECIALIZATIONS_FAILED:
     case FETCH_CATEGORIES_FAILED:
     case FETCH_SUBCATEGORIES_FAILED:
     case CREATE_ARTICLE_SUCCESS:

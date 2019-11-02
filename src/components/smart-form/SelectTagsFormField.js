@@ -31,11 +31,13 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
         onChange={handleSelectChange}
         notFoundContent="No results found"
       >
-        {options.map(c => (
-          <Option key={c.id} value={c.name}>
-            {c.name}
-          </Option>
-        ))}
+        {options
+          ? options.map(c => (
+              <Option key={c.id} value={c.title}>
+                {c.title}
+              </Option>
+            ))
+          : ["test"]}
       </Select>
 
       {meta.touched && meta.error ? (
