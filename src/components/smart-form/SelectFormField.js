@@ -1,8 +1,11 @@
 import React from "react";
 import { useField } from "formik";
+import { Select } from "antd";
+const { Option } = Select;
 
-const SelectFormField = ({ label, ...props }) => {
+const SelectFormField = ({ label, options, ...props }) => {
   const [field, meta] = useField(props);
+
   return (
     <div
       className={
@@ -11,10 +14,17 @@ const SelectFormField = ({ label, ...props }) => {
           : "ant-form-item-control"
       }
     >
-      <label>
-        {label}
-        <select className="ant-input" {...field} {...props} />
-      </label>
+      <label>{label} </label>
+      <select {...field} {...props}>
+        {options
+          ? options.map(c => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))
+          : []}
+      </select>
+
       {meta.touched && meta.error ? (
         <div className="ant-form-explain">{meta.error}</div>
       ) : null}

@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { connect } from "react";
+import { connect } from "react-redux";
 import { Button, PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
@@ -9,12 +9,19 @@ import CreateArticleForm from "./CreateArticleForm";
 const pageTitle = "Create a new article";
 
 // Component
-const CreateArticlePage = ({ ...props }) => {
+const CreateArticlePage = ({ categoryData, subCategoryData, ...props }) => {
   const [formData, setFormData] = useState({
+    category_id: "",
+    subcategory_id: "",
     headline: "",
     short_details: "",
-    zinc_code: ""
+    zinc_code: "",
+    page_title: "",
+    meta_description: "",
+    page_slug: "",
+    meta_keywords: ""
   });
+
   useEffect(() => {
     console.log("article page mounted");
   }, []);
@@ -48,7 +55,12 @@ const CreateArticlePage = ({ ...props }) => {
           </div>
         </div>
 
-        <CreateArticleForm submitForm={submitForm} data={formData} />
+        <CreateArticleForm
+          submitForm={submitForm}
+          data={formData}
+          categoryOptions={categoryData ? categoryData.results : []}
+          subCategoryOptions={subCategoryData ? subCategoryData.results : []}
+        />
       </div>
     </Fragment>
   );
@@ -63,4 +75,7 @@ const mapStateToProps = state => {
   };
 };
 
-export default CreateArticlePage;
+export default connect(
+  mapStateToProps,
+  {}
+)(CreateArticlePage);
