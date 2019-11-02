@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 import { Router } from "react-router-dom";
-import { Provider, connect } from "react-redux";
+import { Provider } from "react-redux";
 import axiosInstance from "./utils/axiosInstance";
 import store from "./stores/store-dev";
 import history from "./utils/history";

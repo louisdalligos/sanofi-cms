@@ -3,6 +3,7 @@ import { Button, PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
 import Navbar from "../../main-navigation/Navbar";
+import CreateArticleForm from "./CreateArticleForm";
 const pageTitle = "Create a new article";
 
 // Component
@@ -33,6 +34,8 @@ const CreateArticlePage = props => {
             <Button type="primary">
               <Link to="/therapy-areas">Back to articles</Link>
             </Button>
+
+            <CreateArticleForm />
           </div>
         </div>
       </div>

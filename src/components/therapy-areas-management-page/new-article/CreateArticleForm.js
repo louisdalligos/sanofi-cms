@@ -1,68 +1,59 @@
-import React, { Fragment, useEffect } from "react";
-import { connect } from "react-redux";
-import { Button, PageHeader, Breadcrumb } from "antd";
-import { Link } from "react-router-dom";
+import React from "react";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import { Button } from "antd";
+import * as Yup from "yup";
 
-import Navbar from "../../main-navigation/Navbar";
+// Form elements
+import TextFormField from "../../smart-form/TextFormField";
 
-// redux actions
-import { createArticle } from "../../../redux/actions/post-management-actions/postManagementActions";
+const ArticleSchema = Yup.object().shape({
+  category_id: Yup.string().required("This field is required"),
+  subcategory_id: Yup.string().required("This field is required"),
+  specializations: Yup.string().required("This field is required"),
+  short_details: Yup.string()
+    .min(2, "Description is too short")
+    .max(150, "Headline is too long")
+    .required("This field is required"),
+  headline: Yup.string()
+    .min(2, "Title is too short")
+    .max(150, "Headline is too long")
+    .required("This field is required"),
+  zinc_code: Yup.number()
+    .positive("Positive numbers only")
+    .required("This field is required"),
+  page_title: Yup.string()
+    .min(2, "Title is too short")
+    .max(60, "Page title is too long")
+    .required("This field is required"),
+  meta_description: Yup.string()
+    .max(150, "Meta description is too long")
+    .required("This field is required")
+  //text_editor: Yup.string().required("This field is required")
+});
 
-const pageTitle = "Create a new article";
-
-// Component
-const CreateArticleForm = ({
-  categoryData,
-  subCategoryData,
-  createArticle,
-  notifs,
-  postManagement,
-  history,
-  ...props
-}) => {
-  useEffect(() => {
-    console.log("component mounted");
-  }, []);
-
+const CreateArticleForm = () => {
   return (
-    <Fragment>
-      <Navbar {...props} />
-      <div className="box-layout-custom">
-        <PageHeader title={pageTitle} />
-        <div className="page-breadcrumb">
-          <div>
-            <Breadcrumb>
-              <Breadcrumb.Item key="content">Content</Breadcrumb.Item>
-              <Breadcrumb.Item key="therapy-areas">
-                <Link to="/therapy-areas">Therapy Areas</Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item key="therapy-ares-create">
-                New Article
-              </Breadcrumb.Item>
-            </Breadcrumb>
-          </div>
-
-          <div>
-            <Button type="primary">
-              <Link to="/therapy-areas">Back to articles</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </Fragment>
+    <Formik
+      validationSchema={ArticleSchema}
+      initialValues={{ short_details: "" }}
+      onSubmit={(values, actions) => {
+        console.log(values);
+        actions.setSubmitting(false);
+      }}
+      render={formikProps => (
+        <form onSubmit={formikProps.handleSubmit}>
+          <TextFormField
+            name="short_details"
+            type="text"
+            label="Short Details"
+          />
+          <Button htmlType="submit" type="primary">
+            Submit
+          </Button>
+        </form>
+      )}
+    />
   );
 };
 
-const mapStateToProps = state => {
-  return {
-    postManagement: state.postManagementReducer,
-    categoryData: state.postManagementReducer.categories,
-    subCategoryData: state.postManagementReducer.subCategories,
-    notifs: state.notificationReducer
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  { createArticle }
-)(CreateArticleForm);
+export default CreateArticleForm;
