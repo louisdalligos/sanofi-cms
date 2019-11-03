@@ -91,6 +91,7 @@ const CreateUserForm = ({
           </div>
         </div>
         <Row>
+          <h3 style={{ marginBottom: 30 }}>List of user requests</h3>
           <InvitedDoctorsTable />
         </Row>
         <Form

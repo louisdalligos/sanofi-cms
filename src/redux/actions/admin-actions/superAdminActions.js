@@ -81,7 +81,7 @@ export function fetchVerifiedAdmins() {
 }
 
 // Fetch list of admin requests
-export function fetchAdminRequestList() {
+export function fetchAdminRequest() {
   return async dispatch => {
     await dispatch({
       type: FETCH_ADMIN_REQUEST_LIST

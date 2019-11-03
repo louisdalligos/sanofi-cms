@@ -16,6 +16,7 @@ import { createAdmin } from "../../redux/actions/admin-actions/superAdminActions
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 import Navbar from "../main-navigation/Navbar";
+import AdminRequestTable from "./AdminRequestTable";
 
 const { Option } = Select;
 const pageTitle = "Create an admin";
@@ -84,7 +85,14 @@ const CreateAdminForm = ({
             </Button>
           </div>
         </div>
+
+        <Row>
+          <h3 style={{ marginBottom: 30 }}>List of admin requests</h3>
+          <AdminRequestTable />
+        </Row>
+
         <Form onSubmit={handleSubmit} className="single-form">
+          <h3>Account Information</h3>
           <Form.Item label="Name">
             {getFieldDecorator("fullname", {
               rules: [
