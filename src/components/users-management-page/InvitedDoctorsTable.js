@@ -39,7 +39,7 @@ const InvitedDoctorsTable = ({ fetchInvitedSiteUsers, superadmin, auth }) => {
             id={record.id}
             htmlType="submit"
             type="primary"
-            disabled={disabled}
+            disabled={record.button === "disabled" ? true : false}
           >
             Resend invitation
           </Button>
@@ -49,7 +49,7 @@ const InvitedDoctorsTable = ({ fetchInvitedSiteUsers, superadmin, auth }) => {
   ];
 
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(loading ? true : false);
+  const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(null);
   const [disabled, setDisabled] = useState(false);
