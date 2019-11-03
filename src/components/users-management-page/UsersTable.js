@@ -27,6 +27,7 @@ import {
   unlockUser,
   blockUser
 } from "../../redux/actions/admin-actions/superAdminActions";
+import { fetchSpecializations } from "../../redux/actions/post-management-actions/postManagementActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 const { confirm } = Modal;
@@ -34,6 +35,7 @@ const { Option } = Select;
 const Search = Input.Search;
 
 const UsersTable = ({
+  fetchSpecializations,
   fetchCurrentUser,
   deleteUser,
   undoDeleteUser,
@@ -41,8 +43,11 @@ const UsersTable = ({
   blockUser,
   clearNotifications,
   notifs,
-  auth
+  auth,
+  postManagement
 }) => {
+  const [specializations, setSpecializations] = useState([]);
+
   const columns = [
     {
       title: "Status",
@@ -251,6 +256,7 @@ const UsersTable = ({
 
   useEffect(() => {
     fetch(); // fetch initial
+    fetchSpecializations();
   }, []);
 
   const fetch = (params = {}) => {
@@ -365,6 +371,9 @@ const UsersTable = ({
         message.error(notifs.notifications.error);
         clearNotifications(); // cleanup our notification object
         break;
+      case "FETCH_SPECIALIZATIONS_SUCCESS":
+        setSpecializations(postManagement.specializations);
+        break;
       default:
         return;
     }
@@ -464,6 +473,11 @@ const UsersTable = ({
     filterFetch({ ...obj }); // call filter fetch method for diff set of total result count
   }
 
+  function onFilterSpecialization(e) {
+    let obj = { specializations: e };
+    filterFetch({ ...obj });
+  }
+
   // handle table sort
   const handleTableChange = (pagination, filters, sorter) => {
     const obj = {
@@ -495,8 +509,20 @@ const UsersTable = ({
         <div className="filter-table-wrapper">
           <Form layout="inline">
             <Form.Item label="Specializations">
-              <Select defaultValue="All specializations" style={{ width: 150 }}>
-                <Option value="1">Specialization 1</Option>
+              <Select
+                defaultValue="All specializations"
+                placeholder="Select a specialization"
+                onChange={onFilterSpecialization}
+                style={{ width: 150 }}
+              >
+                <Option value="">All specializations</Option>
+                {specializations
+                  ? specializations.map(c => (
+                      <Option key={c.id} value={c.title}>
+                        {c.title}
+                      </Option>
+                    ))
+                  : "No results found"}
               </Select>
             </Form.Item>
             <Form.Item label="Accessed">
@@ -564,13 +590,15 @@ const mapStateToProps = state => {
     auth: state.authReducer,
     siteUsers: state.superadmin.siteUsers,
     requestInProgress: state.superadmin.requestInProgress,
-    notifs: state.notificationReducer
+    notifs: state.notificationReducer,
+    postManagement: state.postManagementReducer
   };
 };
 
 export default connect(
   mapStateToProps,
   {
+    fetchSpecializations,
     fetchCurrentUser,
     deleteUser,
     undoDeleteUser,
