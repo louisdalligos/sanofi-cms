@@ -8,19 +8,20 @@ const RouteLeavingGuard = ({ shouldBlockNavigation, navigate, when }) => {
   const [confirmedNavigation, setConfirmedNavigation] = useState(false);
 
   useEffect(() => {
-    //navigate(lastLocation.pathname);
-  }, [lastLocation]);
+    if (confirmedNavigation && !visible) {
+      console.log(lastLocation.pathname);
+      navigate(lastLocation.pathname);
+    }
+  }, [confirmedNavigation]);
 
   const showModal = location => {
-    console.log("show modal location", location);
     setVisible(true);
     setlastLocation(location);
   };
 
-  const closeModal = callback => {
-    //console.log("close modal", callback);
+  const closeModal = (callback, ...params) => {
     setVisible(false);
-    // callback;
+    callback(params);
   };
 
   const handleBlockedNavigation = nextLocation => {
@@ -34,10 +35,16 @@ const RouteLeavingGuard = ({ shouldBlockNavigation, navigate, when }) => {
   };
 
   const handleConfirmNavigationClick = () =>
-    closeModal(() => {
-      console.log("confirm ok last location", lastLocation);
+    closeModal(lastLocation => {
+      console.log(lastLocation);
       if (lastLocation) {
         setConfirmedNavigation(true);
+        // this.setState({
+        //    confirmedNavigation: true
+        // }, () => {
+        //    // Navigate to the previous blocked location with your navigate function
+        //    navigate(lastLocation.pathname)
+        // })
       }
     });
 

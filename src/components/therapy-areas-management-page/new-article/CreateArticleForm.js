@@ -54,7 +54,8 @@ const CreateArticleForm = ({
   fetchSpecializations,
   createArticle,
   history,
-  data
+  data,
+  ...props
 }) => {
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);

@@ -49,7 +49,7 @@ const UsersTable = ({
       dataIndex: "status",
       rowKey: "id",
       className: "status-column",
-      width: 50,
+      width: 80,
       fixed: "left",
       filters: [
         { text: "Active", value: "active" },
@@ -131,6 +131,7 @@ const UsersTable = ({
       title: "Full Name",
       dataIndex: "fullname",
       rowKey: "id",
+      width: 180,
       sorter: true,
       render: (text, record) => (
         <Button
@@ -162,7 +163,7 @@ const UsersTable = ({
       title: "Email",
       dataIndex: "email",
       rowKey: "id",
-      width: 100,
+      width: 180,
       sorter: true
     },
     {
@@ -180,6 +181,7 @@ const UsersTable = ({
     {
       title: "Archive",
       rowKey: "id",
+      width: 70,
       render: (text, record) => (
         <Tooltip
           placement="right"
@@ -209,6 +211,7 @@ const UsersTable = ({
       title: "Block",
       rowKey: "id",
       className: "status-column",
+      width: 70,
       render: (text, record) => (
         <Tooltip
           placement="right"

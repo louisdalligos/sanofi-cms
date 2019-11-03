@@ -8,7 +8,7 @@ import CreateArticleForm from "./CreateArticleForm";
 const pageTitle = "Create a new article";
 
 // Component
-const CreateArticlePage = ({ ...props }) => {
+const CreateArticlePage = ({ history, ...props }) => {
   const [formData, setFormData] = useState({
     category_id: "",
     subcategory_id: "",
@@ -52,7 +52,7 @@ const CreateArticlePage = ({ ...props }) => {
           </div>
         </div>
 
-        <CreateArticleForm data={formData} />
+        <CreateArticleForm data={formData} history={history} />
       </div>
     </Fragment>
   );
