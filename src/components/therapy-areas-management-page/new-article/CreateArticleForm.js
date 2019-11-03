@@ -5,6 +5,7 @@ import { Button, Row, Col, message } from "antd";
 import ReactQuill from "react-quill";
 import * as Yup from "yup";
 import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 import {
   createArticle,
@@ -52,6 +53,7 @@ const CreateArticleForm = ({
   fetchSubCategories,
   fetchSpecializations,
   createArticle,
+  history,
   data
 }) => {
   const [categories, setCategories] = useState([]);
@@ -97,140 +99,147 @@ const CreateArticleForm = ({
   };
 
   return (
-    <Formik
-      enableReinitialize={true}
-      initialValues={data}
-      onSubmit={submitForm}
-      validationSchema={schema}
-    >
-      {props => (
-        <Form className="create-article-form">
-          <Row gutter={16} className="form-section">
-            <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
+    <>
+      <Formik
+        enableReinitialize={true}
+        initialValues={data}
+        onSubmit={submitForm}
+        validationSchema={schema}
+      >
+        {props => (
+          <Form className="create-article-form">
+            <Row gutter={16} className="form-section">
+              <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
+              <Col span={8}>
+                <SelectFormField
+                  options={categories}
+                  label="Category"
+                  name="category_id"
+                  onChange={props.setFieldValue}
+                  isRequired={true}
+                />
+                <SelectFormField
+                  options={subCategories}
+                  label="Sub Category"
+                  name="subcategory_id"
+                  onChange={props.setFieldValue}
+                  isRequired={true}
+                />
+              </Col>
+              <Col span={8}>
+                <SelectTagsFormField
+                  options={specializations}
+                  label="Specializations"
+                  name="specializations"
+                  onChange={props.setFieldValue}
+                  isRequired={true}
+                  placeholder="Please select a specialization"
+                />
+              </Col>
+              <Col span={8}>
+                <TextFormField
+                  name="short_details"
+                  type="text"
+                  label="Short Details"
+                  isRequired={true}
+                  placeholder="Enter a short detail"
+                />
+                <TextFormField
+                  name="headline"
+                  type="text"
+                  label="Headline"
+                  isRequired={true}
+                  placeholder="Enter a headline"
+                />
+                <TextFormField
+                  name="zinc_code"
+                  type="text"
+                  label="Zinc Code"
+                  isRequired={true}
+                  placeholder="Enter a zinc code"
+                />
+              </Col>
+            </Row>
 
-            <Col span={8}>
-              <SelectFormField
-                options={categories}
-                label="Category"
-                name="category_id"
-                onChange={props.setFieldValue}
-                isRequired={true}
-              />
-              <SelectFormField
-                options={subCategories}
-                label="Sub Category"
-                name="subcategory_id"
-                onChange={props.setFieldValue}
-                isRequired={true}
-              />
-            </Col>
-            <Col span={8}>
-              <SelectTagsFormField
-                options={specializations}
-                label="Specializations"
-                name="specializations"
-                onChange={props.setFieldValue}
-                isRequired={true}
-                placeholder="Please select a specialization"
-              />
-            </Col>
-            <Col span={8}>
-              <TextFormField
-                name="short_details"
-                type="text"
-                label="Short Details"
-                isRequired={true}
-                placeholder="Enter a short detail"
-              />
-              <TextFormField
-                name="headline"
-                type="text"
-                label="Headline"
-                isRequired={true}
-                placeholder="Enter a headline"
-              />
-              <TextFormField
-                name="zinc_code"
-                type="text"
-                label="Zinc Code"
-                isRequired={true}
-                placeholder="Enter a zinc code"
-              />
-            </Col>
-          </Row>
+            <Row gutter={16} className="form-section">
+              <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
+              <Col span={12}>
+                <TextFormField
+                  name="page_title"
+                  type="text"
+                  label="Page Title"
+                  isRequired={true}
+                  placeholder="Enter a page title"
+                />
+                <TextFormField
+                  name="meta_description"
+                  type="text"
+                  label="Meta Description"
+                  isRequired={true}
+                  placeholder="Enter a meta description"
+                />
+              </Col>
 
-          <Row gutter={16} className="form-section">
-            <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
-            <Col span={12}>
-              <TextFormField
-                name="page_title"
-                type="text"
-                label="Page Title"
-                isRequired={true}
-                placeholder="Enter a page title"
-              />
-              <TextFormField
-                name="meta_description"
-                type="text"
-                label="Meta Description"
-                isRequired={true}
-                placeholder="Enter a meta description"
-              />
-            </Col>
+              <Col span={12}>
+                <TextFormField
+                  name="page_slug"
+                  type="text"
+                  label="Page Slug(Optional - system will generate if empty"
+                  placeholder="Enter a page slug"
+                />
+                <TextFormField
+                  name="meta_keywords"
+                  type="text"
+                  label="Meta Keywords(Optional)"
+                  placeholder="Enter meta keywords"
+                />
+              </Col>
+            </Row>
 
-            <Col span={12}>
-              <TextFormField
-                name="page_slug"
-                type="text"
-                label="Page Slug(Optional - system will generate if empty"
-                placeholder="Enter a page slug"
-              />
-              <TextFormField
-                name="meta_keywords"
-                type="text"
-                label="Meta Keywords(Optional)"
-                placeholder="Enter meta keywords"
-              />
-            </Col>
-          </Row>
+            {/* 3nd row */}
+            <Row gutter={16} className="form-section last">
+              <Col span={8}>
+                <h3>Feature Image</h3>
 
-          {/* 3nd row */}
-          <Row gutter={16} className="form-section last">
-            <Col span={8}>
-              <h3>Feature Image</h3>
+                {/* <ImageUploader /> */}
+              </Col>
+              <Col span={16}>
+                <h3>Article Body</h3>
 
-              {/* <ImageUploader /> */}
-            </Col>
-            <Col span={16}>
-              <h3>Article Body</h3>
+                <Field name="body">
+                  {({ field }) => (
+                    <ReactQuill
+                      theme="snow"
+                      placeholder="Write something..."
+                      modules={CreateArticleForm.modules}
+                      formats={CreateArticleForm.formats}
+                      value={field.value}
+                      onChange={field.onChange(field.name)}
+                    />
+                  )}
+                </Field>
+              </Col>
+            </Row>
 
-              <Field name="body">
-                {({ field }) => (
-                  <ReactQuill
-                    theme="snow"
-                    placeholder="Write something..."
-                    modules={CreateArticleForm.modules}
-                    formats={CreateArticleForm.formats}
-                    value={field.value}
-                    onChange={field.onChange(field.name)}
-                  />
-                )}
-              </Field>
-            </Col>
-          </Row>
+            <Row>
+              <DisplayFormikState {...props} />
+            </Row>
 
-          {/* <Row>
-            <DisplayFormikState {...props} />
-          </Row> */}
+            <div className="form-actions">
+              <Button htmlType="submit" type="primary">
+                Submit
+              </Button>
+            </div>
 
-          <div className="form-actions">
-            <Button htmlType="submit" type="primary">
-              Submit
-            </Button>
-          </div>
-        </Form>
-      )}
-    </Formik>
+            <RouteLeavingGuard
+              when={props.dirty}
+              navigate={path => history.push(path)}
+              shouldBlockNavigation={location => (props.dirty ? true : false)}
+            />
+          </Form>
+        )}
+      </Formik>
+    </>
   );
 };
 
