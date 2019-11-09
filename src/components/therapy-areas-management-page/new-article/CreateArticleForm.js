@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { Formik, Field, Form, useFormikContext } from "formik";
-import { Button, Row, Col, message, Icon, Upload } from "antd";
+import { Formik, Field, Form } from "formik";
+import { Button, Row, Col, message } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
@@ -150,6 +150,7 @@ const CreateArticleForm = ({
     createArticle(formData);
     action.setSubmitting(false);
     action.resetForm(); // rest form action if success
+    history.push("/therapy-areas");
   };
 
   return (

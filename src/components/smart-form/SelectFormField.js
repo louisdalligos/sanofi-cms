@@ -3,7 +3,7 @@ import { useField } from "formik";
 import { Select } from "antd";
 const { Option } = Select;
 
-const SelectFormField = ({ label, options, ...props }) => {
+const SelectFormField = ({ label, placeholder, options, ...props }) => {
   const [field, meta] = useField(props);
   const name = field.name;
 
@@ -24,7 +24,6 @@ const SelectFormField = ({ label, options, ...props }) => {
         {label}
       </label>
       <Select
-        placeholder={`Please select a ${label}`}
         {...field}
         {...props}
         onChange={handleSelectChange}
