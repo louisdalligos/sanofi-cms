@@ -1,127 +1,97 @@
 import React, { Fragment, useState, useEffect } from "react";
+import { connect } from "react-redux";
 import { Upload, Icon, message, Button } from "antd";
+import axios from "axios";
+import { API } from "../../../utils/api";
 
-const ImageUploader = props => {
-  const [imageUrl, setImageUrl] = useState(null);
-  const [loading, setLoading] = useState(false);
+const ImageUploader = ({ auth, ...props }) => {
+  const [fileList, setFileList] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    return () => {};
-  }, []);
-
-  // Upload image manipulation
-  function getBase64(img, callback) {
-    const reader = new FileReader();
-    reader.addEventListener("load", () => callback(reader.result));
-    reader.readAsDataURL(img);
-  }
-
-  // Validate our file type and size
-  function beforeUpload(file) {
-    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
-    if (!isJpgOrPng) {
-      message.error("You can only upload JPG/PNG file!");
-      return;
-    }
-    const isLt100M = file.size / 1024 / 1024 < 100;
-    if (!isLt100M) {
-      message.error("Image must smaller than 100MB!");
-      return;
-    }
-    return isJpgOrPng && isLt100M;
-  }
-
-  // on upload image
-  const dummyRequest = ({ file, onSuccess }) => {
-    console.log(file);
-    props.setGeneratedImages(file);
-    //setfeaturedImageInfo(file); // set the file to state - to be used on append
-    //setmastheadImageInfo(file);
-    //setthumbnailImageInfo(file);
-    setTimeout(() => {
-      onSuccess("ok");
-    }, 0);
+  const handleChange = info => {
+    let list = [...info.fileList];
+    console.log(list);
+    console.log(fileList);
+    // Only to show the recent uploaded file
+    //list = fileList.slice(-1);
+    //setFileList({ list });
   };
 
-  const handleImageUploadChange = info => {
-    if (info.file.status === "uploading") {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === "done") {
-      getBase64(info.file.originFileObj, imageUrl => {
-        setImageUrl(imageUrl);
-        setLoading(false);
-      });
-    }
-  };
+  const handleUpload = () => {
+    const formData = new FormData();
 
-  const handleTransform = file => {
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const canvas = document.createElement("canvas");
-        const img = document.createElement("img");
-        img.src = reader.result;
-        img.onload = () => {
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          ctx.fillStyle = "red";
-          ctx.textBaseline = "middle";
-          ctx.fillText("Ant Design", 20, 20);
-          canvas.toBlob(resolve);
-        };
-      };
+    fileList.forEach(file => {
+      formData.append("image", file);
     });
+
+    setUploading(true);
+
+    axios({
+      url: `${API}/gallery/check-image`,
+      method: "post",
+      headers: {
+        Authorization: `Bearer ${auth.access_token}`
+      },
+      data: formData
+    })
+      .then(res => {
+        console.log(res.data);
+        //setFileList([]);
+        console.log(fileList);
+        setUploading(false);
+        message.success("upload successfully.");
+      })
+      .catch(err => {
+        setUploading(false);
+        message.error(err.response.data.error);
+      });
+  };
+
+  const properties = {
+    onRemove: file => {
+      const index = fileList.indexOf(file);
+      const newFileList = fileList.slice();
+      newFileList.splice(index, 1);
+      return {
+        fileList: newFileList
+      };
+    },
+    beforeUpload: file => {
+      console.log(file);
+      console.log(auth.access_token);
+      setFileList([...fileList, file]);
+      return false;
+    },
+    onChange: handleChange
   };
 
   return (
-    <>
-      <Upload
-        name="avatar"
-        showUploadList={true}
-        action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-        transformFile={handleTransform}
-        //beforeUpload={beforeUpload}
-        onChange={handleImageUploadChange}
-        customRequest={dummyRequest}
-      >
-        <Button type="primary">
-          <Icon type="upload" /> Upload
+    <Fragment>
+      <Upload {...properties} fileList={fileList}>
+        <Button>
+          <Icon type="upload" /> Select File
         </Button>
       </Upload>
-
-      {/* handle our thumbnails */}
-      <div className="preview-image">
-        <h3>
-          Preview:
-          <small>(Images are optimized and cropped automatically)</small>
-        </h3>
-
-        {imageUrl ? (
-          <div>
-            <img
-              src={imageUrl}
-              id="imageToCrop"
-              alt=""
-              style={{
-                maxWidth: "100%",
-                marginBottom: 20
-              }}
-            />
-
-            {/* <canvas
-                            ref="featuredCanvas"
-                            width={300}
-                            height={300}
-                        ></canvas> */}
-            {/* <ThumbnailGenerator /> */}
-          </div>
-        ) : null}
-      </div>
-    </>
+      <Button
+        type="primary"
+        onClick={handleUpload}
+        disabled={fileList.length === 0}
+        loading={uploading}
+        style={{ marginTop: 16 }}
+      >
+        {uploading ? "Generating thumbnails" : "Generate thumbnails"}
+      </Button>
+    </Fragment>
   );
 };
 
-export default ImageUploader;
+const mapStateToProps = state => {
+  return {
+    auth: state.authReducer
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(ImageUploader);

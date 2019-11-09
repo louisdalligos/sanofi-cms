@@ -25,6 +25,7 @@ import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
 
 // Other components
+import ImageUploader from "./ImageUploader";
 import ThumbnailGenerator from "./ThumbnailGenerator";
 import ImagePreview from "./ImagePreview";
 
@@ -264,9 +265,8 @@ const CreateArticleForm = ({
             <Row gutter={16} className="form-section last">
               <Col span={8}>
                 <h3>Feature Image</h3>
-
-                <ThumbnailGenerator getImages={getImages} />
-                <ImagePreview />
+                <ImageUploader />
+                {/* <ThumbnailGenerator getImages={getImages} /> */}
 
                 {/* The purpose of these field is just to check if form will be dirty on upload of images */}
                 <Field name="masthead" type="hidden" />

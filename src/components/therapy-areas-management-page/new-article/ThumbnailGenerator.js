@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import uuidv4 from "uuid";
 import { FilePond, registerPlugin } from "react-filepond";
 
@@ -15,6 +15,7 @@ import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
 import { blobToFile } from "../../../utils/helper";
 
 import { useFormikContext } from "formik";
+import ImagePreview from "./ImagePreview";
 
 // Register the plugins
 registerPlugin(
@@ -61,7 +62,7 @@ const ThumbnailGenerator = props => {
   };
 
   const onAddFile = (err, fileItem) => {
-    console.log(err, fileItem.getMetadata("resize"));
+    //console.log(err, fileItem.getMetadata("resize"));
   };
 
   const setPreviewFile = (name, output) => {
@@ -70,34 +71,23 @@ const ThumbnailGenerator = props => {
 
   const prepareFile = (fileItem, outputFiles) => {
     outputFiles.forEach(output => {
-      console.log("file item:", output);
+      console.log(output);
+      // // Generate the file to be submitted on the form
+      // let item = blobToFile(output.file, `${output.name}-${uuidv4()}.jpg`);
+      // setGeneratedFiles(generatedFiles => generatedFiles.concat(item));
 
-      // Generate the file to be submitted on the form
-      let item = blobToFile(output.file, `${output.name}-${uuidv4()}.jpg`);
-      setGeneratedFiles(generatedFiles => generatedFiles.concat(item));
-
-      // update our form state
-      if (output.name !== null) {
-        setPreviewFile(output.name, output);
-      }
-
-      // Generate the image to be used on the UI
-      const img = new Image();
-      img.src = URL.createObjectURL(output.file);
-      const div = document.createElement("div");
-      div.setAttribute("class", output.name);
-      const previewEl = document.getElementById("preview");
-      div.appendChild(img); // apend image to class div
-      previewEl.appendChild(div); // append to container
+      // // update our form state
+      // if (output.name !== null) {
+      //   setPreviewFile(output.name, output);
+      // }
     });
   };
 
   return (
-    <div>
+    <Fragment>
       <FilePond
         files={files}
         acceptedFileTypes={["image/png", "image/jpeg"]}
-        labelFileTypeNotAllowed={"Only accept jpeg/png file"}
         allowImageValidateSize={true}
         allowMultiple={false}
         imageResizeTargetWidth={300}
@@ -112,23 +102,9 @@ const ThumbnailGenerator = props => {
         onpreparefile={prepareFile}
         maxFileSize={"25MB"}
       />
-      <ul style={{ marginTop: 30 }}>
-        <li>
-          <small>PNG/JPG</small>
-        </li>
-        <li>
-          <small>Maximum file size of 25mb</small>
-        </li>
-        <li>
-          <small>Minimum width of 940px and height of 400px</small>
-        </li>
-      </ul>
 
-      {/* <h5>Masthead (960x400)</h5>
-            <h5>Featured (300x300)</h5>
-            <h5>Thumbnail (300x280)</h5>
-            */}
-    </div>
+      <ImagePreview data={generatedFiles} />
+    </Fragment>
   );
 };
 
