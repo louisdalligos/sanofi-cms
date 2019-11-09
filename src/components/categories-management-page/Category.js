@@ -71,7 +71,7 @@ const Category = ({
       })
     );
 
-    let val = [id, atIndex];
+    let val = [parseInt(id), atIndex + 1];
     console.log(val);
 
     try {
@@ -92,7 +92,9 @@ const Category = ({
     }
   };
   const findCard = id => {
+    console.log(id, "id");
     const card = cards.filter(c => `${c.id}` === id)[0];
+
     return {
       card,
       index: cards.indexOf(card)

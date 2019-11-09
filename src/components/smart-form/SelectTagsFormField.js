@@ -33,7 +33,7 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
       >
         {options
           ? options.map(c => (
-              <Option key={c.id} value={c.title}>
+              <Option key={c.id} value={c.id} label={c.title}>
                 {c.title}
               </Option>
             ))

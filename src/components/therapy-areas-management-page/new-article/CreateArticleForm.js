@@ -124,6 +124,7 @@ const CreateArticleForm = ({
   };
 
   const submitForm = (values, action) => {
+    action.setSubmitting(true);
     let formData = new FormData();
     formData.set("category_id", values.category_id);
     formData.set("subcategory_id", values.subcategory_id);
@@ -150,7 +151,6 @@ const CreateArticleForm = ({
     createArticle(formData);
     action.setSubmitting(false);
     action.resetForm(); // rest form action if success
-    history.push("/therapy-areas");
   };
 
   return (
