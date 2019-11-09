@@ -225,7 +225,7 @@ body {
   // quill editor
 
   .ql-editor {
-    min-height: 18em;
+    min-height: 25em;
   }
 }
 
@@ -319,6 +319,18 @@ body {
   img {
     display: block;
     margin-bottom: 20px;
+  }
+
+  .masthead img {
+    width: 342px;
+  }
+  .feature img {
+    width: 180px;
+    height: 180px;
+  }
+
+  .thumbnail img {
+    width: 140px;
   }
 }
 

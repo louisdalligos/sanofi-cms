@@ -262,7 +262,7 @@ export function updateArticle(id, values) {
 
       await dispatch({
         type: UPDATE_ARTICLE_SUCCESS,
-        payload: response.data
+        payload: res.data
       });
 
       dispatch(

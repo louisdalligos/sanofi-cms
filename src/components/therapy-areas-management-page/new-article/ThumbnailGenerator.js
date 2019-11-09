@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import uuidv4 from "uuid";
 import { FilePond, registerPlugin } from "react-filepond";
-import "filepond/dist/filepond.min.css";
+//import "filepond/dist/filepond.min.css";
 
 import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
 import FilePondPluginImagePreview from "filepond-plugin-image-preview";
