@@ -1,12 +1,38 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import { Upload, Icon, message, Button } from "antd";
 import axios from "axios";
 import { API } from "../../../utils/api";
 
+function getBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
 const ImageUploader = ({ auth, ...props }) => {
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+  const [showThumbnails, setShowThumbnails] = useState(false);
+  const canvasRef = useRef(null);
+
+  // const generateCanvas = () => {
+  //   const canvas = canvasRef.current;
+  //   const ctx = canvas.getContext("2d");
+  //   const image = new Image();
+  //   image.onload = function() {
+  //     ctx.drawImage(image, 0, 0);
+  //   };
+  //   image.src = previewImage;
+  // };
+
+  useEffect(() => {
+    //generateCanvas();
+  }, []);
 
   const handleChange = info => {
     let list = [...info.fileList];
@@ -34,16 +60,22 @@ const ImageUploader = ({ auth, ...props }) => {
       },
       data: formData
     })
-      .then(res => {
-        console.log(res.data);
-        //setFileList([]);
-        console.log(fileList);
+      .then(async res => {
+        console.log(res);
+        console.log(fileList[0]);
         setUploading(false);
+        const imgString = await getBase64(fileList[0]);
+        setPreviewImage(imgString);
+        console.log(previewImage);
         message.success("upload successfully.");
+        setShowThumbnails(true);
       })
       .catch(err => {
+        console.log(err);
         setUploading(false);
-        message.error(err.response.data.error);
+        // message.error(
+        //   err.response.data.error ? err.response.data.error : "Oops error"
+        // );
       });
   };
 
@@ -57,8 +89,6 @@ const ImageUploader = ({ auth, ...props }) => {
       };
     },
     beforeUpload: file => {
-      console.log(file);
-      console.log(auth.access_token);
       setFileList([...fileList, file]);
       return false;
     },
@@ -81,6 +111,13 @@ const ImageUploader = ({ auth, ...props }) => {
       >
         {uploading ? "Generating thumbnails" : "Generate thumbnails"}
       </Button>
+
+      {showThumbnails ? (
+        <div>
+          <img alt="example" style={{ width: "300px" }} src={previewImage} />
+          show
+        </div>
+      ) : null}
     </Fragment>
   );
 };
