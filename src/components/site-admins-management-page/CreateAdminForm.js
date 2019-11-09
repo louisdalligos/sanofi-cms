@@ -137,19 +137,15 @@ const CreateAdminForm = ({
             )}
           </Form.Item>
           <Form.Item label="Role">
-            {getFieldDecorator(
-              "role",
-              { initialValue: "superadmin" },
-              {
-                rules: [
-                  {
-                    required: true,
-                    message: "Please select the role"
-                  }
-                ]
-              }
-            )(
-              <Select>
+            {getFieldDecorator("role", {
+              rules: [
+                {
+                  required: true,
+                  message: "Please select the role"
+                }
+              ]
+            })(
+              <Select placeholder="Select a role">
                 <Option value="superadmin">Super Admin</Option>
                 <Option value="admin">Admin</Option>
                 <Option value="editor">Content Editor</Option>

@@ -1,5 +1,4 @@
 import axiosInstance from "../../../utils/axiosInstance";
-import axiosInstanceFormData from "../../../utils/axiosInstanceFormData";
 
 function fetchSpecializationsRequest(body) {
   return axiosInstance({
@@ -49,6 +48,14 @@ function createArticleRequest(body) {
   });
 }
 
+function updateArticleRequest(id, body) {
+  return axiosInstance({
+    method: "put",
+    url: `/therapy-areas/update/${id}`,
+    data: body
+  });
+}
+
 function fetchCurrentArticleRequest(id) {
   return axiosInstance({
     method: "get",
@@ -56,18 +63,19 @@ function fetchCurrentArticleRequest(id) {
   });
 }
 
-function archiveArticleRequest(id) {
-  return axiosInstanceFormData({
-    method: "delete",
-    url: `/therapy-areas/delete/${id}`
-  });
-}
-
-function changeArticleStatusRequest(id, status) {
+function archiveArticleRequest(id, body) {
   return axiosInstance({
     method: "put",
     url: `/therapy-areas/change-status/${id}`,
-    data: status
+    data: body
+  });
+}
+
+function changeArticleStatusRequest(id, body) {
+  return axiosInstance({
+    method: "put",
+    url: `/therapy-areas/change-status/${id}`,
+    data: body
   });
 }
 
@@ -78,6 +86,7 @@ const PostManagementServices = {
   fetchSubCategoriesRequest,
   addSubCategoryRequest,
   createArticleRequest,
+  updateArticleRequest,
   archiveArticleRequest,
   fetchCurrentArticleRequest,
   changeArticleStatusRequest

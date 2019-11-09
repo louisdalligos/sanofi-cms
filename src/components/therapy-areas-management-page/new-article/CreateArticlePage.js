@@ -12,7 +12,8 @@ const CreateArticlePage = ({ history, ...props }) => {
   const [formData, setFormData] = useState({
     category_id: "",
     subcategory_id: "",
-    specializations: null,
+    other_tags: [],
+    specializations: [],
     headline: "",
     short_details: "",
     zinc_code: "",
@@ -20,7 +21,11 @@ const CreateArticlePage = ({ history, ...props }) => {
     meta_description: "",
     page_slug: "",
     meta_keywords: "",
-    body: ""
+    body: "",
+    featured: "",
+    masthead: "",
+    thumbnail: "",
+    file: ""
   });
 
   useEffect(() => {
@@ -43,12 +48,6 @@ const CreateArticlePage = ({ history, ...props }) => {
                 New Article
               </Breadcrumb.Item>
             </Breadcrumb>
-          </div>
-
-          <div>
-            <Button type="primary">
-              <Link to="/therapy-areas">Back to articles</Link>
-            </Button>
           </div>
         </div>
 

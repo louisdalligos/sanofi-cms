@@ -212,7 +212,7 @@ body {
   margin-top: 50px;
 }
 
-.create-article-form {
+.therapy-article-form {
   .form-section {
     padding: 50px 0;
     border-bottom: 1px solid #ccc;
@@ -286,5 +286,42 @@ body {
 }
 
 .ant-select-selection--multiple .ant-select-selection__choice__content {
+  font-size: 12px;
+}
+
+// Thumbnail previews
+.preview-image {
+  margin-top: 30px;
+  small {
+    margin-bottom: 30px;
+  }
+}
+
+.set-status-form-control {
+  margin-left: 10px;
+  position: relative;
+  top: 8px;
+
+  .ant-btn-primary {
+    margin-right: 5px;
+  }
+}
+
+.article-status-row {
+  //display: flex !important;
+}
+
+#preview {
+  margin-top: 20px;
+  .null {
+    display: none;
+  }
+  img {
+    display: block;
+    margin-bottom: 20px;
+  }
+}
+
+.filepond--drop-label.filepond--drop-label label {
   font-size: 12px;
 }

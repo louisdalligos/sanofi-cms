@@ -27,7 +27,7 @@ import WrappedForgotPasswordForm from "../components/forgot-password-page/Forgot
 import WrappedCompleteRegistrationForm from "../components/complete-registration-page/CompleteRegistrationForm";
 import WrappedResetPasswordForm from "../components/reset-password-page/ResetPasswordForm";
 import CreateArticlePage from "../components/therapy-areas-management-page/new-article/CreateArticlePage";
-import UpdateArticleForm from "../components/therapy-areas-management-page/update-article/UpdateArticleForm";
+import UpdateArticlePage from "../components/therapy-areas-management-page/update-article/UpdateArticlePage";
 
 import { Role } from "../utils/role";
 import { getAuthUser } from "../redux/actions/auth-actions/authActions";
@@ -104,7 +104,7 @@ const App = ({ auth, ...props }) => {
             <PrivateRoute
               exact
               path="/therapy-areas/:id"
-              component={UpdateArticleForm}
+              component={UpdateArticlePage}
               roles={[Role.SuperAdmin, Role.Admin]}
             />
             <PrivateRoute

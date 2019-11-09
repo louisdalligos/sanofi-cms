@@ -14,10 +14,10 @@ const TextFormField = ({ label, placeholder, ...props }) => {
       <label className={props.isRequired ? "ant-form-item-required" : null}>
         {label}
         <input
-          className="ant-input"
-          placeholder={placeholder}
           {...field}
           {...props}
+          className="ant-input"
+          placeholder={placeholder}
         />
       </label>
       {meta.touched && meta.error ? (

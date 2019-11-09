@@ -3,7 +3,7 @@ import { useField } from "formik";
 import { Select } from "antd";
 const { Option } = Select;
 
-const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
+const TagsSuggestionFormField = ({ label, placeholder, options, ...props }) => {
   const [field, meta] = useField(props);
 
   const handleSelectChange = value => {
@@ -26,7 +26,7 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
       <Select
         {...field}
         {...props}
-        mode="multiple"
+        mode="tags"
         placeholder={placeholder}
         onChange={handleSelectChange}
         notFoundContent="No results found"
@@ -47,4 +47,4 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
   );
 };
 
-export default SelectTagsFormField;
+export default TagsSuggestionFormField;

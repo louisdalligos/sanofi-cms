@@ -12,7 +12,8 @@ import {
   Modal,
   Tooltip,
   Breadcrumb,
-  Pagination
+  Pagination,
+  Tag
 } from "antd";
 import { Link, Redirect } from "react-router-dom";
 
@@ -45,20 +46,37 @@ const TherapyAreasTable = ({
   auth
 }) => {
   const columns = [
-    {
-      title: "Featured",
-      dataIndex: "featured",
-      rowKey: "id",
-      render: (text, record) => (
-        <Tooltip placement="top" title="Featured article">
-          <Icon type="star" />
-        </Tooltip>
-      )
-    },
+    // {
+    //     title: "Featured",
+    //     dataIndex: "featured",
+    //     rowKey: "id",
+    //     render: (text, record) => (
+    //         <Tooltip placement="top" title="Featured article">
+    //             <Icon type="star" />
+    //         </Tooltip>
+    //     )
+    // },
     {
       title: "Status",
       dataIndex: "status",
-      rowKey: "id"
+      rowKey: "id",
+      sorter: true,
+      render: (text, record) => (
+        <Tag
+          color={
+            record.status === "published"
+              ? "green"
+              : record.status === "archived"
+              ? "volcano"
+              : record.status === "unpublished"
+              ? "geekblue"
+              : "blue"
+          }
+          key={record.id}
+        >
+          {text}
+        </Tag>
+      )
     },
     {
       title: "Edit",
@@ -77,12 +95,22 @@ const TherapyAreasTable = ({
       title: "Page Title",
       dataIndex: "page_title",
       rowKey: "id",
-      sorter: true
+      sorter: true,
+      render: (text, record) => (
+        <Button type="link" onClick={e => handleSelectArticle(record.id, e)}>
+          <Link to={`/therapy-areas/${record.id}`}>{text}</Link>
+        </Button>
+      )
     },
     {
-      title: "Featured Image",
+      title: "Thumbnail Image",
       dataIndex: "thumbnail_image",
-      rowKey: "id"
+      rowKey: "id",
+      width: 150,
+      render: (text, record) => (
+        // <img src={record.thumbnail_image} width="100" alt="" />
+        <img src={record.thumbnail_image} alt="" />
+      )
     },
     {
       title: "Zinc Code",
@@ -93,12 +121,14 @@ const TherapyAreasTable = ({
     {
       title: "Publish Date",
       dataIndex: "published_at",
-      rowKey: "id"
+      rowKey: "id",
+      sorter: true
     },
     {
       title: "Date Created",
       dataIndex: "created_at",
-      rowKey: "id"
+      rowKey: "id",
+      sorter: true
     },
     {
       title: "Archive",
@@ -106,7 +136,7 @@ const TherapyAreasTable = ({
       render: (text, record) => (
         <Tooltip placement="right" title="Archive this article">
           <Button type="danger" onClick={e => showArchiveConfirm(record.id, e)}>
-            <Icon type="minus-circle" />
+            <Icon type="file-exclamation" />
           </Button>
         </Tooltip>
       )
@@ -193,40 +223,35 @@ const TherapyAreasTable = ({
 
   useEffect(() => {
     switch (notifs.id) {
+      case "ARCHIVE_ARTICLE_SUCCESS":
+        message.success(
+          notifs.notifications
+            ? notifs.notifications.success
+            : "Article successfully archived!"
+        );
+        fetch(); // call our api to fetch updated data
+        clearNotifications(); // cleanup our notification object
+        setPageNumber(1);
+        break;
+      case "ARCHIVE_ARTICLE_FAILED":
+        message.error(
+          notifs.notifications
+            ? notifs.notifications.error
+            : "There was an error on processing your request!"
+        );
+        clearNotifications();
+        break;
       case "FETCH_SPECIALIZATIONS_SUCCESS":
         setSpecializations(postManagement.specializations);
+        clearNotifications();
         break;
       case "FETCH_SUBCATEGORIES_SUCCESS":
         setSubCategories(postManagement.subCategories.results);
+        clearNotifications();
         break;
       case "FETCH_CATEGORIES_SUCCESS":
         setCategories(postManagement.categories.results);
-        break;
-      case "DELETE_ADMIN_FAILED":
-        message.error(
-          notifs.notifications.error ? notifs.notifications.error : null
-        );
         clearNotifications();
-        break;
-      case "DELETE_ADMIN_SUCCESS":
-        message.success(notifs.notifications.success);
-        fetch(); // call our api to fetch updated data
-        clearNotifications(); // cleanup our notification object
-        break;
-      case "UNDO_DELETE_ADMIN_FAILED":
-        message.error(
-          notifs.notifications.error ? notifs.notifications.error : null
-        );
-        clearNotifications();
-        break;
-      case "UNDO_DELETE_ADMIN_SUCCESS":
-        message.success(notifs.notifications.success);
-        fetch(); // call our api to fetch updated data
-        clearNotifications(); // cleanup our notification object
-        break;
-      case "FETCH_CURRENT_ADMIN_FAILED":
-        message.error(notifs.notifications.error);
-        clearNotifications(); // cleanup our notification object
         break;
       default:
         return;
@@ -419,6 +444,7 @@ const TherapyAreasTable = ({
           onChange={handleTableChange}
           size="small"
           locale={{ emptyText: "No result found" }}
+          scroll={{ x: 1100 }}
         />
 
         {!loading && total !== null ? (

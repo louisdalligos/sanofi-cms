@@ -12,7 +12,8 @@ import {
   Modal,
   Tooltip,
   Breadcrumb,
-  Pagination
+  Pagination,
+  Tag
 } from "antd";
 import { Link } from "react-router-dom";
 
@@ -47,48 +48,25 @@ const AdminsTable = ({
       dataIndex: "status",
       rowKey: "id",
       className: "status-column",
-      filters: [
-        { text: "Active", value: "active" },
-        { text: "Pending", value: "pending" },
-        { text: "Deleted", value: "deleted" },
-        { text: "Locked", value: "locked" }
-      ],
-      onFilter: (value, record) => record.status.indexOf(value) === 0,
+      width: 50,
+      sorter: true,
       render: (text, record) => (
-        <Tooltip
-          placement="top"
-          title={
-            record.status !== "locked"
-              ? `Account is currently ${record.status}`
-              : "Unlock this admin"
-          }
-        >
-          <Icon
-            type={
+        <div>
+          <Tag
+            color={
               record.status === "active"
-                ? "check"
+                ? "green"
                 : record.status === "deleted"
-                ? "exclamation"
+                ? "volcano"
                 : record.status === "pending"
-                ? "question-circle-o"
-                : "unlock"
+                ? "geekblue"
+                : "black"
             }
-            onClick={
-              record.status === "locked" ? e => unlockAdmin(record.id) : null
-            }
-            style={
-              record.status === "active"
-                ? { color: "#92CD00" }
-                : record.status === "pending"
-                ? { color: "#1890ff" }
-                : record.status === "deleted"
-                ? { color: "red" }
-                : record.status === "locked"
-                ? { color: "black" }
-                : null
-            }
-          />
-        </Tooltip>
+            key={record.id}
+          >
+            {text}
+          </Tag>
+        </div>
       )
     },
     {
@@ -145,8 +123,9 @@ const AdminsTable = ({
     },
     {
       title: "Verified since",
-      dataIndex: "verified_since",
+      dataIndex: "registration_completed_at",
       rowKey: "id",
+      width: 200,
       sorter: true
     },
     {
@@ -156,28 +135,40 @@ const AdminsTable = ({
       sorter: true
     },
     {
-      title: "Archive",
+      title: "Actions",
       rowKey: "id",
-      render: (text, record) =>
-        record.status === "deleted" ? (
-          <Tooltip placement="right" title="Undo archive this admin">
-            <Button
-              type="primary"
-              onClick={e => showUndoDeleteConfirm(record.id, e)}
-            >
-              <Icon type="undo" />
-            </Button>
-          </Tooltip>
-        ) : (
-          <Tooltip placement="right" title="Delete this admin">
-            <Button
-              type="danger"
-              onClick={e => showDeleteConfirm(record.id, e)}
-            >
-              <Icon type="delete" />
-            </Button>
-          </Tooltip>
-        )
+      width: 200,
+      render: (text, record) => (
+        <div>
+          {record.status === "deleted" ? (
+            <Tooltip placement="right" title="Undo archive this admin">
+              <Button
+                type="primary"
+                onClick={e => showUndoDeleteConfirm(record.id, e)}
+              >
+                <Icon type="undo" />
+              </Button>
+            </Tooltip>
+          ) : (
+            <Tooltip placement="right" title="Delete this admin">
+              <Button
+                type="danger"
+                onClick={e => showDeleteConfirm(record.id, e)}
+                style={{ marginRight: 10 }}
+              >
+                <Icon type="delete" />
+              </Button>
+            </Tooltip>
+          )}
+          {record.status === "locked" ? (
+            <Tooltip placement="right" title="Unlock this account">
+              <Button type="primary" onClick={e => unlockAdmin(record.id)}>
+                <Icon type="unlock" />
+              </Button>
+            </Tooltip>
+          ) : null}
+        </div>
+      )
     }
   ];
 
@@ -436,6 +427,7 @@ const AdminsTable = ({
           onChange={handleTableChange}
           size="small"
           locale={{ emptyText: "No result found" }}
+          scroll={{ x: 1180 }}
         />
 
         {!loading ? (

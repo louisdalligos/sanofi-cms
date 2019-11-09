@@ -233,7 +233,6 @@ export function createArticle(values) {
         )
       );
     } catch (err) {
-      console.log(err);
       dispatch({
         type: CREATE_ARTICLE_FAILED
       });
@@ -252,17 +251,18 @@ export function createArticle(values) {
 }
 
 // Update article
-export function updateArticle(id) {
+export function updateArticle(id, values) {
   return async dispatch => {
     await dispatch({
       type: UPDATE_ARTICLE_REQUEST
     });
 
     try {
-      const res = await PostManagementServices.updateArticleRequest(id); // PUT request
+      const res = await PostManagementServices.updateArticleRequest(id, values); // PUT request
 
       await dispatch({
-        type: UPDATE_ARTICLE_SUCCESS
+        type: UPDATE_ARTICLE_SUCCESS,
+        payload: response.data
       });
 
       dispatch(
@@ -296,8 +296,15 @@ export function archiveArticle(id) {
       type: ARCHIVE_ARTICLE_REQUEST
     });
 
+    const values = {
+      status: "archived"
+    };
+
     try {
-      const res = await PostManagementServices.archiveArticleRequest(id); // DELETE request
+      const res = await PostManagementServices.archiveArticleRequest(
+        id,
+        values
+      ); // PUT request
 
       await dispatch({
         type: ARCHIVE_ARTICLE_SUCCESS
@@ -317,9 +324,9 @@ export function archiveArticle(id) {
       });
       dispatch(
         returnNotifications(
-          err.data,
+          err.response.data,
           "success",
-          err.status,
+          err.response.status,
           "ARCHIVE_ARTICLE_FAILED"
         )
       );
@@ -358,13 +365,16 @@ export function fetchCurrentArticle(id) {
 }
 
 // Change article status
-export function changeArticleStatus(id) {
+export function changeArticleStatus(id, values) {
   return async dispatch => {
     await dispatch({
       type: CHANGE_ARTICLE_STATUS_REQUEST
     });
     try {
-      const res = await PostManagementServices.changeArticleStatusRequest(id); // PUT request
+      const res = await PostManagementServices.changeArticleStatusRequest(
+        id,
+        values
+      ); // PUT request
 
       await dispatch({
         type: CHANGE_ARTICLE_STATUS_SUCCESS,

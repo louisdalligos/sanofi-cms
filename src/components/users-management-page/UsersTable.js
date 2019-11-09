@@ -12,7 +12,8 @@ import {
   Modal,
   Tooltip,
   Breadcrumb,
-  Pagination
+  Pagination,
+  Tag
 } from "antd";
 import { Link } from "react-router-dom";
 
@@ -56,48 +57,22 @@ const UsersTable = ({
       className: "status-column",
       width: 80,
       fixed: "left",
-      filters: [
-        { text: "Active", value: "active" },
-        { text: "Pending", value: "pending" },
-        { text: "Deleted", value: "deleted" },
-        { text: "Locked", value: "locked" }
-      ],
-      onFilter: (value, record) => record.status.indexOf(value) === 0,
+      sorter: true,
       render: (text, record) => (
-        <Tooltip
-          placement="top"
-          title={
-            record.status !== "locked"
-              ? `Account is currently ${record.status}`
-              : "Unlock this user"
+        <Tag
+          color={
+            record.status === "active"
+              ? "green"
+              : record.status === "deleted"
+              ? "volcano"
+              : record.status === "pending"
+              ? "geekblue"
+              : "blue"
           }
+          key={record.id}
         >
-          <Icon
-            type={
-              record.status === "active"
-                ? "check"
-                : record.status === "deleted"
-                ? "exclamation"
-                : record.status === "pending"
-                ? "question-circle-o"
-                : "unlock"
-            }
-            onClick={
-              record.status === "locked" ? e => unlockUser(record.id) : null
-            }
-            style={
-              record.status === "active"
-                ? { color: "#92CD00" }
-                : record.status === "pending"
-                ? { color: "#1890ff" }
-                : record.status === "deleted"
-                ? { color: "red" }
-                : record.status === "locked"
-                ? { color: "black" }
-                : null
-            }
-          />
-        </Tooltip>
+          {text}
+        </Tag>
       )
     },
     {
@@ -179,7 +154,7 @@ const UsersTable = ({
     },
     {
       title: "Verified since",
-      dataIndex: "email_verified_at",
+      dataIndex: "registration_completed_at",
       rowKey: "id",
       sorter: true
     },
