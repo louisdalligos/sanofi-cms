@@ -52,7 +52,6 @@ const schema = Yup.object().shape({
     .max(150, "Meta description is too long")
     .required("This field is required"),
   body: Yup.string().required("This field is required")
-  //file: Yup.mixed().required("This field is required") // in case image will be required
 });
 
 const CreateArticleForm = ({
@@ -140,7 +139,7 @@ const CreateArticleForm = ({
     formData.set("meta_keywords", values.meta_keywords);
     formData.set("body", values.body);
 
-    // if theres an uploaded image include these field on our form data
+    //if theres an uploaded image include these field on our form data - this is the final
     if (mastheadImageInfo) {
       formData.set("masthead", mastheadImageInfo);
       formData.set("featured", featuredImageInfo);
@@ -266,6 +265,11 @@ const CreateArticleForm = ({
 
                 <ThumbnailGenerator getImages={getImages} />
                 <ImagePreview />
+
+                {/* The purpose of these field is just to check if form will be dirty on upload of images */}
+                <Field name="masthead" type="hidden" />
+                <Field name="featured" type="hidden" />
+                <Field name="thumbnail" type="hidden" />
               </Col>
               <Col span={16}>
                 <h3>Article Body</h3>
@@ -295,9 +299,9 @@ const CreateArticleForm = ({
               </Col>
             </Row>
 
-            {/* <Row>
-                            <DisplayFormikState {...props} />
-                        </Row> */}
+            <Row>
+              <DisplayFormikState {...props} />
+            </Row>
 
             <div className="form-actions">
               <Button style={{ marginRight: 10 }}>

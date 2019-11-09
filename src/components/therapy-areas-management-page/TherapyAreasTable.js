@@ -61,6 +61,7 @@ const TherapyAreasTable = ({
       dataIndex: "status",
       rowKey: "id",
       sorter: true,
+      width: 95,
       render: (text, record) => (
         <Tag
           color={
@@ -81,6 +82,7 @@ const TherapyAreasTable = ({
     {
       title: "Edit",
       rowKey: "id",
+      width: 50,
       render: (text, record) => (
         <Tooltip placement="top" title="Edit article">
           <Button type="link" onClick={e => handleSelectArticle(record.id, e)}>
@@ -444,7 +446,6 @@ const TherapyAreasTable = ({
           onChange={handleTableChange}
           size="small"
           locale={{ emptyText: "No result found" }}
-          scroll={{ x: 1100 }}
         />
 
         {!loading && total !== null ? (

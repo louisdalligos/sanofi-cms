@@ -48,8 +48,8 @@ const AdminsTable = ({
       dataIndex: "status",
       rowKey: "id",
       className: "status-column",
-      width: 50,
       sorter: true,
+      width: 80,
       render: (text, record) => (
         <div>
           <Tag
@@ -73,6 +73,7 @@ const AdminsTable = ({
       title: "View",
       rowKey: "id",
       className: "status-column",
+      width: 50,
       render: (text, record) => (
         <Tooltip
           placement="top"
@@ -125,7 +126,6 @@ const AdminsTable = ({
       title: "Verified since",
       dataIndex: "registration_completed_at",
       rowKey: "id",
-      width: 200,
       sorter: true
     },
     {
@@ -137,7 +137,7 @@ const AdminsTable = ({
     {
       title: "Actions",
       rowKey: "id",
-      width: 200,
+      width: 120,
       render: (text, record) => (
         <div>
           {record.status === "deleted" ? (
@@ -427,7 +427,6 @@ const AdminsTable = ({
           onChange={handleTableChange}
           size="small"
           locale={{ emptyText: "No result found" }}
-          scroll={{ x: 1180 }}
         />
 
         {!loading ? (

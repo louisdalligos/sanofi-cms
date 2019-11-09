@@ -534,7 +534,6 @@ const UsersTable = ({
           onChange={handleTableChange}
           size="small"
           locale={{ emptyText: "No result found" }}
-          scroll={{ x: 1100 }}
         />
 
         {!loading ? (

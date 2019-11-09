@@ -24,8 +24,7 @@ const CreateArticlePage = ({ history, ...props }) => {
     body: "",
     featured: "",
     masthead: "",
-    thumbnail: "",
-    file: ""
+    thumbnail: ""
   });
 
   useEffect(() => {

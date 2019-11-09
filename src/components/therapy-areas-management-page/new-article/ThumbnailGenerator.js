@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import uuidv4 from "uuid";
 import { FilePond, registerPlugin } from "react-filepond";
-//import "filepond/dist/filepond.min.css";
 
 import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
 import FilePondPluginImagePreview from "filepond-plugin-image-preview";
@@ -14,6 +13,8 @@ import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
 
 import { blobToFile } from "../../../utils/helper";
+
+import { useFormikContext } from "formik";
 
 // Register the plugins
 registerPlugin(
@@ -31,6 +32,8 @@ const ThumbnailGenerator = props => {
   const [files, setFiles] = useState([]);
   const [generatedFiles, setGeneratedFiles] = useState([]);
 
+  const { setFieldValue } = useFormikContext();
+
   useEffect(() => {
     console.log(generatedFiles);
     props.getImages(generatedFiles);
@@ -43,7 +46,7 @@ const ThumbnailGenerator = props => {
       //transforms.crop.aspectRatio = 2.39;
       return transforms;
     },
-    feature: transforms => {
+    featured: transforms => {
       transforms.resize.size.width = 300;
       transforms.resize.size.height = 300;
       transforms.crop.aspectRatio = 1.0;
@@ -61,13 +64,24 @@ const ThumbnailGenerator = props => {
     console.log(err, fileItem.getMetadata("resize"));
   };
 
+  const setPreviewFile = (name, output) => {
+    return setFieldValue(name, blobToFile(output.file, `name-${uuidv4()}.jpg`));
+  };
+
   const prepareFile = (fileItem, outputFiles) => {
     outputFiles.forEach(output => {
-      // Generate the file
+      console.log("file item:", output);
+
+      // Generate the file to be submitted on the form
       let item = blobToFile(output.file, `${output.name}-${uuidv4()}.jpg`);
       setGeneratedFiles(generatedFiles => generatedFiles.concat(item));
 
-      // Generate the image
+      // update our form state
+      if (output.name !== null) {
+        setPreviewFile(output.name, output);
+      }
+
+      // Generate the image to be used on the UI
       const img = new Image();
       img.src = URL.createObjectURL(output.file);
       const div = document.createElement("div");
