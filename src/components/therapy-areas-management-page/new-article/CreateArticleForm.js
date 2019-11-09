@@ -32,7 +32,7 @@ import ImagePreview from "./ImagePreview";
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
   subcategory_id: Yup.string().required("This field is required"),
-  specializations: Yup.string().required("This field is required"),
+  //specializations: Yup.string().required("This field is required"),
   short_details: Yup.string()
     .min(2, "Description is too short")
     .max(150, "Headline is too long")
@@ -125,11 +125,12 @@ const CreateArticleForm = ({
 
   const submitForm = (values, action) => {
     let formData = new FormData();
-
     formData.set("category_id", values.category_id);
     formData.set("subcategory_id", values.subcategory_id);
     formData.set("other_tags", values.other_tags);
-    formData.set("specializations", values.specializations);
+    values.specializations.length === 0
+      ? formData.set("specializations", null)
+      : formData.set("specializations", values.specializations);
     formData.set("headline", values.headline);
     formData.set("short_details", values.short_details);
     formData.set("zinc_code", values.zinc_code);
@@ -192,7 +193,7 @@ const CreateArticleForm = ({
                   label="Specializations"
                   name="specializations"
                   onChange={props.setFieldValue}
-                  isRequired={true}
+                  isRequired={false}
                   placeholder="Please select a specialization"
                 />
               </Col>
