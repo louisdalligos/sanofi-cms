@@ -26,7 +26,7 @@ import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
 
 // Other components
-import ThumbnailGenerator from "./ThumbnailGenerator";
+import ImageUploader from "./ImageUploader";
 
 // validation schema
 const schema = Yup.object().shape({
@@ -194,18 +194,18 @@ const UpdateArticleForm = ({
     //eslint-disable-next-line
   }, [notifs.id]);
 
-  const getImages = files => {
-    // looks dirty -will refactor
-    if (files[1]) {
-      setmastheadImageInfo(files[1]);
+  // get the file
+  const getImage = (name, file) => {
+    console.log(file);
+    console.log(name);
+    if (name === "masthead") {
+      setmastheadImageInfo(file);
     }
-
-    if (files[2]) {
-      setfeaturedImageInfo(files[2]);
+    if (name === "featured") {
+      setfeaturedImageInfo(file);
     }
-
-    if (files[3]) {
-      setthumbnailImageInfo(files[3]);
+    if (name === "thumbnail") {
+      setthumbnailImageInfo(file);
     }
   };
 
@@ -448,12 +448,7 @@ const UpdateArticleForm = ({
             <Row gutter={16} className="form-section last">
               <Col span={8}>
                 <h3>Feature Image</h3>
-                <ThumbnailGenerator
-                  getImages={getImages}
-                  disabled={disabled}
-                  clearImages={clearImages}
-                  values={props.values}
-                />
+                <ImageUploader getImage={getImage} />
               </Col>
               <Col span={16}>
                 <h3>Article Body</h3>

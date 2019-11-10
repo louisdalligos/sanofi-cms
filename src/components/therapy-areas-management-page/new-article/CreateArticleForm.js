@@ -26,8 +26,8 @@ import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
 
 // Other components
 import ImageUploader from "./ImageUploader";
-import ThumbnailGenerator from "./ThumbnailGenerator";
-import ImagePreview from "./ImagePreview";
+//import ThumbnailGenerator from "./ThumbnailGenerator";
+//import ImagePreview from "./ImagePreview";
 
 // validation schema
 const schema = Yup.object().shape({
@@ -108,21 +108,6 @@ const CreateArticleForm = ({
     }
     //eslint-disable-next-line
   }, [notifs.id]);
-
-  const getImages = files => {
-    // looks dirty -will refactor
-    if (files[1]) {
-      setmastheadImageInfo(files[1]);
-    }
-
-    if (files[2]) {
-      setfeaturedImageInfo(files[2]);
-    }
-
-    if (files[3]) {
-      setthumbnailImageInfo(files[3]);
-    }
-  };
 
   // get the file
   const getImage = (name, file) => {
