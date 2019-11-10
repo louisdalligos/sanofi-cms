@@ -142,11 +142,11 @@ const CreateArticleForm = ({
     formData.set("meta_keywords", values.meta_keywords);
     formData.set("body", values.body);
 
-    //if theres an uploaded image include these field on our form data - this is the final
-    if (mastheadImageInfo) {
-      formData.set("masthead", mastheadImageInfo);
-      formData.set("featured", featuredImageInfo);
-      formData.set("thumbnail", thumbnailImageInfo);
+    //if theres an uploaded image include these field on our form data
+    if (values.masthead) {
+      formData.set("masthead", values.masthead);
+      formData.set("featured", values.featured);
+      formData.set("thumbnail", values.thumbnail);
     }
 
     createArticle(formData);
@@ -267,11 +267,6 @@ const CreateArticleForm = ({
                 <h3>Feature Image</h3>
                 <ImageUploader />
                 {/* <ThumbnailGenerator getImages={getImages} /> */}
-
-                {/* The purpose of these field is just to check if form will be dirty on upload of images */}
-                <Field name="masthead" type="hidden" />
-                <Field name="featured" type="hidden" />
-                <Field name="thumbnail" type="hidden" />
               </Col>
               <Col span={16}>
                 <h3>Article Body</h3>

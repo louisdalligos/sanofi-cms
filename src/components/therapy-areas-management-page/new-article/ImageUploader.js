@@ -1,9 +1,12 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
-import { Upload, Icon, message, Button, Alert } from "antd";
+import { Upload, Icon, message, Button, Spin } from "antd";
+import { useFormikContext } from "formik";
+
 import axios from "axios";
 import { API } from "../../../utils/api";
 
+// library
 import Resizer from "../../library/ImageResizer";
 
 const description = [
@@ -20,11 +23,15 @@ const description = [
   </ul>
 ];
 
+const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
+
 const ImageUploader = ({ auth, ...props }) => {
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [featuredImage, setFeaturedmage] = useState("");
   const [showThumbnails, setShowThumbnails] = useState(false);
+
+  const { setFieldValue, values } = useFormikContext();
 
   useEffect(() => {
     //generateCanvas();
@@ -37,6 +44,19 @@ const ImageUploader = ({ auth, ...props }) => {
     // Only to show the recent uploaded file
     //list = fileList.slice(-1);
     //setFileList({ list });
+  };
+
+  // Set current value unto formik values - used to trigger isDirty boolean
+  const setImageFormFieldStatus = (name, output) => {
+    return setFieldValue(name, output);
+  };
+
+  // Handle clearing of images
+  const handleClearImages = () => {
+    console.log("clear");
+    setImageFormFieldStatus("masthead", "");
+    setImageFormFieldStatus("featured", "");
+    setImageFormFieldStatus("thumbnail", "");
   };
 
   const handleUpload = () => {
@@ -61,9 +81,26 @@ const ImageUploader = ({ auth, ...props }) => {
         console.log(res);
         console.log("ORIGINAL FILE: ", fileList[0]);
 
-        // resize our file
+        // set our file
         const file = fileList[0];
 
+        // Generate masthead image
+        Resizer.imageFileResizer(
+          file,
+          960,
+          400,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            console.log(uri);
+            setFeaturedmage(uri);
+            setImageFormFieldStatus("masthead", uri); // set form value status
+          },
+          "base64"
+        );
+
+        // Generate featured image
         Resizer.imageFileResizer(
           file,
           300,
@@ -74,6 +111,23 @@ const ImageUploader = ({ auth, ...props }) => {
           uri => {
             console.log(uri);
             setFeaturedmage(uri);
+            setImageFormFieldStatus("featured", uri); // set form value status
+          },
+          "base64"
+        );
+
+        // Generate thumbnail image
+        Resizer.imageFileResizer(
+          file,
+          300,
+          280,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            console.log(uri);
+            setFeaturedmage(uri);
+            setImageFormFieldStatus("thumbnail", uri); // set form value status
           },
           "base64"
         );
@@ -116,6 +170,7 @@ const ImageUploader = ({ auth, ...props }) => {
       </Upload>
 
       {description}
+
       <Button
         type="primary"
         onClick={handleUpload}
@@ -128,19 +183,36 @@ const ImageUploader = ({ auth, ...props }) => {
 
       {showThumbnails ? (
         <div id="preview">
-          <h3>Preview:</h3>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <h3>Preview:</h3>
+            <Button type="link" onClick={handleClearImages}>
+              Clear images
+            </Button>
+          </div>
           <small style={{ marginBottom: 20, display: "block" }}>
             Images are optimized and cropped automatically
           </small>
 
-          <h4>Masthead</h4>
-          <img alt="" style={{ width: "300px" }} src={featuredImage} />
+          {values.masthead ? (
+            <div>
+              <h4>Masthead</h4>
+              <img alt="" style={{ width: "300px" }} src={values.masthead} />
+            </div>
+          ) : null}
 
-          <h4>Featured</h4>
-          <img alt="" style={{ width: "200px" }} src={featuredImage} />
+          {values.featured ? (
+            <div>
+              <h4>Featured</h4>
+              <img alt="" style={{ width: "200px" }} src={values.featured} />
+            </div>
+          ) : null}
 
-          <h4>Thumbnail</h4>
-          <img alt="" style={{ width: "180px" }} src={featuredImage} />
+          {values.thumbnail ? (
+            <div>
+              <h4>Thumbnail</h4>
+              <img alt="" style={{ width: "180px" }} src={values.thumbnail} />
+            </div>
+          ) : null}
         </div>
       ) : null}
     </Fragment>
