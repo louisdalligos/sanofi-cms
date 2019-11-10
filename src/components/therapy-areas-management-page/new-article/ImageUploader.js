@@ -30,6 +30,7 @@ const ImageUploader = ({ auth, ...props }) => {
   const [uploading, setUploading] = useState(false);
   const [featuredImage, setFeaturedmage] = useState("");
   const [showThumbnails, setShowThumbnails] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(true);
 
   const { setFieldValue, values } = useFormikContext();
 
@@ -57,6 +58,7 @@ const ImageUploader = ({ auth, ...props }) => {
     setImageFormFieldStatus("masthead", "");
     setImageFormFieldStatus("featured", "");
     setImageFormFieldStatus("thumbnail", "");
+    setIsSpinning(false);
   };
 
   const handleUpload = () => {
@@ -68,6 +70,7 @@ const ImageUploader = ({ auth, ...props }) => {
     });
 
     setUploading(true);
+    setIsSpinning(true);
 
     axios({
       url: `${API}/gallery/check-image`,
@@ -197,22 +200,14 @@ const ImageUploader = ({ auth, ...props }) => {
             <div>
               <h4>Masthead</h4>
               <img alt="" style={{ width: "300px" }} src={values.masthead} />
-            </div>
-          ) : null}
-
-          {values.featured ? (
-            <div>
               <h4>Featured</h4>
               <img alt="" style={{ width: "200px" }} src={values.featured} />
-            </div>
-          ) : null}
-
-          {values.thumbnail ? (
-            <div>
               <h4>Thumbnail</h4>
               <img alt="" style={{ width: "180px" }} src={values.thumbnail} />
             </div>
-          ) : null}
+          ) : (
+            <Spin indicator={antIcon} spinning={isSpinning} />
+          )}
         </div>
       ) : null}
     </Fragment>
