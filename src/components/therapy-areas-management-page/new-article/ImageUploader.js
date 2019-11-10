@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useRef } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Upload, Icon, message, Button, Spin } from "antd";
 import { useFormikContext } from "formik";
@@ -26,7 +26,7 @@ const description = [
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 const ImageUploader = ({ auth, getImage, ...props }) => {
-  const [fileList, setFileList] = useState([]);
+  const [uploadedFileList, setUploadedFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [mastHeadImage, setMastHeadImage] = useState("");
   const [featuredImage, setFeaturedmage] = useState("");
@@ -37,16 +37,42 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
   const { setFieldValue, values } = useFormikContext();
 
   useEffect(() => {
-    //generateCanvas();
-  }, []);
+    if (uploadedFileList.length > 1) {
+      uploadedFileList.shift();
+    }
 
-  const handleChange = info => {
-    let list = [...info.fileList];
-    console.log(list);
-    console.log(fileList);
-    // Only to show the recent uploaded file
-    //list = fileList.slice(-1);
-    //setFileList({ list });
+    console.log("in effect", uploadedFileList);
+  }, [uploadedFileList, setUploadedFileList]);
+
+  const handleRemove = file => {
+    console.log(file);
+    const index = uploadedFileList.indexOf(file);
+    const newFileList = uploadedFileList.slice();
+    newFileList.splice(index, 1);
+    setUploadedFileList(newFileList);
+    setImageFormFieldStatus("masthead", "");
+    setImageFormFieldStatus("featured", "");
+    setImageFormFieldStatus("thumbnail", "");
+    setIsSpinning(false);
+  };
+
+  const handleBeforeUpload = file => {
+    console.log(file, "BEFORE UPLOAD");
+    setUploadedFileList([...uploadedFileList, file]);
+    console.log(uploadedFileList, "UPDATED AFTER UPLOAD");
+    return false;
+  };
+
+  const handleChange = ({ file, fileList }) => {
+    console.log(file, "on change");
+    // let files = [...uploadedFileList];
+    // console.log(files);
+    // if (files.length > 1) {
+    //   files = files.slice(-1);
+    //   // set our state
+    //   setUploadedFileList({ files });
+    //   console.log("updated", fileList);
+    // }
   };
 
   // Set current value unto formik values - used to trigger isDirty boolean
@@ -56,7 +82,8 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
 
   // Handle clearing of images
   const handleClearImages = () => {
-    console.log("clear");
+    setUploadedFileList([]);
+    console.log("clear", uploadedFileList);
     setImageFormFieldStatus("masthead", "");
     setImageFormFieldStatus("featured", "");
     setImageFormFieldStatus("thumbnail", "");
@@ -64,9 +91,10 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
   };
 
   const handleUpload = () => {
+    console.log(uploadedFileList, "UPLOADED LIST");
     const formData = new FormData();
 
-    fileList.forEach(file => {
+    uploadedFileList.forEach(file => {
       console.log("File uploaded", file);
       formData.append("image", file);
     });
@@ -84,7 +112,7 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
     })
       .then(async () => {
         // set our file
-        const file = fileList[0];
+        const file = uploadedFileList[0];
 
         // Generate masthead image
         Resizer.imageFileResizer(
@@ -188,33 +216,22 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
         setShowThumbnails(true);
       })
       .catch(err => {
-        console.log(err);
+        console.log(err.response);
         setUploading(false);
         message.error(
-          err.response.data.error ? err.response.data.error : "Oops error"
+          err.response ? err.response.data.error : "Oops! Something went wrong!"
         );
       });
   };
 
-  const properties = {
-    onRemove: file => {
-      const index = fileList.indexOf(file);
-      const newFileList = fileList.slice();
-      newFileList.splice(index, 1);
-      return {
-        fileList: newFileList
-      };
-    },
-    beforeUpload: file => {
-      setFileList([...fileList, file]);
-      return false;
-    },
-    onChange: handleChange
-  };
-
   return (
     <Fragment>
-      <Upload {...properties} fileList={fileList}>
+      <Upload
+        onRemove={handleRemove}
+        beforeUpload={handleBeforeUpload}
+        onChange={handleChange}
+        fileList={uploadedFileList}
+      >
         <Button>
           <Icon type="upload" /> Select File
         </Button>
@@ -225,7 +242,7 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
       <Button
         type="primary"
         onClick={handleUpload}
-        disabled={fileList.length === 0}
+        disabled={uploadedFileList.length === 0}
         loading={uploading}
         style={{ marginTop: 16 }}
       >
@@ -236,7 +253,11 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
         <div id="preview">
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <h3>Preview:</h3>
-            <Button type="link" onClick={handleClearImages}>
+            <Button
+              type="link"
+              onClick={handleClearImages}
+              disabled={uploadedFileList.length === 0}
+            >
               Clear images
             </Button>
           </div>
