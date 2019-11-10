@@ -1,34 +1,30 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
-import { Upload, Icon, message, Button } from "antd";
+import { Upload, Icon, message, Button, Alert } from "antd";
 import axios from "axios";
 import { API } from "../../../utils/api";
 
-function getBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
-}
+import Resizer from "../../library/ImageResizer";
+
+const description = [
+  <ul style={{ marginTop: 20 }}>
+    <li>
+      <small>PNG/JPG</small>
+    </li>
+    <li>
+      <small>Maximum file size of 25mb</small>
+    </li>
+    <li>
+      <small>Minimum width of 940px and height of 400px</small>
+    </li>
+  </ul>
+];
 
 const ImageUploader = ({ auth, ...props }) => {
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
+  const [featuredImage, setFeaturedmage] = useState("");
   const [showThumbnails, setShowThumbnails] = useState(false);
-  const canvasRef = useRef(null);
-
-  // const generateCanvas = () => {
-  //   const canvas = canvasRef.current;
-  //   const ctx = canvas.getContext("2d");
-  //   const image = new Image();
-  //   image.onload = function() {
-  //     ctx.drawImage(image, 0, 0);
-  //   };
-  //   image.src = previewImage;
-  // };
 
   useEffect(() => {
     //generateCanvas();
@@ -47,6 +43,7 @@ const ImageUploader = ({ auth, ...props }) => {
     const formData = new FormData();
 
     fileList.forEach(file => {
+      console.log("File uploaded", file);
       formData.append("image", file);
     });
 
@@ -62,20 +59,35 @@ const ImageUploader = ({ auth, ...props }) => {
     })
       .then(async res => {
         console.log(res);
-        console.log(fileList[0]);
+        console.log("ORIGINAL FILE: ", fileList[0]);
+
+        // resize our file
+        const file = fileList[0];
+
+        Resizer.imageFileResizer(
+          file,
+          300,
+          300,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            console.log(uri);
+            setFeaturedmage(uri);
+          },
+          "base64"
+        );
+
         setUploading(false);
-        const imgString = await getBase64(fileList[0]);
-        setPreviewImage(imgString);
-        console.log(previewImage);
         message.success("upload successfully.");
         setShowThumbnails(true);
       })
       .catch(err => {
         console.log(err);
         setUploading(false);
-        // message.error(
-        //   err.response.data.error ? err.response.data.error : "Oops error"
-        // );
+        message.error(
+          err.response.data.error ? err.response.data.error : "Oops error"
+        );
       });
   };
 
@@ -102,6 +114,8 @@ const ImageUploader = ({ auth, ...props }) => {
           <Icon type="upload" /> Select File
         </Button>
       </Upload>
+
+      {description}
       <Button
         type="primary"
         onClick={handleUpload}
@@ -113,9 +127,20 @@ const ImageUploader = ({ auth, ...props }) => {
       </Button>
 
       {showThumbnails ? (
-        <div>
-          <img alt="example" style={{ width: "300px" }} src={previewImage} />
-          show
+        <div id="preview">
+          <h3>Preview:</h3>
+          <small style={{ marginBottom: 20, display: "block" }}>
+            Images are optimized and cropped automatically
+          </small>
+
+          <h4>Masthead</h4>
+          <img alt="" style={{ width: "300px" }} src={featuredImage} />
+
+          <h4>Featured</h4>
+          <img alt="" style={{ width: "200px" }} src={featuredImage} />
+
+          <h4>Thumbnail</h4>
+          <img alt="" style={{ width: "180px" }} src={featuredImage} />
         </div>
       ) : null}
     </Fragment>
