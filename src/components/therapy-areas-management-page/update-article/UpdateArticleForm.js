@@ -130,7 +130,9 @@ const UpdateArticleForm = ({
       );
       setSelectedSpecializations(
         currentArticle.specializations
-          ? currentArticle.specializations.split(",")
+          ? currentArticle.specializations.split(",").map(item => {
+              return parseInt(item, 10);
+            })
           : []
       );
       setPageTitle(currentArticle.page_title);
@@ -147,7 +149,7 @@ const UpdateArticleForm = ({
       setThumbnail(currentArticle.thumbnail_image);
       setLoading(false);
 
-      console.log(selectedSpecializations, otherTags);
+      console.log(selectedSpecializations, "SELCTED");
     }
   }, [currentArticle, setLoading, setSelectedSpecializations, setOtherTags]);
 
