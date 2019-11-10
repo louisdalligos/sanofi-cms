@@ -124,6 +124,21 @@ const CreateArticleForm = ({
     }
   };
 
+  // get the file
+  const getImage = (name, file) => {
+    console.log(file);
+    console.log(name);
+    if (name === "masthead") {
+      setmastheadImageInfo(file);
+    }
+    if (name === "featured") {
+      setfeaturedImageInfo(file);
+    }
+    if (name === "thumbnail") {
+      setthumbnailImageInfo(file);
+    }
+  };
+
   const submitForm = (values, action) => {
     action.setSubmitting(true);
     let formData = new FormData();
@@ -144,9 +159,9 @@ const CreateArticleForm = ({
 
     //if theres an uploaded image include these field on our form data
     if (values.masthead) {
-      formData.set("masthead", values.masthead);
-      formData.set("featured", values.featured);
-      formData.set("thumbnail", values.thumbnail);
+      formData.set("masthead", mastheadImageInfo);
+      formData.set("featured", featuredImageInfo);
+      formData.set("thumbnail", thumbnailImageInfo);
     }
 
     createArticle(formData);
@@ -265,7 +280,7 @@ const CreateArticleForm = ({
             <Row gutter={16} className="form-section last">
               <Col span={8}>
                 <h3>Feature Image</h3>
-                <ImageUploader />
+                <ImageUploader getImage={getImage} />
                 {/* <ThumbnailGenerator getImages={getImages} /> */}
               </Col>
               <Col span={16}>

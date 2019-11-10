@@ -111,7 +111,7 @@ const TherapyAreasTable = ({
       width: 150,
       render: (text, record) => (
         // <img src={record.thumbnail_image} width="100" alt="" />
-        <img src={record.thumbnail_image} alt="" />
+        <img src={record.thumbnail_image} alt="" width="70" />
       )
     },
     {

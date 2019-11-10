@@ -25,10 +25,12 @@ const description = [
 
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
-const ImageUploader = ({ auth, ...props }) => {
+const ImageUploader = ({ auth, getImage, ...props }) => {
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [mastHeadImage, setMastHeadImage] = useState("");
   const [featuredImage, setFeaturedmage] = useState("");
+  const [thumbnailImage, setThumbnailImage] = useState("");
   const [showThumbnails, setShowThumbnails] = useState(false);
   const [isSpinning, setIsSpinning] = useState(true);
 
@@ -80,10 +82,7 @@ const ImageUploader = ({ auth, ...props }) => {
       },
       data: formData
     })
-      .then(async res => {
-        console.log(res);
-        console.log("ORIGINAL FILE: ", fileList[0]);
-
+      .then(async () => {
         // set our file
         const file = fileList[0];
 
@@ -97,10 +96,27 @@ const ImageUploader = ({ auth, ...props }) => {
           0,
           uri => {
             console.log(uri);
-            setFeaturedmage(uri);
-            setImageFormFieldStatus("masthead", uri); // set form value status
+            setMastHeadImage(uri);
+            //@todo - for refactor - use React memo
+            setImageFormFieldStatus("masthead", "1"); // set form value status
+            getImage("masthead", uri); // pass value to the form
           },
           "base64"
+        );
+
+        // Generate masthead image - blob
+        Resizer.imageFileResizer(
+          file,
+          960,
+          400,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            console.log(uri);
+            getImage("masthead", uri);
+          },
+          "blob"
         );
 
         // Generate featured image
@@ -114,9 +130,25 @@ const ImageUploader = ({ auth, ...props }) => {
           uri => {
             console.log(uri);
             setFeaturedmage(uri);
-            setImageFormFieldStatus("featured", uri); // set form value status
+            setImageFormFieldStatus("featured", "1"); // set form value status
+            getImage("featured", uri);
           },
           "base64"
+        );
+
+        // Generate featured image - blob
+        Resizer.imageFileResizer(
+          file,
+          300,
+          300,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            console.log(uri);
+            getImage("featured", uri);
+          },
+          "blob"
         );
 
         // Generate thumbnail image
@@ -129,10 +161,26 @@ const ImageUploader = ({ auth, ...props }) => {
           0,
           uri => {
             console.log(uri);
-            setFeaturedmage(uri);
-            setImageFormFieldStatus("thumbnail", uri); // set form value status
+            setThumbnailImage(uri);
+            setImageFormFieldStatus("thumbnail", "1"); // set form value status
+            getImage("thumbnail", uri);
           },
           "base64"
+        );
+
+        // Generate thumbnail image - blob
+        Resizer.imageFileResizer(
+          file,
+          300,
+          280,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            console.log(uri);
+            getImage("thumbnail", uri);
+          },
+          "blob"
         );
 
         setUploading(false);
@@ -199,11 +247,11 @@ const ImageUploader = ({ auth, ...props }) => {
           {values.masthead ? (
             <div>
               <h4>Masthead</h4>
-              <img alt="" style={{ width: "300px" }} src={values.masthead} />
+              <img alt="" style={{ width: "300px" }} src={mastHeadImage} />
               <h4>Featured</h4>
-              <img alt="" style={{ width: "200px" }} src={values.featured} />
+              <img alt="" style={{ width: "200px" }} src={featuredImage} />
               <h4>Thumbnail</h4>
-              <img alt="" style={{ width: "180px" }} src={values.thumbnail} />
+              <img alt="" style={{ width: "180px" }} src={thumbnailImage} />
             </div>
           ) : (
             <Spin indicator={antIcon} spinning={isSpinning} />
