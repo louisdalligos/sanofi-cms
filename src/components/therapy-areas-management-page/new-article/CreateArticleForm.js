@@ -296,9 +296,9 @@ const CreateArticleForm = ({
               </Col>
             </Row>
 
-            <Row>
+            {/* <Row>
               <DisplayFormikState {...props} />
-            </Row>
+            </Row> */}
 
             <div className="form-actions">
               <Button style={{ marginRight: 10 }}>
