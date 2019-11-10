@@ -250,16 +250,6 @@ const UpdateArticleForm = ({
     changeArticleStatus(id, values); // redux action
   };
 
-  // Clear images
-  const clearImages = () => {
-    setMasthead("");
-    setFeatured("");
-    setThumbnail("");
-    setDisabled(false); // Enable our upload
-    const el = document.getElementById("images-preview-list");
-    el.remove();
-  };
-
   return (
     <Spin spinning={loading}>
       <Formik
