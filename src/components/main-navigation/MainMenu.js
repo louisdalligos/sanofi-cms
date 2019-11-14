@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Menu } from "antd";
 import { Link } from "react-router-dom";
@@ -8,10 +8,6 @@ const { SubMenu } = Menu;
 const MainMenu = ({ user, ...props }) => {
   const [current, setCurrent] = useState("dashboard");
   const windowWidth = useWindowWidth();
-
-  useEffect(() => {
-    console.log(windowWidth);
-  }, []);
 
   const handleMenuClick = e => {
     console.log("click ", e.key);

@@ -129,8 +129,11 @@ const CreateArticleForm = ({
   };
 
   const submitForm = (values, action) => {
+    const formatSlug = values.page_slug.replace(/\s+/g, "-").toLowerCase();
     action.setSubmitting(true);
+
     let formData = new FormData();
+
     formData.set("category_id", values.category_id);
     formData.set("subcategory_id", values.subcategory_id);
     formData.set("other_tags", values.other_tags);
@@ -142,7 +145,7 @@ const CreateArticleForm = ({
     formData.set("zinc_code", values.zinc_code);
     formData.set("page_title", values.page_title);
     formData.set("meta_description", values.meta_description);
-    formData.set("page_slug", values.page_slug);
+    formData.set("page_slug", formatSlug);
     formData.set("meta_keywords", values.meta_keywords);
     formData.set("body", values.body);
 

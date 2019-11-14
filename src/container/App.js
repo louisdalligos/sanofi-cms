@@ -52,6 +52,7 @@ const App = ({ auth, ...props }) => {
       //console.log("has token");
       store.dispatch(getAuthUser());
     }
+    //eslint-disable-next-line
   }, [token]);
 
   return (
