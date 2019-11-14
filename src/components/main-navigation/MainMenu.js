@@ -1,17 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Menu } from "antd";
 import { Link } from "react-router-dom";
-
+import { useWindowWidth } from "../custom-hooks/useWindowWidth";
 const { SubMenu } = Menu;
 
 const MainMenu = ({ user, ...props }) => {
   const [current, setCurrent] = useState("dashboard");
+  const windowWidth = useWindowWidth();
+
+  useEffect(() => {
+    console.log(windowWidth);
+  }, []);
 
   const handleMenuClick = e => {
     console.log("click ", e.key);
     setCurrent(e.key);
-    props.setDrawerVisibility(false);
+    if (windowWidth && windowWidth < 767) {
+      props.setDrawerVisibility(false);
+    }
   };
 
   return (

@@ -18,6 +18,7 @@ const Navbar = ({ ...props }) => {
       console.log("Unmounting");
       document.body.setAttribute("width", "100%");
     };
+    // eslint-disable-next-line
   }, [isMobileMenuOpen]);
 
   // Mobile menu trigger
@@ -56,6 +57,7 @@ const Navbar = ({ ...props }) => {
 
         <ProfileMenu {...props} />
       </div>
+
       <Drawer
         title="Menu"
         placement="left"
