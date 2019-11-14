@@ -30,6 +30,7 @@ import WrappedResetPasswordForm from "../components/reset-password-page/ResetPas
 import CreateArticlePage from "../components/therapy-areas-management-page/new-article/CreateArticlePage";
 import UpdateArticlePage from "../components/therapy-areas-management-page/update-article/UpdateArticlePage";
 import CreateProductPage from "../components/products-management-page/add-product/CreateProductPage";
+import UpdateProductPage from "../components/products-management-page/update-product/UpdateProductPage";
 
 import { Role } from "../utils/role";
 import { getAuthUser } from "../redux/actions/auth-actions/authActions";
@@ -135,6 +136,12 @@ const App = ({ auth, ...props }) => {
               exact
               path="/products/create"
               component={CreateProductPage}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
+              path="/products/:id"
+              component={UpdateProductPage}
               roles={[Role.SuperAdmin, Role.Admin]}
             />
             <PublicRoute
