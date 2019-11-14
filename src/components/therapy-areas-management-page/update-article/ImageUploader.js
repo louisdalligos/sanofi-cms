@@ -46,6 +46,7 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
         name: "uploaded-file.png"
       }
     ]);
+    //eslint-disable-next-line
   }, []);
 
   // Make sure we only pass 1 file on generate
@@ -261,7 +262,12 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
 
       {showThumbnails ? (
         <div id="preview">
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between"
+            }}
+          >
             <h3>Preview:</h3>
             <Button
               type="link"

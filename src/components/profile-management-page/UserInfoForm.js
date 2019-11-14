@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Form, Input, Button, Select, Alert, message } from "antd";
+import { Form, Input, Button, Select, message } from "antd";
 
 import { updateProfileInfo } from "../../redux/actions/user-maintenance-actions/userMaintenanceActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";

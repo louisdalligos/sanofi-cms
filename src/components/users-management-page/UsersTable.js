@@ -3,15 +3,10 @@ import { connect } from "react-redux";
 import {
   Button,
   Icon,
-  Row,
   Table,
   message,
-  Select,
-  Form,
-  Input,
   Modal,
   Tooltip,
-  Breadcrumb,
   Pagination,
   Tag
 } from "antd";
@@ -28,15 +23,15 @@ import {
   unlockUser,
   blockUser
 } from "../../redux/actions/admin-actions/superAdminActions";
-import { fetchSpecializations } from "../../redux/actions/post-management-actions/postManagementActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
+// Table components
+import UsersTableFilter from "./UsersTableFilter";
+import PageBreadcrumb from "./PageBreadCrumb";
+
 const { confirm } = Modal;
-const { Option } = Select;
-const Search = Input.Search;
 
 const UsersTable = ({
-  fetchSpecializations,
   fetchCurrentUser,
   deleteUser,
   undoDeleteUser,
@@ -44,11 +39,8 @@ const UsersTable = ({
   blockUser,
   clearNotifications,
   notifs,
-  auth,
-  postManagement
+  auth
 }) => {
-  const [specializations, setSpecializations] = useState([]);
-
   const columns = [
     {
       title: "Status",
@@ -56,7 +48,6 @@ const UsersTable = ({
       rowKey: "id",
       className: "status-column",
       width: 80,
-      fixed: "left",
       sorter: true,
       render: (text, record) => (
         <Tag
@@ -73,38 +64,6 @@ const UsersTable = ({
         >
           {text}
         </Tag>
-      )
-    },
-    {
-      title: "View",
-      rowKey: "id",
-      className: "status-column",
-      width: 50,
-      render: (text, record) => (
-        <Tooltip
-          placement="top"
-          title={
-            record.status === "pending"
-              ? "Account is still pending"
-              : record.status === "deleted"
-              ? "Account has been deleted"
-              : "View/Update doctor's information"
-          }
-        >
-          <Button
-            type="link"
-            onClick={e => handleSelectUser(record.id, e)}
-            disabled={
-              record.status === "pending" || record.status === "deleted"
-                ? true
-                : null
-            }
-          >
-            <Link to={`/doctors/${record.id}`}>
-              <Icon type="eye" />
-            </Link>
-          </Button>
-        </Tooltip>
       )
     },
     {
@@ -159,66 +118,61 @@ const UsersTable = ({
       sorter: true
     },
     {
-      title: "Archive",
+      title: "Action",
       rowKey: "id",
-      width: 70,
+      width: 120,
+      className: "table-action-column",
       render: (text, record) => (
-        <Tooltip
-          placement="right"
-          title={
-            record.status === "pending"
-              ? "Account is still pending"
-              : record.status === "deleted"
-              ? "Account has been deleted"
-              : "Delete this user?"
-          }
-        >
-          <Button
-            type="danger"
-            onClick={e => showDeleteConfirm(record.id, e)}
-            disabled={
-              record.status === "pending" || record.status === "deleted"
-                ? true
-                : null
+        <Fragment>
+          <Tooltip
+            placement="right"
+            title={
+              record.status === "pending"
+                ? "Account is still pending"
+                : record.status === "deleted"
+                ? "Account has been deleted"
+                : "Delete this user?"
             }
           >
-            <Icon type="delete" />
-          </Button>
-        </Tooltip>
-      )
-    },
-    {
-      title: "Block",
-      rowKey: "id",
-      className: "status-column",
-      width: 70,
-      render: (text, record) => (
-        <Tooltip
-          placement="right"
-          title={
-            record.status === "pending"
-              ? "Account is still pending"
-              : record.status === "deleted"
-              ? "Account has been deleted"
-              : record.status === "locked"
-              ? "Account is blocked"
-              : "Block this user?"
-          }
-        >
-          <Button
-            type="danger"
-            onClick={e => showBlockConfirm(record.id, e)}
-            disabled={
-              record.status === "pending" ||
-              record.status === "deleted" ||
-              record.status === "locked"
-                ? true
-                : null
+            <Button
+              type="danger"
+              onClick={e => showDeleteConfirm(record.id, e)}
+              disabled={
+                record.status === "pending" || record.status === "deleted"
+                  ? true
+                  : null
+              }
+            >
+              <Icon type="delete" />
+            </Button>
+          </Tooltip>
+          <Tooltip
+            placement="right"
+            title={
+              record.status === "pending"
+                ? "Account is still pending"
+                : record.status === "deleted"
+                ? "Account has been deleted"
+                : record.status === "locked"
+                ? "Account is blocked"
+                : "Block this user?"
             }
           >
-            <Icon type="close-circle" />
-          </Button>
-        </Tooltip>
+            <Button
+              type="danger"
+              onClick={e => showBlockConfirm(record.id, e)}
+              disabled={
+                record.status === "pending" ||
+                record.status === "deleted" ||
+                record.status === "locked"
+                  ? true
+                  : null
+              }
+            >
+              <Icon type="close-circle" />
+            </Button>
+          </Tooltip>
+        </Fragment>
       )
     }
   ];
@@ -231,7 +185,7 @@ const UsersTable = ({
 
   useEffect(() => {
     fetch(); // fetch initial
-    fetchSpecializations();
+    //eslint-disable-next-line
   }, []);
 
   const fetch = (params = {}) => {
@@ -277,7 +231,7 @@ const UsersTable = ({
     })
       .then(response => {
         setLoading(false);
-        if (response.data.success == "No results found") {
+        if (response.data.success === "No results found") {
           setTotal(0);
           message.error("No results found");
         } else {
@@ -346,9 +300,6 @@ const UsersTable = ({
         message.error(notifs.notifications.error);
         clearNotifications(); // cleanup our notification object
         break;
-      case "FETCH_SPECIALIZATIONS_SUCCESS":
-        setSpecializations(postManagement.specializations);
-        break;
       default:
         return;
     }
@@ -409,12 +360,6 @@ const UsersTable = ({
     });
   }
 
-  function onSearch(e) {
-    console.log(e);
-    let obj = { search: e };
-    filterFetch({ ...obj }); // call filter fetch method for diff set of total result count
-  }
-
   function handleSelectUser(id, e) {
     e.stopPropagation();
     console.log("View user", id);
@@ -443,16 +388,6 @@ const UsersTable = ({
     fetch({ ...obj });
   }
 
-  function onSelectChange(e) {
-    let obj = { accessed: e };
-    filterFetch({ ...obj }); // call filter fetch method for diff set of total result count
-  }
-
-  function onFilterSpecialization(e) {
-    let obj = { specializations: e };
-    filterFetch({ ...obj });
-  }
-
   // handle table sort
   const handleTableChange = (pagination, filters, sorter) => {
     const obj = {
@@ -464,97 +399,42 @@ const UsersTable = ({
 
   return (
     <Fragment>
-      <div className="page-breadcrumb">
-        <div>
-          <Breadcrumb>
-            <Breadcrumb.Item key="users">Users</Breadcrumb.Item>
-            <Breadcrumb.Item key="doctors">
-              <Link to="/doctors">Doctors</Link>
-            </Breadcrumb.Item>
-          </Breadcrumb>
-        </div>
+      {/* breadcrumbs */}
+      <PageBreadcrumb />
 
-        <div>
-          <Button type="primary">
-            <Link to="/doctors/create">New Profile</Link>
-          </Button>
-        </div>
-      </div>
-      <Row>
-        <div className="filter-table-wrapper">
-          <Form layout="inline">
-            <Form.Item label="Specializations">
-              <Select
-                defaultValue="All specializations"
-                placeholder="Select a specialization"
-                onChange={onFilterSpecialization}
-                style={{ width: 150 }}
-              >
-                <Option value="">All specializations</Option>
-                {specializations
-                  ? specializations.map(c => (
-                      <Option key={c.id} value={c.title}>
-                        {c.title}
-                      </Option>
-                    ))
-                  : "No results found"}
-              </Select>
-            </Form.Item>
-            <Form.Item label="Accessed">
-              <Select
-                defaultValue="anytime"
-                style={{ width: 200 }}
-                onChange={onSelectChange}
-              >
-                <Option value="anytime">Anytime</Option>
-                <Option value="today">Today</Option>
-                <Option value="within_seven_days">Within 7 days</Option>
-                <Option value="within_thirty_days">Within 30 days</Option>
-                <Option value="not_within_365_days">Not within 365 days</Option>
-              </Select>
-            </Form.Item>
+      {/* filters */}
+      <UsersTableFilter filterFetch={filterFetch} />
 
-            <Form.Item>
-              <Search
-                placeholder="name, email..."
-                onSearch={onSearch}
-                style={{ width: 250 }}
-              />
-            </Form.Item>
-          </Form>
-        </div>
-      </Row>
-      <Row>
-        <Table
-          columns={columns}
-          rowKey={record => record.id}
-          dataSource={data}
-          pagination={false}
-          loading={loading}
-          onChange={handleTableChange}
+      <Table
+        columns={columns}
+        rowKey={record => record.id}
+        dataSource={data}
+        pagination={false}
+        loading={loading}
+        onChange={handleTableChange}
+        size="small"
+        locale={{ emptyText: "No result found" }}
+        scroll={{ x: 1100 }}
+      />
+
+      {!loading ? (
+        <Pagination
+          showQuickJumper
+          showSizeChanger
+          pageSizeOptions={["10", "25", "50", "100"]}
+          total={total}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
+          pageSize={pageSize}
+          defaultCurrent={pageNumber}
+          itemRender={itemRender}
+          onChange={onPagerChange}
+          onShowSizeChange={onPageSizeChange}
           size="small"
-          locale={{ emptyText: "No result found" }}
+          className="table-pagination-custom"
         />
-
-        {!loading ? (
-          <Pagination
-            showQuickJumper
-            showSizeChanger
-            pageSizeOptions={["10", "25", "50", "100"]}
-            total={total}
-            showTotal={(total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`
-            }
-            pageSize={pageSize}
-            defaultCurrent={pageNumber}
-            itemRender={itemRender}
-            onChange={onPagerChange}
-            onShowSizeChange={onPageSizeChange}
-            size="small"
-            className="table-pagination-custom"
-          />
-        ) : null}
-      </Row>
+      ) : null}
     </Fragment>
   );
 };
@@ -572,7 +452,6 @@ const mapStateToProps = state => {
 export default connect(
   mapStateToProps,
   {
-    fetchSpecializations,
     fetchCurrentUser,
     deleteUser,
     undoDeleteUser,

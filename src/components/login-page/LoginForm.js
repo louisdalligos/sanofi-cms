@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { Form, Icon, Input, Button, Alert, Layout, Row, message } from "antd";
+import { Form, Icon, Input, Button, Alert, Layout, Row } from "antd";
 
-import {
-  signin,
-  getAuthUser
-} from "../../redux/actions/auth-actions/authActions";
+import { signin } from "../../redux/actions/auth-actions/authActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 import logo from "../../assets/logo.png";
@@ -16,7 +13,7 @@ const { Content } = Layout;
 const LoginForm = ({
   form,
   form: { getFieldDecorator },
-  auth: { isLoggedIn, requestInProgress, user },
+  auth: { requestInProgress, user },
   notifs,
   history,
   signin,

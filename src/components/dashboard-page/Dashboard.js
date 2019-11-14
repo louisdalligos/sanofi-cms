@@ -1,16 +1,12 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment } from "react";
 import { connect } from "react-redux";
-import { Layout, PageHeader, Card } from "antd";
-import Navbar from "../main-navigation/Navbar";
-const { Content } = Layout;
+import { PageHeader, Card } from "antd";
 
 const Dashboard = ({ ...props }) => {
   const pageTitle = "Dashboard";
 
   return (
     <Fragment>
-      <Navbar {...props} />
-
       <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
 

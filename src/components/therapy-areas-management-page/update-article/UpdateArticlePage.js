@@ -1,9 +1,8 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { Button, PageHeader, Breadcrumb } from "antd";
+import { PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
-import Navbar from "../../main-navigation/Navbar";
 import UpdateArticleForm from "./UpdateArticleForm";
 
 // redux actions
@@ -22,7 +21,7 @@ const UpdateArticlePage = ({
   ...props
 }) => {
   const [currentArticleId, setCurrentArticleId] = useState(match.params.id);
-  const [loading, setLoading] = useState(false);
+  //const [loading, setLoading] = useState(false);
 
   // const [formData, setFormData] = useState({
   //     category_id: "",
@@ -50,7 +49,6 @@ const UpdateArticlePage = ({
 
   return (
     <Fragment>
-      <Navbar {...props} />
       <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
         <div className="page-breadcrumb">

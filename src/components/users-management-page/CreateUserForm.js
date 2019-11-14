@@ -1,11 +1,10 @@
-import React, { useEffect, Fragment } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import {
   Form,
   Input,
   Button,
   message,
-  Select,
   Row,
   PageHeader,
   InputNumber,
@@ -16,7 +15,6 @@ import { Link } from "react-router-dom";
 import { createUser } from "../../redux/actions/admin-actions/superAdminActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
-import Navbar from "../main-navigation/Navbar";
 import InvitedDoctorsTable from "./InvitedDoctorsTable";
 
 const pageTitle = "Create an account";
@@ -68,7 +66,6 @@ const CreateUserForm = ({
 
   return (
     <>
-      <Navbar {...props} />
       <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
         <div className="page-breadcrumb">
@@ -143,7 +140,7 @@ const CreateUserForm = ({
                   message: "Please enter a prc number only"
                 }
               ]
-            })(<InputNumber />)}
+            })(<InputNumber placeholder="Enter the PRC number" />)}
           </Form.Item>
 
           <Form.Item>

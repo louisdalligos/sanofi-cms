@@ -6,11 +6,9 @@ import { Form, Button, PageHeader, Row, Descriptions, Spin } from "antd";
 import { fetchCurrentUser } from "../../redux/actions/admin-actions/superAdminActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
-import Navbar from "../main-navigation/Navbar";
 const pageTitle = "View doctor's information";
 
 const ViewUserForm = ({ superadmin, currentUser, match, ...props }) => {
-  const [currentUserId, setCurrentUserId] = useState(match.params.id);
   const [loading, setLoading] = useState(false);
 
   const [firstname, setFirstName] = useState(null);
@@ -32,11 +30,11 @@ const ViewUserForm = ({ superadmin, currentUser, match, ...props }) => {
       setAlumni(currentUser.alumni && currentUser.alumni === 1 ? "yes" : null);
       setMobile(currentUser.mobile_number);
     }
+    //eslint-disable-next-line
   }, [currentUser]);
 
   return (
     <Fragment>
-      <Navbar {...props} />
       <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
         <Row>

@@ -1,14 +1,14 @@
 import React from "react";
 import { useField } from "formik";
 
-const TextFormField = ({ label, placeholder, ...props }) => {
+const TextFormField = ({ label, placeholder, className, ...props }) => {
   const [field, meta] = useField(props);
   return (
     <div
       className={
         meta.touched && meta.error
-          ? "has-feedback has-error ant-form-item-control"
-          : "ant-form-item-control"
+          ? `${className} has-feedback has-error ant-form-item-control`
+          : `${className} ant-form-item-control`
       }
     >
       <label className={props.isRequired ? "ant-form-item-required" : null}>
@@ -16,7 +16,7 @@ const TextFormField = ({ label, placeholder, ...props }) => {
         <input
           {...field}
           {...props}
-          className="ant-input"
+          className={"ant-input"}
           placeholder={placeholder}
         />
       </label>

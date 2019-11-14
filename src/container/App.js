@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, Fragment } from "react";
 import { withRouter, Route, Switch } from "react-router-dom";
 import { connect } from "react-redux";
 import PrivateRoute from "../routes/PrivateRoute";
@@ -16,6 +16,7 @@ import WrappedCreateUserForm from "../components/users-management-page/CreateUse
 import WrappedViewUserForm from "../components/users-management-page/ViewUserForm";
 import CategoriesManagement from "../components/categories-management-page/CategoriesManagement";
 import SubCategoriesManagement from "../components/sub-categories-management-page/SubCategoriesManagement";
+import ProductsManagement from "../components/products-management-page/ProductsManagement";
 
 // 404
 import NotFound from "../components/404-page/NotFound";
@@ -28,11 +29,15 @@ import WrappedCompleteRegistrationForm from "../components/complete-registration
 import WrappedResetPasswordForm from "../components/reset-password-page/ResetPasswordForm";
 import CreateArticlePage from "../components/therapy-areas-management-page/new-article/CreateArticlePage";
 import UpdateArticlePage from "../components/therapy-areas-management-page/update-article/UpdateArticlePage";
+import CreateProductPage from "../components/products-management-page/add-product/CreateProductPage";
 
 import { Role } from "../utils/role";
 import { getAuthUser } from "../redux/actions/auth-actions/authActions";
 import store from "../stores/store-dev";
 import { message } from "antd";
+
+import Navbar from "../components/main-navigation/Navbar";
+
 const token = sessionStorage.getItem("access_token");
 
 // Our MAIN APP wrapper
@@ -55,6 +60,7 @@ const App = ({ auth, ...props }) => {
         message.info("Please wait a moment...", 1)
       ) : (
         <div className="wrapper">
+          {auth.isLoggedIn ? <Navbar {...props} /> : null}
           <Switch location={props.history.location}>
             <PrivateRoute exact path={"/"} component={Dashboard} />
             <PrivateRoute exact path="/profile" component={ProfileManagement} />
@@ -97,6 +103,7 @@ const App = ({ auth, ...props }) => {
               roles={[Role.SuperAdmin, Role.Admin]}
             />
             <PrivateRoute
+              exact
               path="/therapy-areas/create"
               component={CreateArticlePage}
               roles={[Role.SuperAdmin, Role.Admin]}
@@ -115,6 +122,18 @@ const App = ({ auth, ...props }) => {
             <PrivateRoute
               path="/sub-categories"
               component={SubCategoriesManagement}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
+              path="/products"
+              component={ProductsManagement}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
+              path="/products/create"
+              component={CreateProductPage}
               roles={[Role.SuperAdmin, Role.Admin]}
             />
             <PublicRoute

@@ -1,18 +1,18 @@
 import React, { Fragment } from "react";
 import { PageHeader } from "antd";
-import TherapyAreasTable from "./TherapyAreasTable";
+import ProductsTable from "./ProductsTable";
 
-const TherapyAreasManagement = props => {
-  const pageTitle = "Therapy Areas";
+const ProductsManagement = () => {
+  const pageTitle = "Products";
 
   return (
     <Fragment>
       <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
-        <TherapyAreasTable />
+        <ProductsTable />
       </div>
     </Fragment>
   );
 };
 
-export default TherapyAreasManagement;
+export default ProductsManagement;

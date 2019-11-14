@@ -18,8 +18,6 @@ import {
 } from "../../redux/actions/admin-actions/superAdminActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
-import Navbar from "../main-navigation/Navbar";
-
 const { Option } = Select;
 const pageTitle = "Update an admin";
 
@@ -54,6 +52,7 @@ const UpdateAdminForm = ({
         role: currentAdmin.role
       });
     }
+    //eslint-disable-next-line
   }, [currentAdmin]);
 
   useEffect(() => {
@@ -90,7 +89,6 @@ const UpdateAdminForm = ({
 
   return (
     <Fragment>
-      <Navbar {...props} />
       <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
         <div className="page-breadcrumb">

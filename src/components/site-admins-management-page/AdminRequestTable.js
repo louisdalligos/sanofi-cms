@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Button, Table, Pagination, message, Form } from "antd";
+import { Table, Pagination } from "antd";
 import { connect } from "react-redux";
 import { fetchAdminRequest } from "../../redux/actions/admin-actions/superAdminActions";
 
@@ -53,6 +53,7 @@ const AdminRequestTable = ({ fetchAdminRequest, superadmin, auth }) => {
         setData(response.data.results);
       })
       .catch(err => {
+        setLoading(false);
         console.log(err);
       });
   };
@@ -81,6 +82,7 @@ const AdminRequestTable = ({ fetchAdminRequest, superadmin, auth }) => {
         dataSource={data}
         loading={loading}
         pagination={false}
+        locale={{ emptyText: "No result found" }}
         size="small"
       />
 

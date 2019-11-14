@@ -54,6 +54,7 @@ const ResetPasswordForm = ({
     if (pwr_token) {
       getResetPasswordTokenFromParams(pwr_token);
     }
+    //eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -85,6 +86,7 @@ const ResetPasswordForm = ({
     if (password_reset_token) {
       verifyPasswordResetToken(password_reset_token);
     }
+    //eslint-disable-next-line
   }, [password_reset_token]);
 
   // handle confirm blur

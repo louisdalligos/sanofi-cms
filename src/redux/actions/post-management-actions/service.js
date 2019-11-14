@@ -3,7 +3,7 @@ import axiosInstance from "../../../utils/axiosInstance";
 function fetchSpecializationsRequest(body) {
   return axiosInstance({
     method: "get",
-    baseURL: "https://sanofi-qa.nuworks.ph:8443/api/v1/specializations",
+    baseURL: "/api/v1/specializations",
     data: body
   });
 }
@@ -50,7 +50,7 @@ function createArticleRequest(body) {
 
 function updateArticleRequest(id, body) {
   return axiosInstance({
-    method: "put",
+    method: "post",
     url: `/therapy-areas/update/${id}`,
     data: body
   });

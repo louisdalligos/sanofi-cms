@@ -6,14 +6,13 @@ import { Button, Row, Col, message, Icon, Tooltip } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
-//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
 import {
   createArticle,
   fetchCategories,
-  fetchSubCategories,
   fetchSpecializations
 } from "../../../redux/actions/post-management-actions/postManagementActions";
 import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
@@ -27,13 +26,10 @@ import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 
 // Other components
 import ImageUploader from "./ImageUploader";
-//import ThumbnailGenerator from "./ThumbnailGenerator";
-//import ImagePreview from "./ImagePreview";
 
 // validation schema
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
-  subcategory_id: Yup.string().required("This field is required"),
   //specializations: Yup.string().required("This field is required"),
   short_details: Yup.string()
     .min(2, "Description is too short")
@@ -58,11 +54,10 @@ const schema = Yup.object().shape({
 const sampleZincFormat =
   "Sample format: SAPH.TJO.19.05.0200 | Version 2.5 | 30 May 2019";
 
-const CreateArticleForm = ({
+const CreateProductForm = ({
   notifs,
   postManagement,
   fetchCategories,
-  fetchSubCategories,
   fetchSpecializations,
   createArticle,
   history,
@@ -70,7 +65,6 @@ const CreateArticleForm = ({
   ...props
 }) => {
   const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
   const [specializations, setSpecializations] = useState([]);
 
   const [mastheadImageInfo, setmastheadImageInfo] = useState("");
@@ -79,18 +73,13 @@ const CreateArticleForm = ({
 
   useEffect(() => {
     fetchCategories();
-    fetchSubCategories();
     fetchSpecializations();
-    //eslint-disable-next-line
   }, []);
 
   useEffect(() => {
     switch (notifs.id) {
       case "FETCH_SPECIALIZATIONS_SUCCESS":
         setSpecializations(postManagement.specializations);
-        break;
-      case "FETCH_SUBCATEGORIES_SUCCESS":
-        setSubCategories(postManagement.subCategories.results);
         break;
       case "FETCH_CATEGORIES_SUCCESS":
         setCategories(postManagement.categories.results);
@@ -132,7 +121,6 @@ const CreateArticleForm = ({
     action.setSubmitting(true);
     let formData = new FormData();
     formData.set("category_id", values.category_id);
-    formData.set("subcategory_id", values.subcategory_id);
     formData.set("other_tags", values.other_tags);
     values.specializations.length === 0
       ? formData.set("specializations", null)
@@ -175,13 +163,6 @@ const CreateArticleForm = ({
                   options={categories}
                   label="Category"
                   name="category_id"
-                  onChange={props.setFieldValue}
-                  isRequired={true}
-                />
-                <SelectFormField
-                  options={subCategories}
-                  label="Sub Category"
-                  name="subcategory_id"
                   onChange={props.setFieldValue}
                   isRequired={true}
                 />
@@ -296,8 +277,8 @@ const CreateArticleForm = ({
                       <ReactQuill
                         theme="snow"
                         placeholder="Write something..."
-                        modules={CreateArticleForm.modules}
-                        formats={CreateArticleForm.formats}
+                        modules={CreateProductForm.modules}
+                        formats={CreateProductForm.formats}
                         value={field.value}
                         onChange={field.onChange(field.name)}
                       />
@@ -310,9 +291,9 @@ const CreateArticleForm = ({
               </Col>
             </Row>
 
-            {/* <Row>
+            <Row>
               <DisplayFormikState {...props} />
-            </Row> */}
+            </Row>
 
             <div className="form-actions">
               <Button style={{ marginRight: 10 }}>
@@ -335,7 +316,7 @@ const CreateArticleForm = ({
   );
 };
 
-CreateArticleForm.modules = {
+CreateProductForm.modules = {
   toolbar: [
     [{ header: "1" }, { header: "2" }, { font: [] }],
     [{ size: [] }],
@@ -355,7 +336,7 @@ CreateArticleForm.modules = {
   }
 };
 
-CreateArticleForm.formats = [
+CreateProductForm.formats = [
   "header",
   "font",
   "size",
@@ -381,5 +362,5 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  { createArticle, fetchSpecializations, fetchCategories, fetchSubCategories }
-)(CreateArticleForm);
+  { createArticle, fetchSpecializations, fetchCategories }
+)(CreateProductForm);

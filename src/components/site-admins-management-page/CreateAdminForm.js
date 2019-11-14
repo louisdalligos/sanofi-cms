@@ -15,7 +15,6 @@ import { Link } from "react-router-dom";
 import { createAdmin } from "../../redux/actions/admin-actions/superAdminActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
-import Navbar from "../main-navigation/Navbar";
 import AdminRequestTable from "./AdminRequestTable";
 
 const { Option } = Select;
@@ -63,7 +62,6 @@ const CreateAdminForm = ({
 
   return (
     <Fragment>
-      <Navbar {...props} />
       <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
         <div className="page-breadcrumb">

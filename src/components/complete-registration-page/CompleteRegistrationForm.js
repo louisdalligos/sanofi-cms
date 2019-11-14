@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { connect } from "react-redux";
-import { Form, Input, Button, Layout, Row, Spin, message, Alert } from "antd";
+import { Form, Input, Button, Layout, Row, message, Alert } from "antd";
 import { useQuery } from "../../utils/helper";
 
 import {

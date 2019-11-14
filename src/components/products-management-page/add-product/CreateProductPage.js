@@ -2,15 +2,14 @@ import React, { Fragment, useEffect, useState } from "react";
 import { PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
-import CreateArticleForm from "./CreateArticleForm";
+import CreateProductForm from "./CreateProductForm";
 
-const pageTitle = "Create a new article";
+const pageTitle = "Create a new product";
 
 // Component
-const CreateArticlePage = ({ history, ...props }) => {
+const CreateProductPage = ({ history, ...props }) => {
   const [formData, setFormData] = useState({
     category_id: "",
-    subcategory_id: "",
     other_tags: [],
     specializations: [],
     headline: "",
@@ -27,7 +26,7 @@ const CreateArticlePage = ({ history, ...props }) => {
   });
 
   useEffect(() => {
-    console.log("article page mounted");
+    console.log("product page mounted");
   }, []);
 
   return (
@@ -38,19 +37,19 @@ const CreateArticlePage = ({ history, ...props }) => {
           <div>
             <Breadcrumb>
               <Breadcrumb.Item key="content">Content</Breadcrumb.Item>
-              <Breadcrumb.Item key="therapy-areas">
-                <Link to="/therapy-areas">Therapy Areas</Link>
+              <Breadcrumb.Item key="products">
+                <Link to="/products">Products</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item key="therapy-ares-create">
-                New Article
+              <Breadcrumb.Item key="products-create">
+                New Product
               </Breadcrumb.Item>
             </Breadcrumb>
           </div>
         </div>
 
-        <CreateArticleForm data={formData} history={history} />
+        <CreateProductForm data={formData} history={history} />
       </div>
     </Fragment>
   );
 };
-export default CreateArticlePage;
+export default CreateProductPage;

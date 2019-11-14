@@ -1,6 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Button, Table, Pagination, message, Form, Input } from "antd";
-import PropTypes from "prop-types";
+import { Button, Table, Pagination, message, Form } from "antd";
 import { connect } from "react-redux";
 import { fetchInvitedSiteUsers } from "../../redux/actions/admin-actions/superAdminActions";
 
@@ -52,10 +51,10 @@ const InvitedDoctorsTable = ({ fetchInvitedSiteUsers, superadmin, auth }) => {
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(null);
-  const [disabled, setDisabled] = useState(false);
 
   useEffect(() => {
     fetch(); // fetch initial
+    //eslint-disable-next-line
   }, []);
 
   const fetch = (params = {}) => {
@@ -77,6 +76,7 @@ const InvitedDoctorsTable = ({ fetchInvitedSiteUsers, superadmin, auth }) => {
         setData(response.data.results);
       })
       .catch(err => {
+        setLoading(false);
         console.log(err);
       });
   };
@@ -130,6 +130,7 @@ const InvitedDoctorsTable = ({ fetchInvitedSiteUsers, superadmin, auth }) => {
         dataSource={data}
         loading={loading}
         pagination={false}
+        locale={{ emptyText: "No result found" }}
         size="small"
       />
 

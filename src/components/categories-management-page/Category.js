@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Row, Button, Spin, Modal, Input, message } from "antd";
+import { Row, Button, Spin, Modal, message } from "antd";
 import { useDrop } from "react-dnd";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -43,6 +43,7 @@ const Category = ({
 
   useEffect(() => {
     fetchCategories();
+    //eslint-disable-next-line
   }, []);
 
   useEffect(() => {

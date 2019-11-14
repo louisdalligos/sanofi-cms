@@ -8,51 +8,43 @@ import {
   Modal,
   Tooltip,
   Pagination,
-  Tag
+  Tag,
+  Switch
 } from "antd";
 import { Link } from "react-router-dom";
 
 import axios from "axios";
 import { API } from "../../utils/api";
 
-// redux actions import
-import {
-  archiveArticle,
-  changeArticleStatus
-} from "../../redux/actions/post-management-actions/postManagementActions";
+//import { archiveProduct, changeProductStatus} from "../../redux/actions/products-actions/productManagementActions"
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 // Table components
-import TherapyAreasTableFilter from "./TherapyAreasTableFilter";
+import ProductsTableFilter from "./ProductsTableFilter";
 import PageBreadcrumb from "./PageBreadcrumb";
 
 const { confirm } = Modal;
 
-const TherapyAreasTable = ({
+const ProductsTable = ({
   notifs,
   clearNotifications,
-  postManagement,
-  archiveArticle,
-  changeArticleStatus,
+  //archiveProduct,
+  //changeProductStatus,
   auth
 }) => {
   const columns = [
-    // {
-    //     title: "Featured",
-    //     dataIndex: "featured",
-    //     rowKey: "id",
-    //     render: (text, record) => (
-    //         <Tooltip placement="top" title="Featured article">
-    //             <Icon type="star" />
-    //         </Tooltip>
-    //     )
-    // },
+    {
+      title: "New",
+      dataIndex: "new",
+      rowKey: "id",
+      render: (text, record) => <Switch />
+    },
     {
       title: "Status",
       dataIndex: "status",
       rowKey: "id",
       sorter: true,
-      width: 95,
+      width: 90,
       render: (text, record) => (
         <Tag
           color={
@@ -75,9 +67,9 @@ const TherapyAreasTable = ({
       rowKey: "id",
       width: 50,
       render: (text, record) => (
-        <Tooltip placement="top" title="Edit article">
-          <Button type="link" onClick={e => handleSelectArticle(record.id, e)}>
-            <Link to={`/therapy-areas/${record.id}`}>
+        <Tooltip placement="top" title="Edit product">
+          <Button type="link" onClick={e => handleSelectProduct(record.id, e)}>
+            <Link to={`/products/${record.id}`}>
               <Icon type="form" />
             </Link>
           </Button>
@@ -85,24 +77,28 @@ const TherapyAreasTable = ({
       )
     },
     {
-      title: "Page Title",
-      dataIndex: "page_title",
+      title: "Product Name/Description",
+      dataIndex: "product_name",
       rowKey: "id",
       sorter: true,
       render: (text, record) => (
-        <Button type="link" onClick={e => handleSelectArticle(record.id, e)}>
-          <Link to={`/therapy-areas/${record.id}`}>{text}</Link>
-        </Button>
-      )
-    },
-    {
-      title: "Thumbnail Image",
-      dataIndex: "thumbnail_image",
-      rowKey: "id",
-      width: 150,
-      render: (text, record) => (
-        // <img src={record.thumbnail_image} width="100" alt="" />
-        <img src={record.thumbnail_image} alt="" width="70" />
+        <div className="table-title-featured-wrap">
+          {/* <img src={record.thumbnail_image} alt="" width="70" /> */}
+          <img
+            src="https://picsum.photos/id/392/200/200"
+            alt={text}
+            className="table-list-thumbnail-image"
+          />
+          <div>
+            <Button
+              type="link"
+              onClick={e => handleSelectProduct(record.id, e)}
+            >
+              <Link to={`/products/${record.id}`}>{text}</Link>
+            </Button>
+            <small>Lorem ipsum dolor</small>
+          </div>
+        </div>
       )
     },
     {
@@ -124,26 +120,35 @@ const TherapyAreasTable = ({
       sorter: true
     },
     {
-      title: "Archive",
+      title: "Actions",
       rowKey: "id",
       render: (text, record) => (
-        <Tooltip placement="right" title="Archive this article">
+        <Tooltip placement="right" title="Archive this product">
           <Button type="danger" onClick={e => showArchiveConfirm(record.id, e)}>
-            <Icon type="file-exclamation" />
+            <Icon type="delete" />
           </Button>
         </Tooltip>
       )
     }
   ];
 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([
+    {
+      id: "1",
+      status: "unpublished",
+      product_name: "Product 101",
+      zinc_code: "12343434565",
+      published_at: "11-10-2019",
+      created_at: "11-11-2019"
+    }
+  ]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
 
   useEffect(() => {
-    fetch(); // fetch initial
+    fetch(); // fetch initial list of products
     //eslint-disable-next-line
   }, []);
 
@@ -151,7 +156,7 @@ const TherapyAreasTable = ({
   const fetch = (params = {}) => {
     setLoading(true);
     axios({
-      url: `${API}/therapy-areas`,
+      url: `${API}/products`,
       method: "get",
       headers: {
         Accept: "application/json",
@@ -163,7 +168,7 @@ const TherapyAreasTable = ({
       .then(response => {
         setTotal(response.data.info ? response.data.info.total_count : null); // get total count from server and set to state
         setLoading(false);
-        setData(response.data.results);
+        //setData(response.data.results);
       })
       .catch(err => {
         setLoading(false);
@@ -179,7 +184,7 @@ const TherapyAreasTable = ({
   const filterFetch = (params = {}) => {
     setLoading(true);
     axios({
-      url: `${API}/therapy-areas`,
+      url: `${API}/products`,
       method: "get",
       headers: {
         Accept: "application/json",
@@ -240,12 +245,12 @@ const TherapyAreasTable = ({
     e.stopPropagation();
 
     confirm({
-      title: "Are you sure you want to archive this article?",
+      title: "Are you sure you want to archive this product?",
       okText: "Yes",
       okType: "primary",
       cancelText: "No",
       onOk() {
-        archiveArticle(id);
+        //archiveProduct(id);
       },
       onCancel() {
         console.log("Cancel");
@@ -253,10 +258,9 @@ const TherapyAreasTable = ({
     });
   }
 
-  function handleSelectArticle(id, e) {
+  function handleSelectProduct(id, e) {
     e.stopPropagation();
     console.log(id);
-    //fetchCurrentAdmin(id);
   }
 
   function itemRender(current, type, originalElement) {
@@ -283,7 +287,7 @@ const TherapyAreasTable = ({
 
   // handle table sort
   const handleTableChange = (pagination, filters, sorter) => {
-    console.log(filters);
+    console.log("Various parameters", pagination, filters, sorter);
 
     const obj = {
       order_by_field: sorter.field,
@@ -298,7 +302,7 @@ const TherapyAreasTable = ({
       <PageBreadcrumb />
 
       {/* filters */}
-      <TherapyAreasTableFilter filterFetch={filterFetch} />
+      <ProductsTableFilter filterFetch={filterFetch} />
 
       <Table
         columns={columns}
@@ -337,16 +341,15 @@ const TherapyAreasTable = ({
 const mapStateToProps = state => {
   return {
     auth: state.authReducer,
-    notifs: state.notificationReducer,
-    postManagement: state.postManagementReducer
+    notifs: state.notificationReducer
   };
 };
 
 export default connect(
   mapStateToProps,
   {
-    clearNotifications,
-    archiveArticle,
-    changeArticleStatus
+    clearNotifications
+    //archiveProduct,
+    //changeProductStatus
   }
-)(TherapyAreasTable);
+)(ProductsTable);

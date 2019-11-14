@@ -244,7 +244,7 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
         onClick={handleUpload}
         disabled={uploadedFileList.length === 0}
         loading={uploading}
-        style={{ marginTop: 16, marginBottom: 20 }}
+        style={{ marginTop: 16 }}
       >
         {uploading ? "Generating thumbnails" : "Generate thumbnails"}
       </Button>

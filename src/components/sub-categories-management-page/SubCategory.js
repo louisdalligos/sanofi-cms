@@ -43,6 +43,7 @@ const SubCategory = ({
 
   useEffect(() => {
     fetchSubCategories();
+    //eslint-disable-next-line
   }, []);
 
   useEffect(() => {

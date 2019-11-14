@@ -1,11 +1,9 @@
 import React, { Fragment } from "react";
-import { Layout, PageHeader, Tabs, Row, Col } from "antd";
+import { PageHeader, Tabs, Row, Col } from "antd";
 
-import Navbar from "../main-navigation/Navbar";
 import WrappedUserInfoForm from "./UserInfoForm";
 import WrappedChangePasswordForm from "./ChangePasswordForm";
 
-const { Content } = Layout;
 const { TabPane } = Tabs;
 
 const ProfileManagement = props => {
@@ -13,8 +11,6 @@ const ProfileManagement = props => {
 
   return (
     <Fragment>
-      <Navbar {...props} />
-
       <div className="box-layout-custom">
         <PageHeader title={pageTitle} />
 

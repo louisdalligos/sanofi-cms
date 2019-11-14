@@ -3,15 +3,10 @@ import { connect } from "react-redux";
 import {
   Button,
   Icon,
-  Row,
   Table,
   message,
-  Select,
-  Form,
-  Input,
   Modal,
   Tooltip,
-  Breadcrumb,
   Pagination,
   Tag
 } from "antd";
@@ -29,9 +24,11 @@ import {
 } from "../../redux/actions/admin-actions/superAdminActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
+// Table components
+import AdminsTableFilter from "./AdminsTableFilter";
+import PageBreadcrumb from "./PageBreadcrumb";
+
 const { confirm } = Modal;
-const { Option } = Select;
-const Search = Input.Search;
 
 const AdminsTable = ({
   fetchCurrentAdmin,
@@ -67,32 +64,6 @@ const AdminsTable = ({
             {text}
           </Tag>
         </div>
-      )
-    },
-    {
-      title: "View",
-      rowKey: "id",
-      className: "status-column",
-      width: 50,
-      render: (text, record) => (
-        <Tooltip
-          placement="top"
-          title={
-            record.status === "pending"
-              ? "Account is still pending"
-              : "View/Update admin"
-          }
-        >
-          <Button
-            type="link"
-            onClick={e => handleSelectAdmin(record.id, e)}
-            disabled={record.status === "pending" ? true : null}
-          >
-            <Link to={`/admins/${record.id}`}>
-              <Icon type="eye" />
-            </Link>
-          </Button>
-        </Tooltip>
       )
     },
     {
@@ -138,6 +109,7 @@ const AdminsTable = ({
       title: "Actions",
       rowKey: "id",
       width: 120,
+      className: "table-action-column",
       render: (text, record) => (
         <div>
           {record.status === "deleted" ? (
@@ -154,7 +126,6 @@ const AdminsTable = ({
               <Button
                 type="danger"
                 onClick={e => showDeleteConfirm(record.id, e)}
-                style={{ marginRight: 10 }}
               >
                 <Icon type="delete" />
               </Button>
@@ -180,6 +151,7 @@ const AdminsTable = ({
 
   useEffect(() => {
     fetch(); // fetch initial - only applies on initial fetch of all results
+    //eslint-disable-next-line
   }, []);
 
   const fetch = (params = {}) => {
@@ -201,7 +173,12 @@ const AdminsTable = ({
         setData(response.data.results);
       })
       .catch(err => {
-        console.log(err);
+        setLoading(false);
+        message.error(
+          err && err.response.data.error
+            ? err.response.data.error
+            : "There was an error in processing your request"
+        );
       });
   };
 
@@ -220,7 +197,7 @@ const AdminsTable = ({
     })
       .then(response => {
         setLoading(false);
-        if (response.data.success == "No results found") {
+        if (response.data.success === "No results found") {
           setTotal(0);
           message.error("No results found");
         } else {
@@ -234,7 +211,12 @@ const AdminsTable = ({
         setData(response.data.results ? response.data.results : []);
       })
       .catch(err => {
-        console.log(err);
+        setLoading(false);
+        message.error(
+          err && err.response.data.error
+            ? err.response.data.error
+            : "There was an error in processing your request"
+        );
       });
   };
 
@@ -324,11 +306,6 @@ const AdminsTable = ({
     });
   }
 
-  function onSearch(e) {
-    let obj = { search: e };
-    filterFetch({ ...obj }); // call filter fetch method for diff set of total result count
-  }
-
   function handleSelectAdmin(id, e) {
     e.stopPropagation();
     fetchCurrentAdmin(id);
@@ -356,11 +333,6 @@ const AdminsTable = ({
     fetch({ ...obj });
   }
 
-  function onSelectChange(e) {
-    let obj = { accessed: e };
-    filterFetch({ ...obj }); // call filter fetch method for diff set of total result count
-  }
-
   // handle table sort
   const handleTableChange = (pagination, filters, sorter) => {
     console.log(filters);
@@ -374,80 +346,42 @@ const AdminsTable = ({
 
   return (
     <Fragment>
-      <div className="page-breadcrumb">
-        <div>
-          <Breadcrumb>
-            <Breadcrumb.Item key="users">Users</Breadcrumb.Item>
-            <Breadcrumb.Item key="admins">
-              <Link to="/admins">Site admins</Link>
-            </Breadcrumb.Item>
-          </Breadcrumb>
-        </div>
+      {/* breadcrumbs */}
+      <PageBreadcrumb />
 
-        <div>
-          <Button type="primary">
-            <Link to="/admins/create">New Profile</Link>
-          </Button>
-        </div>
-      </div>
-      <Row>
-        <div className="filter-table-wrapper">
-          <Form layout="inline">
-            <Form.Item label="Accessed">
-              <Select
-                defaultValue="anytime"
-                style={{ width: 200 }}
-                onChange={onSelectChange}
-              >
-                <Option value="anytime">Anytime</Option>
-                <Option value="today">Today</Option>
-                <Option value="within_seven_days">Within 7 days</Option>
-                <Option value="within_thirty_days">Within 30 days</Option>
-                <Option value="not_within_365_days">Not within 365 days</Option>
-              </Select>
-            </Form.Item>
+      {/* filters */}
+      <AdminsTableFilter filterFetch={filterFetch} />
 
-            <Form.Item>
-              <Search
-                placeholder="Name, Email, Department..."
-                onSearch={onSearch}
-                style={{ width: 250 }}
-              />
-            </Form.Item>
-          </Form>
-        </div>
-      </Row>
-      <Row>
-        <Table
-          columns={columns}
-          rowKey={record => record.id}
-          dataSource={data}
-          loading={loading}
-          pagination={false}
-          onChange={handleTableChange}
+      <Table
+        columns={columns}
+        rowKey={record => record.id}
+        dataSource={data}
+        loading={loading}
+        pagination={false}
+        onChange={handleTableChange}
+        size="small"
+        locale={{ emptyText: "No result found" }}
+        scroll={{ x: 1100 }}
+      />
+
+      {!loading ? (
+        <Pagination
+          showQuickJumper
+          showSizeChanger
+          pageSizeOptions={["10", "25", "50", "100"]}
+          total={total}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
+          pageSize={pageSize}
+          defaultCurrent={pageNumber}
+          itemRender={itemRender}
+          onChange={onPagerChange}
+          onShowSizeChange={onPageSizeChange}
           size="small"
-          locale={{ emptyText: "No result found" }}
+          className="table-pagination-custom"
         />
-
-        {!loading ? (
-          <Pagination
-            showQuickJumper
-            showSizeChanger
-            pageSizeOptions={["10", "25", "50", "100"]}
-            total={total}
-            showTotal={(total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`
-            }
-            pageSize={pageSize}
-            defaultCurrent={pageNumber}
-            itemRender={itemRender}
-            onChange={onPagerChange}
-            onShowSizeChange={onPageSizeChange}
-            size="small"
-            className="table-pagination-custom"
-          />
-        ) : null}
-      </Row>
+      ) : null}
     </Fragment>
   );
 };

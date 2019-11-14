@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { Formik, Field, Form, useFormikContext } from "formik";
-import { Button, Row, Col, message, Icon, Upload, Spin } from "antd";
+import { Formik, Field, Form } from "formik";
+import { Button, Row, Col, message, Icon, Spin, Tooltip } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
-import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
@@ -24,6 +24,7 @@ import TextFormField from "../../smart-form/TextFormField";
 import SelectFormField from "../../smart-form/SelectFormField";
 import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
+import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 
 // Other components
 import ImageUploader from "./ImageUploader";
@@ -41,9 +42,7 @@ const schema = Yup.object().shape({
     .min(2, "Title is too short")
     .max(150, "Headline is too long")
     .required("This field is required"),
-  zinc_code: Yup.number()
-    .positive("Positive numbers only")
-    .required("This field is required"),
+  zinc_code: Yup.string().required("This field is required"),
   page_title: Yup.string()
     .min(2, "Title is too short")
     .max(60, "Page title is too long")
@@ -53,6 +52,10 @@ const schema = Yup.object().shape({
     .required("This field is required"),
   body: Yup.string().required("This field is required")
 });
+
+// sample format tooltip text
+const sampleZincFormat =
+  "Sample format: SAPH.TJO.19.05.0200 | Version 2.5 | 30 May 2019";
 
 const UpdateArticleForm = ({
   notifs,
@@ -94,13 +97,8 @@ const UpdateArticleForm = ({
   const [masthead, setMasthead] = useState("");
   const [featured, setFeatured] = useState("");
   const [thumbnail, setThumbnail] = useState("");
-  const [disabled, setDisabled] = useState(true);
 
-  const [statusOptions, setStatusOptions] = useState([
-    { id: "unpublished", name: "unpublished" },
-    { id: "published", name: "published" },
-    { id: "archived", name: "archived" }
-  ]);
+  const [statusOptions, setStatusOptions] = useState([]);
 
   const [isDisabled, setIsDisabled] = useState(true);
 
@@ -111,10 +109,17 @@ const UpdateArticleForm = ({
     fetchSubCategories();
     fetchSpecializations();
 
+    setStatusOptions([
+      { id: "unpublished", name: "unpublished" },
+      { id: "published", name: "published" },
+      { id: "archived", name: "archived" }
+    ]);
+
     return () => {
       //alert("Unmount update");
       //setLoading(false);
     };
+    //eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -148,8 +153,6 @@ const UpdateArticleForm = ({
       setFeatured(currentArticle.featured_image);
       setThumbnail(currentArticle.thumbnail_image);
       setLoading(false);
-
-      console.log(selectedSpecializations, "SELCTED");
     }
   }, [currentArticle, setLoading, setSelectedSpecializations, setOtherTags]);
 
@@ -216,26 +219,27 @@ const UpdateArticleForm = ({
 
     let formData = new FormData();
 
-    formData.set("category_id", values.category_id);
-    formData.set("subcategory_id", values.subcategory_id);
-    formData.set("other_tags", values.other_tags);
+    formData.append("category_id", values.category_id);
+    formData.append("subcategory_id", values.subcategory_id);
+    formData.append("other_tags", values.other_tags);
     values.specializations.length === 0
-      ? formData.set("specializations", null)
-      : formData.set("specializations", values.specializations);
-    formData.set("headline", values.headline);
-    formData.set("short_details", values.short_details);
-    formData.set("zinc_code", values.zinc_code);
-    formData.set("page_title", values.page_title);
-    formData.set("meta_description", values.meta_description);
-    formData.set("page_slug", values.page_slug);
-    formData.set("meta_keywords", values.meta_keywords);
-    formData.set("body", values.body);
+      ? formData.append("specializations", null)
+      : formData.append("specializations", values.specializations);
+    formData.append("headline", values.headline);
+    formData.append("short_details", values.short_details);
+    formData.append("zinc_code", values.zinc_code);
+    formData.append("page_title", values.page_title);
+    formData.append("meta_description", values.meta_description);
+    formData.append("page_slug", values.page_slug);
+    formData.append("meta_keywords", values.meta_keywords);
+    formData.append("body", values.body);
+    formData.append("_method", "PUT");
 
     // if theres an uploaded image include these field on our form data
     if (mastheadImageInfo) {
-      formData.set("masthead", mastheadImageInfo);
-      formData.set("featured", featuredImageInfo);
-      formData.set("thumbnail", thumbnailImageInfo);
+      formData.append("masthead", mastheadImageInfo);
+      formData.append("featured", featuredImageInfo);
+      formData.append("thumbnail", thumbnailImageInfo);
     }
 
     updateArticle(currentArticle.id, formData);
@@ -279,8 +283,8 @@ const UpdateArticleForm = ({
       >
         {props => (
           <Form className="therapy-article-form">
-            <Row className="article-status-row">
-              <Col span={12} style={{ display: "flex" }}>
+            <Row gutter={24} className="article-status-row">
+              <Col xs={24} md={16} style={{ display: "flex" }}>
                 <SelectFormField
                   options={statusOptions}
                   label="Current status: "
@@ -323,7 +327,7 @@ const UpdateArticleForm = ({
                   </div>
                 )}
               </Col>
-              <Col span={4} style={{ float: "right" }}>
+              <Col xs={24} md={8} style={{ float: "right" }}>
                 {/* <div>
                                     <Button style={{ marginRight: 10 }}>
                                         <Link to="/therapy-areas">Cancel</Link>
@@ -342,9 +346,9 @@ const UpdateArticleForm = ({
                                 </div> */}
               </Col>
             </Row>
-            <Row gutter={16} className="form-section">
+            <Row gutter={24} className="form-section">
               <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
-              <Col span={8}>
+              <Col xs={24} md={8}>
                 <SelectFormField
                   options={categories}
                   label="Category"
@@ -366,7 +370,7 @@ const UpdateArticleForm = ({
                   onChange={props.setFieldValue}
                 />
               </Col>
-              <Col span={8}>
+              <Col xs={24} md={8}>
                 <SelectTagsFormField
                   options={specializations}
                   label="Specializations"
@@ -376,7 +380,7 @@ const UpdateArticleForm = ({
                   placeholder="Please select a specialization"
                 />
               </Col>
-              <Col span={8}>
+              <Col xs={24} md={8}>
                 <TextFormField
                   name="short_details"
                   type="text"
@@ -391,19 +395,28 @@ const UpdateArticleForm = ({
                   isRequired={true}
                   placeholder="Enter a headline"
                 />
-                <TextFormField
+                <ZincCodeFormField
+                  className="zinc-code-field"
                   name="zinc_code"
                   type="text"
-                  label="Zinc Code"
+                  onChange={props.setFieldValue}
+                  label={
+                    <div>
+                      <span>Zinc Code </span>{" "}
+                      <Tooltip placement="top" title={sampleZincFormat}>
+                        <Icon type="info-circle" style={{ color: "#1890ff" }} />
+                      </Tooltip>
+                    </div>
+                  }
                   isRequired={true}
                   placeholder="Enter a zinc code"
                 />
               </Col>
             </Row>
 
-            <Row gutter={16} className="form-section">
+            <Row gutter={24} className="form-section">
               <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
-              <Col span={12}>
+              <Col xs={24} md={12}>
                 <TextFormField
                   name="page_title"
                   type="text"
@@ -420,7 +433,7 @@ const UpdateArticleForm = ({
                 />
               </Col>
 
-              <Col span={12}>
+              <Col xs={24} md={12}>
                 <TextFormField
                   name="page_slug"
                   type="text"
@@ -437,12 +450,12 @@ const UpdateArticleForm = ({
             </Row>
 
             {/* 3nd row */}
-            <Row gutter={16} className="form-section last">
-              <Col span={8}>
+            <Row gutter={24} className="form-section last">
+              <Col xs={24} md={8}>
                 <h3>Feature Image</h3>
                 <ImageUploader getImage={getImage} />
               </Col>
-              <Col span={16}>
+              <Col xs={24} md={16}>
                 <h3>Article Body</h3>
                 <Field name="body">
                   {({ field, form: { touched, errors }, meta }) => (
