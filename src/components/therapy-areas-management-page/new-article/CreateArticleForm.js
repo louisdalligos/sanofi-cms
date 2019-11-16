@@ -165,6 +165,8 @@ const CreateArticleForm = ({
         initialValues={data}
         onSubmit={submitForm}
         validationSchema={schema}
+        validateOnChange={false}
+        validateOnBlur={false}
       >
         {props => (
           <Form className="therapy-article-form">
