@@ -54,20 +54,25 @@ const TherapyAreasTable = ({
       sorter: true,
       width: 95,
       render: (text, record) => (
-        <Tag
-          color={
-            record.status === "published"
-              ? "green"
-              : record.status === "archived"
-              ? "volcano"
-              : record.status === "unpublished"
-              ? "geekblue"
-              : "blue"
-          }
-          key={record.id}
-        >
-          {text}
-        </Tag>
+        <Fragment>
+          <Tag
+            color={
+              record.status === "published"
+                ? "green"
+                : record.status === "archived"
+                ? "volcano"
+                : record.status === "unpublished"
+                ? "geekblue"
+                : "blue"
+            }
+            key={record.id}
+          >
+            {text}
+          </Tag>
+          <small style={{ display: "block" }}>
+            {record.deleted_at ? record.deleted_at : null}
+          </small>
+        </Fragment>
       )
     },
     {
