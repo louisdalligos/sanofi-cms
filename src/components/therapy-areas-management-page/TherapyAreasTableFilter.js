@@ -22,6 +22,8 @@ const TherapyAreasTableFilter = ({
   clearNotifications,
   ...props
 }) => {
+  const { getFieldDecorator } = props.form;
+
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [status, setStatus] = useState([
@@ -90,10 +92,8 @@ const TherapyAreasTableFilter = ({
 
   // Reset function
   const handleResetFilters = () => {
-    // let obj = { categories: "", status: "", specializations: "" };
-    // filterFetch({ ...obj });
-
-    onFilterCategory("");
+    props.fetch();
+    props.form.resetFields();
   };
 
   return (
@@ -105,84 +105,92 @@ const TherapyAreasTableFilter = ({
               <Col xs={24} md={1}>
                 <Form.Item label="Show" />
               </Col>
-              <Col xs={24} md={3}>
+              <Col xs={24} md={4}>
                 <Form.Item label="">
-                  <Select
-                    defaultValue="All status"
-                    placeholder="Select a status"
-                    onChange={onFilterStatus}
-                  >
-                    <Option value="">All status</Option>
-                    {status
-                      ? status.map(s => (
-                          <Option key={s} value={s}>
-                            {s}
-                          </Option>
-                        ))
-                      : "No results found"}
-                  </Select>
+                  {getFieldDecorator("filter_status", {})(
+                    <Select
+                      placeholder="Select a status"
+                      onChange={onFilterStatus}
+                    >
+                      {status
+                        ? status.map(s => (
+                            <Option key={s} value={s}>
+                              {s}
+                            </Option>
+                          ))
+                        : "No results found"}
+                    </Select>
+                  )}
                 </Form.Item>
               </Col>
               <Col xs={24} md={4}>
                 <Form.Item label="">
-                  <Select
-                    defaultValue="All specializations"
-                    placeholder="Select a specialization"
-                    onChange={onFilterSpecialization}
-                  >
-                    <Option value="">All specializations</Option>
-                    {specializations
-                      ? specializations.map(c => (
-                          <Option key={c.id} value={c.title}>
-                            {c.title}
-                          </Option>
-                        ))
-                      : "No results found"}
-                  </Select>
+                  {getFieldDecorator("filter_specialization", {})(
+                    <Select
+                      defaultValue="All specializations"
+                      placeholder="Select a specialization"
+                      onChange={onFilterSpecialization}
+                    >
+                      <Option value="">All specializations</Option>
+                      {specializations
+                        ? specializations.map(c => (
+                            <Option key={c.id} value={c.title}>
+                              {c.title}
+                            </Option>
+                          ))
+                        : "No results found"}
+                    </Select>
+                  )}
                 </Form.Item>
               </Col>
               <Col xs={24} md={4}>
                 <Form.Item label="">
-                  <Select
-                    defaultValue="All category"
-                    placeholder="Select a category"
-                    onChange={onFilterCategory}
-                  >
-                    <Option value="">All category</Option>
-                    {categories
-                      ? categories.map(c => (
-                          <Option key={c.id} value={c.id}>
-                            {c.name}
-                          </Option>
-                        ))
-                      : "No results found"}
-                  </Select>
+                  {getFieldDecorator("filter_category", {})(
+                    <Select
+                      defaultValue="All category"
+                      placeholder="Select a category"
+                      onChange={onFilterCategory}
+                    >
+                      <Option value="">All category</Option>
+                      {categories
+                        ? categories.map(c => (
+                            <Option key={c.id} value={c.id}>
+                              {c.name}
+                            </Option>
+                          ))
+                        : "No results found"}
+                    </Select>
+                  )}
                 </Form.Item>
               </Col>
               <Col xs={24} md={4}>
                 <Form.Item label="">
-                  <Select
-                    defaultValue="All subcategory"
-                    placeholder="Select a category"
-                    onChange={onFilterSubCategory}
-                  >
-                    <Option value="">All subcategory</Option>
-                    {subCategories
-                      ? subCategories.map(c => (
-                          <Option key={c.id} value={c.id}>
-                            {c.name}
-                          </Option>
-                        ))
-                      : "No results found"}
-                  </Select>
+                  {getFieldDecorator("filter_subCategory", {})(
+                    <Select
+                      defaultValue="All subcategory"
+                      placeholder="Select a category"
+                      onChange={onFilterSubCategory}
+                    >
+                      <Option value="">All subcategory</Option>
+                      {subCategories
+                        ? subCategories.map(c => (
+                            <Option key={c.id} value={c.id}>
+                              {c.name}
+                            </Option>
+                          ))
+                        : "No results found"}
+                    </Select>
+                  )}
                 </Form.Item>
               </Col>
               <Col xs={24} md={5}>
                 <Form.Item>
-                  <Search placeholder="title, tag..." onSearch={onSearch} />
+                  {getFieldDecorator("filter_search", {})(
+                    <Search placeholder="title, tag..." onSearch={onSearch} />
+                  )}
                 </Form.Item>
               </Col>
-              <Col xs={24} md={2}>
+              <Col xs={24} md={1}>
                 <Form.Item label="">
                   <Button
                     type="primary"
@@ -201,6 +209,10 @@ const TherapyAreasTableFilter = ({
   );
 };
 
+const WrappedTherapyAreasTableFilter = Form.create({ name: "therapy_filter" })(
+  TherapyAreasTableFilter
+);
+
 const mapStateToProps = state => {
   return {
     notifs: state.notificationReducer,
@@ -216,4 +228,4 @@ export default connect(
     fetchCategories,
     fetchSubCategories
   }
-)(TherapyAreasTableFilter);
+)(WrappedTherapyAreasTableFilter);

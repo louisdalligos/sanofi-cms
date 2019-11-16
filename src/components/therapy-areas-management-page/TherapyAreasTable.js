@@ -23,7 +23,7 @@ import {
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 // Table components
-import TherapyAreasTableFilter from "./TherapyAreasTableFilter";
+import WrappedTherapyAreasTableFilter from "./TherapyAreasTableFilter";
 import PageBreadcrumb from "./PageBreadcrumb";
 
 const { confirm } = Modal;
@@ -303,7 +303,7 @@ const TherapyAreasTable = ({
       <PageBreadcrumb />
 
       {/* filters */}
-      <TherapyAreasTableFilter filterFetch={filterFetch} />
+      <WrappedTherapyAreasTableFilter filterFetch={filterFetch} fetch={fetch} />
 
       <Table
         columns={columns}

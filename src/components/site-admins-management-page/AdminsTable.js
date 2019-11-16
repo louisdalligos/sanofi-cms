@@ -337,7 +337,7 @@ const AdminsTable = ({
       <PageBreadcrumb />
 
       {/* filters */}
-      <WrappedAdminsTableFilter filterFetch={filterFetch} />
+      <WrappedAdminsTableFilter filterFetch={filterFetch} fetch={fetch} />
 
       <Table
         columns={columns}

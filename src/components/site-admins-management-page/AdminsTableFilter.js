@@ -38,8 +38,7 @@ const AdminsTableFilter = ({ ...props }) => {
 
   // Reset function
   const handleResetFilters = () => {
-    let obj = { status: "", specializations: "" };
-    props.filterFetch({ ...obj });
+    props.fetch();
     props.form.resetFields();
   };
 

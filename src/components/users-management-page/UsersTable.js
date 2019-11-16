@@ -375,7 +375,7 @@ const UsersTable = ({
       <PageBreadcrumb />
 
       {/* filters */}
-      <WrappedUsersTableFilter filterFetch={filterFetch} />
+      <WrappedUsersTableFilter filterFetch={filterFetch} fetch={fetch} />
 
       <Table
         columns={columns}

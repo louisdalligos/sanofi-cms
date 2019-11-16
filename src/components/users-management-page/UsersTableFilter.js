@@ -70,8 +70,7 @@ const UsersTableFilter = ({
 
   // Reset function
   const handleResetFilters = () => {
-    let obj = { categories: "", status: "", specializations: "" };
-    props.filterFetch({ ...obj });
+    props.fetch();
     props.form.resetFields();
   };
 
