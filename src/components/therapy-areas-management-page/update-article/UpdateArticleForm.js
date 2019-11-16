@@ -302,7 +302,7 @@ const UpdateArticleForm = ({
                         handleChangeStatus(props.values.status);
                       }}
                     >
-                      Save
+                      Apply
                     </Button>
                     <Button
                       size="small"
