@@ -28,6 +28,8 @@ import { clearNotifications } from "../../redux/actions/notification-actions/not
 // Table components
 import UsersTableFilter from "./UsersTableFilter";
 import PageBreadcrumb from "./PageBreadCrumb";
+import { TableAction } from "./TableAction";
+import { RecordStatus } from "./RecordStatus";
 
 const { confirm } = Modal;
 
@@ -50,20 +52,7 @@ const UsersTable = ({
       width: 80,
       sorter: true,
       render: (text, record) => (
-        <Tag
-          color={
-            record.status === "active"
-              ? "green"
-              : record.status === "deleted"
-              ? "volcano"
-              : record.status === "pending"
-              ? "geekblue"
-              : "blue"
-          }
-          key={record.id}
-        >
-          {text}
-        </Tag>
+        <RecordStatus id={record.id} status={record.status} label={text} />
       )
     },
     {
@@ -120,58 +109,32 @@ const UsersTable = ({
     {
       title: "Action",
       rowKey: "id",
-      width: 120,
+      width: 160,
       className: "table-action-column",
       render: (text, record) => (
         <Fragment>
-          <Tooltip
-            placement="right"
-            title={
-              record.status === "pending"
-                ? "Account is still pending"
-                : record.status === "deleted"
-                ? "Account has been deleted"
-                : "Delete this user?"
-            }
-          >
-            <Button
-              type="danger"
-              onClick={e => showDeleteConfirm(record.id, e)}
-              disabled={
-                record.status === "pending" || record.status === "deleted"
-                  ? true
-                  : null
-              }
-            >
-              <Icon type="delete" />
-            </Button>
-          </Tooltip>
-          <Tooltip
-            placement="right"
-            title={
-              record.status === "pending"
-                ? "Account is still pending"
-                : record.status === "deleted"
-                ? "Account has been deleted"
-                : record.status === "locked"
-                ? "Account is blocked"
-                : "Block this user?"
-            }
-          >
-            <Button
-              type="danger"
-              onClick={e => showBlockConfirm(record.id, e)}
-              disabled={
-                record.status === "pending" ||
-                record.status === "deleted" ||
-                record.status === "locked"
-                  ? true
-                  : null
-              }
-            >
-              <Icon type="close-circle" />
-            </Button>
-          </Tooltip>
+          <TableAction
+            title="Delete user?"
+            iconType="delete"
+            recordId={record.id}
+            handleTableAction={showDeleteConfirm}
+          />
+          {record.status === "blocked" ? (
+            <TableAction
+              title="Unblock user?"
+              buttonType="primary"
+              iconType="unlock"
+              recordId={record.id}
+              handleTableAction={showUnBlockConfirm}
+            />
+          ) : (
+            <TableAction
+              title="Block user?"
+              iconType="cross"
+              recordId={record.id}
+              handleTableAction={showBlockConfirm}
+            />
+          )}
         </Fragment>
       )
     }
@@ -324,6 +287,24 @@ const UsersTable = ({
     });
   }
 
+  function showUnBlockConfirm(id, e) {
+    e.stopPropagation();
+
+    confirm({
+      title: "Are you sure you want to unblock this user?",
+      okText: "Yes",
+      okType: "primary",
+      cancelText: "No",
+      onOk() {
+        console.log("OK deleted", id);
+        unlockUser(id);
+      },
+      onCancel() {
+        console.log("Cancel");
+      }
+    });
+  }
+
   function showDeleteConfirm(id, e) {
     e.stopPropagation();
 
@@ -414,7 +395,7 @@ const UsersTable = ({
         onChange={handleTableChange}
         size="small"
         locale={{ emptyText: "No result found" }}
-        scroll={{ x: 1100 }}
+        scroll={{ x: 1300 }}
       />
 
       {!loading ? (

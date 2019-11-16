@@ -19,7 +19,7 @@ const UsersTableFilter = ({
   const [status, setStatus] = useState([
     "active",
     "pending",
-    "locked",
+    "blocked",
     "deleted"
   ]);
   const [specializations, setSpecializations] = useState([]);
