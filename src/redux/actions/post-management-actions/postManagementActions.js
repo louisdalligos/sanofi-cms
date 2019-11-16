@@ -199,7 +199,7 @@ export function addSubCategory(values) {
       });
       dispatch(
         returnNotifications(
-          err.data,
+          err.response.data,
           "success",
           err.status,
           "ADD_SUBCATEGORY_FAILED"

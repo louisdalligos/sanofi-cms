@@ -51,6 +51,11 @@ const SubCategory = ({
       case "FETCH_SUBCATEGORIES_SUCCESS":
         setCards(postManagement.subCategories.results);
         break;
+      case "ADD_SUBCATEGORY_FAILED":
+        message.error(
+          notification.notifications ? notification.notifications.error : null
+        );
+        break;
       case "ADD_SUBCATEGORY_SUCCESS":
         message.success(
           notification.notifications ? notification.notifications.success : null
@@ -62,7 +67,7 @@ const SubCategory = ({
         return;
     }
     // eslint-disable-next-line
-  }, [notification.id]);
+  }, [notification.id, notification.notifications]);
 
   const moveCard = (id, atIndex) => {
     const { card, index } = findCard(id);
@@ -156,7 +161,7 @@ const SubCategory = ({
             onSubmit={(values, { resetForm }) => {
               console.log(values);
               addSubCategory(values);
-              resetForm();
+              //resetForm();
             }}
           >
             {({ errors, touched }) => (
