@@ -25,8 +25,10 @@ import {
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 // Table components
-import AdminsTableFilter from "./AdminsTableFilter";
+import WrappedAdminsTableFilter from "./AdminsTableFilter";
 import PageBreadcrumb from "./PageBreadcrumb";
+import { TableAction } from "../smart-table/TableAction";
+import { RecordStatus } from "../smart-table/RecordStatus";
 
 const { confirm } = Modal;
 
@@ -48,22 +50,7 @@ const AdminsTable = ({
       sorter: true,
       width: 80,
       render: (text, record) => (
-        <div>
-          <Tag
-            color={
-              record.status === "active"
-                ? "green"
-                : record.status === "deleted"
-                ? "volcano"
-                : record.status === "pending"
-                ? "geekblue"
-                : "black"
-            }
-            key={record.id}
-          >
-            {text}
-          </Tag>
-        </div>
+        <RecordStatus id={record.id} status={record.status} label={text} />
       )
     },
     {
@@ -111,34 +98,34 @@ const AdminsTable = ({
       width: 120,
       className: "table-action-column",
       render: (text, record) => (
-        <div>
+        <Fragment>
           {record.status === "deleted" ? (
-            <Tooltip placement="right" title="Undo archive this admin">
-              <Button
-                type="primary"
-                onClick={e => showUndoDeleteConfirm(record.id, e)}
-              >
-                <Icon type="undo" />
-              </Button>
-            </Tooltip>
+            <TableAction
+              title="Undo delete?"
+              buttonType="primary"
+              iconType="undo"
+              recordId={record.id}
+              handleTableAction={showUndoDeleteConfirm}
+            />
           ) : (
-            <Tooltip placement="right" title="Delete this admin">
-              <Button
-                type="danger"
-                onClick={e => showDeleteConfirm(record.id, e)}
-              >
-                <Icon type="delete" />
-              </Button>
-            </Tooltip>
+            <TableAction
+              title="Delete admin?"
+              iconType="delete"
+              recordId={record.id}
+              handleTableAction={showDeleteConfirm}
+            />
           )}
+
           {record.status === "locked" ? (
-            <Tooltip placement="right" title="Unlock this account">
-              <Button type="primary" onClick={e => unlockAdmin(record.id)}>
-                <Icon type="unlock" />
-              </Button>
-            </Tooltip>
+            <TableAction
+              title="Unlock account?"
+              buttonType="primary"
+              iconType="unlock"
+              recordId={record.id}
+              handleTableAction={showDeleteConfirm}
+            />
           ) : null}
-        </div>
+        </Fragment>
       )
     }
   ];
@@ -350,7 +337,7 @@ const AdminsTable = ({
       <PageBreadcrumb />
 
       {/* filters */}
-      <AdminsTableFilter filterFetch={filterFetch} />
+      <WrappedAdminsTableFilter filterFetch={filterFetch} />
 
       <Table
         columns={columns}

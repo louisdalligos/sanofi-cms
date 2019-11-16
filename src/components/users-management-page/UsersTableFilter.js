@@ -24,8 +24,11 @@ const UsersTableFilter = ({
   ]);
   const [specializations, setSpecializations] = useState([]);
 
+  const { getFieldDecorator } = props.form;
+
   useEffect(() => {
     fetchSpecializations();
+    console.log(props.resetFields);
     //eslint-disable-next-line
   }, []);
 
@@ -67,8 +70,9 @@ const UsersTableFilter = ({
 
   // Reset function
   const handleResetFilters = () => {
-    // let obj = { categories: "", status: "", specializations: "" };
-    // filterFetch({ ...obj });
+    let obj = { categories: "", status: "", specializations: "" };
+    props.filterFetch({ ...obj });
+    props.form.resetFields();
   };
 
   return (
@@ -82,56 +86,64 @@ const UsersTableFilter = ({
               </Col>
               <Col xs={24} md={4}>
                 <Form.Item label="">
-                  <Select
-                    defaultValue="All status"
-                    placeholder="Select a status"
-                    onChange={onFilterStatus}
-                  >
-                    <Option value="">All status</Option>
-                    {status
-                      ? status.map(s => (
-                          <Option key={s} value={s}>
-                            {s}
-                          </Option>
-                        ))
-                      : "No results found"}
-                  </Select>
+                  {getFieldDecorator("filter_status", {})(
+                    <Select
+                      placeholder="Select a status"
+                      onChange={onFilterStatus}
+                    >
+                      {status
+                        ? status.map(s => (
+                            <Option key={s} value={s}>
+                              {s}
+                            </Option>
+                          ))
+                        : "No results found"}
+                    </Select>
+                  )}
                 </Form.Item>
               </Col>
               <Col xs={24} md={5}>
                 <Form.Item label="">
-                  <Select
-                    defaultValue="All specializations"
-                    placeholder="Select a specialization"
-                    onChange={onFilterSpecialization}
-                  >
-                    <Option value="">All specializations</Option>
-                    {specializations
-                      ? specializations.map(c => (
-                          <Option key={c.id} value={c.title}>
-                            {c.title}
-                          </Option>
-                        ))
-                      : "No results found"}
-                  </Select>
+                  {getFieldDecorator("filter_specialization", {})(
+                    <Select
+                      placeholder="Select a specialization"
+                      onChange={onFilterSpecialization}
+                    >
+                      <Option value="">All specializations</Option>
+                      {specializations
+                        ? specializations.map(c => (
+                            <Option key={c.id} value={c.title}>
+                              {c.title}
+                            </Option>
+                          ))
+                        : "No results found"}
+                    </Select>
+                  )}
                 </Form.Item>
               </Col>
               <Col xs={24} md={5}>
                 <Form.Item label="">
-                  <Select defaultValue="anytime" onChange={onFilterAccessed}>
-                    <Option value="anytime">Anytime</Option>
-                    <Option value="today">Today</Option>
-                    <Option value="within_seven_days">Within 7 days</Option>
-                    <Option value="within_thirty_days">Within 30 days</Option>
-                    <Option value="not_within_365_days">
-                      Not within 365 days
-                    </Option>
-                  </Select>
+                  {getFieldDecorator("filter_lastAccessed", {})(
+                    <Select
+                      placeholder="Select last accessed"
+                      onChange={onFilterAccessed}
+                    >
+                      <Option value="anytime">Anytime</Option>
+                      <Option value="today">Today</Option>
+                      <Option value="within_seven_days">Within 7 days</Option>
+                      <Option value="within_thirty_days">Within 30 days</Option>
+                      <Option value="not_within_365_days">
+                        Not within 365 days
+                      </Option>
+                    </Select>
+                  )}
                 </Form.Item>
               </Col>
               <Col xs={24} md={5}>
                 <Form.Item>
-                  <Search placeholder="name, email..." onSearch={onSearch} />
+                  {getFieldDecorator("filter_search", {})(
+                    <Search placeholder="name, email..." onSearch={onSearch} />
+                  )}
                 </Form.Item>
               </Col>
               <Col xs={24} md={4}>
@@ -153,6 +165,10 @@ const UsersTableFilter = ({
   );
 };
 
+const WrappedUsersTableFilter = Form.create({ name: "user_filter" })(
+  UsersTableFilter
+);
+
 const mapStateToProps = state => {
   return {
     notifs: state.notificationReducer,
@@ -166,4 +182,4 @@ export default connect(
     clearNotifications,
     fetchSpecializations
   }
-)(UsersTableFilter);
+)(WrappedUsersTableFilter);

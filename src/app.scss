@@ -413,3 +413,7 @@ body {
 .ant-tooltip-inner {
   font-size: 12px;
 }
+
+.ant-form-inline .ant-form-item > .ant-form-item-control-wrapper {
+  display: contents;
+}

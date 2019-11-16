@@ -1,15 +1,6 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { connect } from "react-redux";
-import {
-  Button,
-  Icon,
-  Table,
-  message,
-  Modal,
-  Tooltip,
-  Pagination,
-  Tag
-} from "antd";
+import { Button, Table, message, Modal, Pagination } from "antd";
 import { Link } from "react-router-dom";
 
 import axios from "axios";
@@ -26,10 +17,10 @@ import {
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 // Table components
-import UsersTableFilter from "./UsersTableFilter";
+import WrappedUsersTableFilter from "./UsersTableFilter";
 import PageBreadcrumb from "./PageBreadCrumb";
-import { TableAction } from "./TableAction";
-import { RecordStatus } from "./RecordStatus";
+import { TableAction } from "../smart-table/TableAction";
+import { RecordStatus } from "../smart-table/RecordStatus";
 
 const { confirm } = Modal;
 
@@ -109,7 +100,7 @@ const UsersTable = ({
     {
       title: "Action",
       rowKey: "id",
-      width: 160,
+      width: 140,
       className: "table-action-column",
       render: (text, record) => (
         <Fragment>
@@ -384,7 +375,7 @@ const UsersTable = ({
       <PageBreadcrumb />
 
       {/* filters */}
-      <UsersTableFilter filterFetch={filterFetch} />
+      <WrappedUsersTableFilter filterFetch={filterFetch} />
 
       <Table
         columns={columns}
@@ -395,7 +386,7 @@ const UsersTable = ({
         onChange={handleTableChange}
         size="small"
         locale={{ emptyText: "No result found" }}
-        scroll={{ x: 1300 }}
+        scroll={{ x: 1200 }}
       />
 
       {!loading ? (
