@@ -162,8 +162,6 @@ const UpdateArticleForm = ({
             ? notifs.notifications.success
             : "Article successfully publised"
         );
-        setLoading(false);
-        setIsDisabled(true);
         break;
       case "CHANGE_ARTICLE_STATUS_FAILED":
         message.error(
@@ -194,8 +192,11 @@ const UpdateArticleForm = ({
       default:
         return;
     }
+
+    setLoading(false);
+    setIsDisabled(true);
     //eslint-disable-next-line
-  }, [notifs.id]);
+  }, [notifs.id, notifs.notifications]);
 
   // get the file
   const getImage = (name, file) => {
