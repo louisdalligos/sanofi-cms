@@ -160,8 +160,8 @@ export function addCategory(values) {
       });
       dispatch(
         returnNotifications(
-          err.data,
-          "success",
+          err.response.data,
+          "error",
           err.status,
           "ADD_CATEGORY_FAILED"
         )

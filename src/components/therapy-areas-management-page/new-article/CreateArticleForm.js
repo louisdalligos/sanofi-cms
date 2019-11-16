@@ -131,6 +131,17 @@ const CreateArticleForm = ({
     action.setSubmitting(true);
     let formData = new FormData();
 
+    let formattedSlug;
+
+    // do our custom formating of data here
+    if (values.slug) {
+      console.log(values.slug);
+      debugger;
+      formattedSlug = values.slug.replace(/\s+/g, "-").toLowerCase();
+    } else {
+      formattedSlug = "";
+    }
+
     formData.set("category_id", values.category_id);
     formData.set("subcategory_id", values.subcategory_id);
     formData.set("other_tags", values.other_tags);
@@ -142,7 +153,7 @@ const CreateArticleForm = ({
     formData.set("zinc_code", values.zinc_code);
     formData.set("page_title", values.page_title);
     formData.set("meta_description", values.meta_description);
-    formData.set("page_slug", values.page_slug);
+    formData.set("slug", formattedSlug);
     formData.set("meta_keywords", values.meta_keywords);
     formData.set("body", values.body);
 
@@ -261,7 +272,7 @@ const CreateArticleForm = ({
 
               <Col xs={24} md={12}>
                 <TextFormField
-                  name="page_slug"
+                  name="slug"
                   type="text"
                   label="Page Slug(Optional - system will generate if empty"
                   placeholder="Enter a page slug"

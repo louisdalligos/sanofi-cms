@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Row, Button, Spin, Modal, message } from "antd";
 import { useDrop } from "react-dnd";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form, Field, useFormikContext } from "formik";
 import * as Yup from "yup";
 
 import CategoryItem from "./CategoryItem";
@@ -51,6 +51,11 @@ const Category = ({
       case "FETCH_CATEGORIES_SUCCESS":
         setCards(postManagement.categories.results);
         break;
+      case "ADD_CATEGORY_FAILED":
+        message.error(
+          notification.notifications ? notification.notifications.error : null
+        );
+        break;
       case "ADD_CATEGORY_SUCCESS":
         message.success(
           notification.notifications ? notification.notifications.success : null
@@ -62,7 +67,7 @@ const Category = ({
         return;
     }
     // eslint-disable-next-line
-  }, [notification.id]);
+  }, [notification.id, notification.notifications]);
 
   const moveCard = (id, atIndex) => {
     const { card, index } = findCard(id);
@@ -155,10 +160,9 @@ const Category = ({
               name: ""
             }}
             validationSchema={CategorySchema}
-            onSubmit={(values, { resetForm }) => {
+            onSubmit={(values, { setFieldValue }) => {
               console.log(values);
               addCategory(values);
-              resetForm();
             }}
           >
             {({ errors, touched }) => (
@@ -170,7 +174,7 @@ const Category = ({
                       : null
                   }
                 >
-                  <Field name="name" className="ant-input" />
+                  <Field name="name" className="ant-input" id="category_name" />
                   {errors.name && touched.name ? (
                     <div className="ant-form-explain">{errors.name}</div>
                   ) : null}

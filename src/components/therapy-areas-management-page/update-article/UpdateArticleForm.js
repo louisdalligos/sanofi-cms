@@ -215,8 +215,20 @@ const UpdateArticleForm = ({
 
   const submitForm = (values, action) => {
     clearNotifications(); // clear our notifs
+    action.setSubmitting(true);
 
     let formData = new FormData();
+
+    let formattedSlug;
+
+    // do our custom formating of data here
+    if (values.slug) {
+      console.log(values.slug);
+      debugger;
+      formattedSlug = values.slug.replace(/\s+/g, "-").toLowerCase();
+    } else {
+      formattedSlug = "";
+    }
 
     formData.append("category_id", values.category_id);
     formData.append("subcategory_id", values.subcategory_id);
@@ -229,7 +241,7 @@ const UpdateArticleForm = ({
     formData.append("zinc_code", values.zinc_code);
     formData.append("page_title", values.page_title);
     formData.append("meta_description", values.meta_description);
-    formData.append("page_slug", values.page_slug);
+    formData.append("slug", formattedSlug);
     formData.append("meta_keywords", values.meta_keywords);
     formData.append("body", values.body);
     formData.append("_method", "PUT");
@@ -270,7 +282,7 @@ const UpdateArticleForm = ({
           zinc_code: zincCode,
           page_title: pageTitle,
           meta_description: metaDescription,
-          page_slug: slug,
+          slug: slug,
           meta_keywords: metaKeywords ? metaKeywords : "",
           body: body,
           featured: featured,
@@ -436,7 +448,7 @@ const UpdateArticleForm = ({
 
               <Col xs={24} md={12}>
                 <TextFormField
-                  name="page_slug"
+                  name="slug"
                   type="text"
                   label="Page Slug(Optional - system will generate if empty"
                   placeholder="Enter a page slug"
