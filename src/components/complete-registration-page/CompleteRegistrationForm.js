@@ -39,7 +39,8 @@ const CompleteRegistrationForm = ({
 
   // component state
   const [confirmDirty, setConfirmDirty] = useState(false);
-  const [disabled, setDisabled] = useState(false);
+  const [disabled, setDisabled] = useState(true);
+  const [isExpiredToken, setIsExpiredToken] = useState(true);
 
   useEffect(() => {
     const info = () => {
@@ -53,11 +54,17 @@ const CompleteRegistrationForm = ({
     if (r_token) {
       getTokenFromParams(r_token);
     }
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
     switch (id) {
+      case "VERIFY_REGISTRATION_TOKEN_SUCCESS":
+        setDisabled(false);
+        message.success(success);
+        break;
       case "VERIFY_REGISTRATION_TOKEN_FAILED":
+        setIsExpiredToken(false);
         message.error(error);
         break;
       case "RESEND_EMAIL_LINK_SUCCESS":
@@ -66,9 +73,6 @@ const CompleteRegistrationForm = ({
       case "RESEND_EMAIL_LINK_FAILED":
         message.error(error ? error : notifications.message);
         setDisabled(true);
-        break;
-      case "VERIFY_REGISTRATION_TOKEN_FAILED":
-        message.error(error);
         break;
       case "REGISTER_SUCCESS":
         message.success(success);
@@ -81,12 +85,13 @@ const CompleteRegistrationForm = ({
         return;
     }
     //eslint-disable-next-line
-  }, [id]);
+  }, [id, notifications]);
 
   useEffect(() => {
     if (registration_token) {
       verifyRegistrationToken(registration_token);
     }
+    //eslint-disable-next-line
   }, [registration_token]);
 
   // handle confirm blur
@@ -126,6 +131,7 @@ const CompleteRegistrationForm = ({
   const handleResendEmail = () => {
     clearNotifications();
     resendEmailLink(registration_token);
+    setDisabled(true);
   };
 
   return (
@@ -211,14 +217,22 @@ const CompleteRegistrationForm = ({
                 </Form>
               ) : (
                 <Fragment>
-                  <div style={{ width: 300 }}>
-                    <Alert
-                      type="warning"
-                      message="Your registration link has expired.
+                  <div className="auth-form">
+                    <div className="heading">
+                      <img src={logo} alt="" />
+                    </div>
+                    {isExpiredToken ? (
+                      <Alert
+                        type="warning"
+                        message="Your registration link has expired.
                                         Please get a new one by clicking on the
                                         button below"
-                      closable
-                    />
+                        closable
+                      />
+                    ) : (
+                      <Alert type="error" message={error} closable />
+                    )}
+
                     <Button
                       type="primary"
                       onClick={handleResendEmail}
