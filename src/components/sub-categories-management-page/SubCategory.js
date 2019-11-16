@@ -120,13 +120,13 @@ const SubCategory = ({
     <>
       <Row>
         <Button type="primary" onClick={showAddSubCategoryModal}>
-          Add Sub Category
+          Add Subcategory
         </Button>
         <Spin spinning={postManagement.requestInProgress}>
           <table ref={drop} style={style}>
             <thead>
               <tr>
-                <th>Sub Category Name</th>
+                <th>Subcategory Name</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -148,7 +148,7 @@ const SubCategory = ({
         </Spin>
 
         <Modal
-          title="New Sub Category"
+          title="New Subcategory"
           visible={modalVisible}
           className="modal-form"
           onCancel={handleCancel}
