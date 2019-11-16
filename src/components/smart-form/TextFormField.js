@@ -11,7 +11,7 @@ const TextFormField = ({ label, placeholder, className, ...props }) => {
           : `${className} ant-form-item-control`
       }
     >
-      <label className={props.isRequired ? "ant-form-item-required" : null}>
+      <label className={props.required ? "ant-form-item-required" : null}>
         {label}
         <input
           {...field}

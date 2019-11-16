@@ -4,6 +4,9 @@ import { connect } from "react-redux";
 import PrivateRoute from "../routes/PrivateRoute";
 import PublicRoute from "../routes/PublicRoute";
 
+// Dashboard
+import UsersDashboard from "../components/users-dashboard-page/UsersDashboard";
+
 // Pages
 import Dashboard from "../components/dashboard-page/Dashboard";
 import ProfileManagement from "../components/profile-management-page/ProfileManagement";
@@ -17,6 +20,11 @@ import WrappedViewUserForm from "../components/users-management-page/ViewUserFor
 import CategoriesManagement from "../components/categories-management-page/CategoriesManagement";
 import SubCategoriesManagement from "../components/sub-categories-management-page/SubCategoriesManagement";
 import ProductsManagement from "../components/products-management-page/ProductsManagement";
+import CPDManagement from "../components/cpd-management-page/CPDManagement";
+import CMEManagement from "../components/cme-management/CMEManagement";
+import DoctorSpecialization from "../components/doctor-specialization-page/DoctorSpecialization";
+import OtherTags from "../components/other-tags-page/OtherTags";
+import Academy from "../components/academy-page/Academy";
 
 // 404
 import NotFound from "../components/404-page/NotFound";
@@ -65,6 +73,12 @@ const App = ({ auth, ...props }) => {
           {auth.isLoggedIn ? <Navbar {...props} /> : null}
           <Switch location={props.history.location}>
             <PrivateRoute exact path={"/"} component={Dashboard} />
+            <PrivateRoute
+              exact
+              path="/users"
+              component={UsersDashboard}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
             <PrivateRoute exact path="/profile" component={ProfileManagement} />
             <PrivateRoute
               exact
@@ -100,6 +114,12 @@ const App = ({ auth, ...props }) => {
             />
             <PrivateRoute
               exact
+              path="/cpd-management"
+              component={CPDManagement}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
               path="/therapy-areas"
               component={TherapyAreasManagement}
               roles={[Role.SuperAdmin, Role.Admin]}
@@ -117,13 +137,39 @@ const App = ({ auth, ...props }) => {
               roles={[Role.SuperAdmin, Role.Admin]}
             />
             <PrivateRoute
+              exact
               path="/categories"
               component={CategoriesManagement}
               roles={[Role.SuperAdmin, Role.Admin]}
             />
             <PrivateRoute
+              exact
               path="/sub-categories"
               component={SubCategoriesManagement}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
+              path="/other-tags"
+              component={OtherTags}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
+              path="/cme"
+              component={CMEManagement}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
+              path="/doctor-specialization"
+              component={DoctorSpecialization}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
+              path="/academy"
+              component={Academy}
               roles={[Role.SuperAdmin, Role.Admin]}
             />
             <PrivateRoute

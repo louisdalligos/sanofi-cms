@@ -132,16 +132,7 @@ const ProductsTable = ({
     }
   ];
 
-  const [data, setData] = useState([
-    {
-      id: "1",
-      status: "unpublished",
-      product_name: "Product 101",
-      zinc_code: "12343434565",
-      published_at: "11-10-2019",
-      created_at: "11-11-2019"
-    }
-  ]);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(null);
@@ -168,7 +159,8 @@ const ProductsTable = ({
       .then(response => {
         setTotal(response.data.info ? response.data.info.total_count : null); // get total count from server and set to state
         setLoading(false);
-        //setData(response.data.results);
+        console.log(response.data.results, "products response");
+        setData(response.data.results);
       })
       .catch(err => {
         setLoading(false);

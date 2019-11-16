@@ -11,10 +11,10 @@ import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
 import {
-  createArticle,
   fetchCategories,
   fetchSpecializations
 } from "../../../redux/actions/post-management-actions/postManagementActions";
+import { createProduct } from "../../../redux/actions/product-management-actions/productManagementActions";
 import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
 
 // Form elements
@@ -24,27 +24,25 @@ import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
 import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 
-// Other components
-import ImageUploader from "./ImageUploader";
-
 // validation schema
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
   //specializations: Yup.string().required("This field is required"),
-  short_details: Yup.string()
-    .min(2, "Description is too short")
-    .max(150, "Headline is too long")
+  short_description: Yup.string()
+    .min(1, "Short description is too short")
+    .max(150, "Product name is too long")
     .required("This field is required"),
-  headline: Yup.string()
-    .min(2, "Title is too short")
-    .max(150, "Headline is too long")
+  product_name: Yup.string()
+    .min(1, "Product name is too short")
+    .max(150, "Product name is too long")
     .required("This field is required"),
   zinc_code: Yup.string().required("This field is required"),
   page_title: Yup.string()
-    .min(2, "Title is too short")
+    .min(1, "Title is too short")
     .max(60, "Page title is too long")
     .required("This field is required"),
   meta_description: Yup.string()
+    .min(1, "Description is too short")
     .max(150, "Meta description is too long")
     .required("This field is required"),
   body: Yup.string().required("This field is required")
@@ -59,7 +57,7 @@ const CreateProductForm = ({
   postManagement,
   fetchCategories,
   fetchSpecializations,
-  createArticle,
+  createProduct,
   history,
   data,
   ...props
@@ -67,13 +65,10 @@ const CreateProductForm = ({
   const [categories, setCategories] = useState([]);
   const [specializations, setSpecializations] = useState([]);
 
-  const [mastheadImageInfo, setmastheadImageInfo] = useState("");
-  const [featuredImageInfo, setfeaturedImageInfo] = useState("");
-  const [thumbnailImageInfo, setthumbnailImageInfo] = useState("");
-
   useEffect(() => {
     fetchCategories();
     fetchSpecializations();
+    //eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -84,11 +79,11 @@ const CreateProductForm = ({
       case "FETCH_CATEGORIES_SUCCESS":
         setCategories(postManagement.categories.results);
         break;
-      case "CREATE_ARTICLE_SUCCESS":
+      case "CREATE_PRODUCT_SUCCESS":
         clearNotifications();
         message.success(notifs.notifications.success);
         break;
-      case "CREATE_ARTICLE_FAILED":
+      case "CREATE_PRODUCT_FAILED":
         clearNotifications();
         message.error(
           notifs.notifications
@@ -102,48 +97,37 @@ const CreateProductForm = ({
     //eslint-disable-next-line
   }, [notifs.id]);
 
-  // get the file
-  const getImage = (name, file) => {
-    console.log(file);
-    console.log(name);
-    if (name === "masthead") {
-      setmastheadImageInfo(file);
-    }
-    if (name === "featured") {
-      setfeaturedImageInfo(file);
-    }
-    if (name === "thumbnail") {
-      setthumbnailImageInfo(file);
-    }
-  };
-
   const submitForm = (values, action) => {
+    clearNotifications();
     action.setSubmitting(true);
     let formData = new FormData();
+    let formattedSlug;
+
+    // do our custom formating of data here
+    if (values.slug) {
+      console.log(values.slug);
+      debugger;
+      formattedSlug = values.slug.replace(/\s+/g, "-").toLowerCase();
+    } else {
+      formattedSlug = "";
+    }
+
     formData.set("category_id", values.category_id);
     formData.set("other_tags", values.other_tags);
     values.specializations.length === 0
       ? formData.set("specializations", null)
       : formData.set("specializations", values.specializations);
-    formData.set("headline", values.headline);
-    formData.set("short_details", values.short_details);
+    formData.set("product_name", values.product_name);
+    formData.set("short_description", values.short_description);
     formData.set("zinc_code", values.zinc_code);
     formData.set("page_title", values.page_title);
     formData.set("meta_description", values.meta_description);
-    formData.set("page_slug", values.page_slug);
+    formData.set("slug", formattedSlug);
     formData.set("meta_keywords", values.meta_keywords);
     formData.set("body", values.body);
 
-    //if theres an uploaded image include these field on our form data
-    if (values.masthead) {
-      formData.set("masthead", mastheadImageInfo);
-      formData.set("featured", featuredImageInfo);
-      formData.set("thumbnail", thumbnailImageInfo);
-    }
-
-    createArticle(formData);
+    createProduct(formData);
     action.setSubmitting(false);
-    action.resetForm(); // rest form action if success
   };
 
   return (
@@ -164,14 +148,14 @@ const CreateProductForm = ({
                   label="Category"
                   name="category_id"
                   onChange={props.setFieldValue}
-                  isRequired={true}
+                  required={true}
                 />
                 <TagsSuggestionFormField
                   placeholder={"Select a tag"}
                   label="Other tags"
                   name="other_tags"
                   onChange={props.setFieldValue}
-                  isRequired={false}
+                  required={false}
                 />
               </Col>
               <Col xs={24} md={8}>
@@ -180,24 +164,24 @@ const CreateProductForm = ({
                   label="Specializations"
                   name="specializations"
                   onChange={props.setFieldValue}
-                  isRequired={false}
+                  required={false}
                   placeholder="Please select a specialization"
                 />
               </Col>
               <Col xs={24} md={8}>
                 <TextFormField
-                  name="short_details"
+                  name="short_description"
                   type="text"
-                  label="Short Details"
-                  isRequired={true}
-                  placeholder="Enter a short detail"
+                  label="Short Description"
+                  required={true}
+                  placeholder="Enter a short description"
                 />
                 <TextFormField
-                  name="headline"
+                  name="product_name"
                   type="text"
-                  label="Headline"
-                  isRequired={true}
-                  placeholder="Enter a headline"
+                  label="Product Name"
+                  required={true}
+                  placeholder="Enter a product name"
                 />
 
                 <ZincCodeFormField
@@ -213,7 +197,7 @@ const CreateProductForm = ({
                       </Tooltip>
                     </div>
                   }
-                  isRequired={true}
+                  required={true}
                   placeholder="Enter a zinc code"
                 />
               </Col>
@@ -226,32 +210,32 @@ const CreateProductForm = ({
                   name="page_title"
                   type="text"
                   label="Page Title"
-                  isRequired={true}
+                  required={true}
                   placeholder="Enter a page title"
                 />
                 <TextFormField
                   name="meta_description"
                   type="text"
                   label="Meta Description"
-                  isRequired={true}
+                  required={true}
                   placeholder="Enter a meta description"
                 />
               </Col>
 
               <Col xs={24} md={12}>
                 <TextFormField
-                  name="page_slug"
+                  name="slug"
                   type="text"
                   label="Page Slug(Optional - system will generate if empty"
                   placeholder="Enter a page slug"
-                  isRequired={false}
+                  required={false}
                 />
                 <TextFormField
                   name="meta_keywords"
                   type="text"
                   label="Meta Keywords(Optional)"
                   placeholder="Enter meta keywords"
-                  isRequired={false}
+                  required={false}
                 />
               </Col>
             </Row>
@@ -260,11 +244,10 @@ const CreateProductForm = ({
             <Row gutter={24} className="form-section last">
               <Col xs={24} md={8}>
                 <h3>Feature Image</h3>
-                <ImageUploader getImage={getImage} />
-                {/* <ThumbnailGenerator getImages={getImages} /> */}
+                {/* <ImageUploader getImage={getImage} /> */}
               </Col>
               <Col xs={24} md={16}>
-                <h3>Article Body</h3>
+                <h3>Product Description</h3>
                 <Field name="body">
                   {({ field, form: { touched, errors }, meta }) => (
                     <div
@@ -362,5 +345,5 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  { createArticle, fetchSpecializations, fetchCategories }
+  { createProduct, fetchSpecializations, fetchCategories }
 )(CreateProductForm);

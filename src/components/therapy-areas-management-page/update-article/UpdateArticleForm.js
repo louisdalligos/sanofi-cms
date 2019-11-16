@@ -29,6 +29,8 @@ import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 // Other components
 import ImageUploader from "./ImageUploader";
 
+import { sampleZincFormat } from "../../../utils/constant";
+
 // validation schema
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
@@ -52,10 +54,6 @@ const schema = Yup.object().shape({
     .required("This field is required"),
   body: Yup.string().required("This field is required")
 });
-
-// sample format tooltip text
-const sampleZincFormat =
-  "Sample format: SAPH.TJO.19.05.0200 | Version 2.5 | 30 May 2019";
 
 const UpdateArticleForm = ({
   notifs,

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
-import { Button, Row, Col, message, Icon, Tooltip } from "antd";
+import { Button, Row, Col, message, Icon, Tooltip, Tabs } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
@@ -53,6 +53,8 @@ const schema = Yup.object().shape({
 // sample format tooltip text
 const sampleZincFormat =
   "Sample format: SAPH.TJO.19.05.0200 | Version 2.5 | 30 May 2019";
+
+const { TabPane } = Tabs;
 
 const UpdateArticleForm = ({
   notifs,
@@ -146,172 +148,195 @@ const UpdateArticleForm = ({
     action.resetForm(); // rest form action if success
   };
 
+  const callback = key => {
+    console.log(key);
+  };
+
   return (
     <>
-      <Formik
-        enableReinitialize={true}
-        initialValues={data}
-        onSubmit={submitForm}
-        validationSchema={schema}
-      >
-        {props => (
-          <Form className="therapy-article-form">
-            <Row gutter={24} className="form-section">
-              <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
-              <Col xs={24} md={8}>
-                <SelectFormField
-                  options={categories}
-                  label="Category"
-                  name="category_id"
-                  onChange={props.setFieldValue}
-                  isRequired={true}
-                />
-                <TagsSuggestionFormField
-                  placeholder={"Select a tag"}
-                  label="Other tags"
-                  name="other_tags"
-                  onChange={props.setFieldValue}
-                  isRequired={false}
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <SelectTagsFormField
-                  options={specializations}
-                  label="Specializations"
-                  name="specializations"
-                  onChange={props.setFieldValue}
-                  isRequired={false}
-                  placeholder="Please select a specialization"
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <TextFormField
-                  name="short_details"
-                  type="text"
-                  label="Short Details"
-                  isRequired={true}
-                  placeholder="Enter a short detail"
-                />
-                <TextFormField
-                  name="headline"
-                  type="text"
-                  label="Headline"
-                  isRequired={true}
-                  placeholder="Enter a headline"
-                />
+      <Tabs onChange={callback} type="card">
+        <TabPane tab="Main Product Info" key="1">
+          <Formik
+            enableReinitialize={true}
+            initialValues={data}
+            onSubmit={submitForm}
+            validationSchema={schema}
+          >
+            {props => (
+              <Form className="therapy-article-form">
+                <Row gutter={24} className="form-section">
+                  <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
+                  <Col xs={24} md={8}>
+                    <SelectFormField
+                      options={categories}
+                      label="Category"
+                      name="category_id"
+                      onChange={props.setFieldValue}
+                      isRequired={true}
+                    />
+                    <TagsSuggestionFormField
+                      placeholder={"Select a tag"}
+                      label="Other tags"
+                      name="other_tags"
+                      onChange={props.setFieldValue}
+                      isRequired={false}
+                    />
+                  </Col>
+                  <Col xs={24} md={8}>
+                    <SelectTagsFormField
+                      options={specializations}
+                      label="Specializations"
+                      name="specializations"
+                      onChange={props.setFieldValue}
+                      isRequired={false}
+                      placeholder="Please select a specialization"
+                    />
+                  </Col>
+                  <Col xs={24} md={8}>
+                    <TextFormField
+                      name="short_details"
+                      type="text"
+                      label="Short Details"
+                      isRequired={true}
+                      placeholder="Enter a short detail"
+                    />
+                    <TextFormField
+                      name="headline"
+                      type="text"
+                      label="Headline"
+                      isRequired={true}
+                      placeholder="Enter a headline"
+                    />
 
-                <ZincCodeFormField
-                  className="zinc-code-field"
-                  name="zinc_code"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  label={
-                    <div>
-                      <span>Zinc Code </span>{" "}
-                      <Tooltip placement="top" title={sampleZincFormat}>
-                        <Icon type="info-circle" style={{ color: "#1890ff" }} />
-                      </Tooltip>
-                    </div>
-                  }
-                  isRequired={true}
-                  placeholder="Enter a zinc code"
-                />
-              </Col>
-            </Row>
-
-            <Row gutter={24} className="form-section">
-              <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
-              <Col xs={24} md={12}>
-                <TextFormField
-                  name="page_title"
-                  type="text"
-                  label="Page Title"
-                  isRequired={true}
-                  placeholder="Enter a page title"
-                />
-                <TextFormField
-                  name="meta_description"
-                  type="text"
-                  label="Meta Description"
-                  isRequired={true}
-                  placeholder="Enter a meta description"
-                />
-              </Col>
-
-              <Col xs={24} md={12}>
-                <TextFormField
-                  name="page_slug"
-                  type="text"
-                  label="Page Slug(Optional - system will generate if empty"
-                  placeholder="Enter a page slug"
-                  isRequired={false}
-                />
-                <TextFormField
-                  name="meta_keywords"
-                  type="text"
-                  label="Meta Keywords(Optional)"
-                  placeholder="Enter meta keywords"
-                  isRequired={false}
-                />
-              </Col>
-            </Row>
-
-            {/* 3nd row */}
-            <Row gutter={24} className="form-section last">
-              <Col xs={24} md={8}>
-                <h3>Feature Image</h3>
-                <ImageUploader getImage={getImage} />
-                {/* <ThumbnailGenerator getImages={getImages} /> */}
-              </Col>
-              <Col xs={24} md={16}>
-                <h3>Article Body</h3>
-                <Field name="body">
-                  {({ field, form: { touched, errors }, meta }) => (
-                    <div
-                      className={
-                        meta.touched && meta.error
-                          ? "has-feedback has-error ant-form-item-control"
-                          : "ant-form-item-control"
+                    <ZincCodeFormField
+                      className="zinc-code-field"
+                      name="zinc_code"
+                      type="text"
+                      onChange={props.setFieldValue}
+                      label={
+                        <div>
+                          <span>Zinc Code </span>{" "}
+                          <Tooltip placement="top" title={sampleZincFormat}>
+                            <Icon
+                              type="info-circle"
+                              style={{
+                                color: "#1890ff"
+                              }}
+                            />
+                          </Tooltip>
+                        </div>
                       }
-                    >
-                      <ReactQuill
-                        theme="snow"
-                        placeholder="Write something..."
-                        modules={UpdateArticleForm.modules}
-                        formats={UpdateArticleForm.formats}
-                        value={field.value}
-                        onChange={field.onChange(field.name)}
-                      />
-                      {meta.touched && meta.error ? (
-                        <div className="ant-form-explain">{meta.error}</div>
-                      ) : null}
-                    </div>
-                  )}
-                </Field>
-              </Col>
-            </Row>
+                      isRequired={true}
+                      placeholder="Enter a zinc code"
+                    />
+                  </Col>
+                </Row>
 
-            <Row>
-              <DisplayFormikState {...props} />
-            </Row>
+                <Row gutter={24} className="form-section">
+                  <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
+                  <Col xs={24} md={12}>
+                    <TextFormField
+                      name="page_title"
+                      type="text"
+                      label="Page Title"
+                      isRequired={true}
+                      placeholder="Enter a page title"
+                    />
+                    <TextFormField
+                      name="meta_description"
+                      type="text"
+                      label="Meta Description"
+                      isRequired={true}
+                      placeholder="Enter a meta description"
+                    />
+                  </Col>
 
-            <div className="form-actions">
-              <Button style={{ marginRight: 10 }}>
-                <Link to="/therapy-areas">Cancel</Link>
-              </Button>
-              <Button htmlType="submit" type="primary">
-                Save
-              </Button>
-            </div>
+                  <Col xs={24} md={12}>
+                    <TextFormField
+                      name="page_slug"
+                      type="text"
+                      label="Page Slug(Optional - system will generate if empty"
+                      placeholder="Enter a page slug"
+                      isRequired={false}
+                    />
+                    <TextFormField
+                      name="meta_keywords"
+                      type="text"
+                      label="Meta Keywords(Optional)"
+                      placeholder="Enter meta keywords"
+                      isRequired={false}
+                    />
+                  </Col>
+                </Row>
 
-            <RouteLeavingGuard
-              when={props.dirty}
-              navigate={path => history.push(path)}
-              shouldBlockNavigation={location => (props.dirty ? true : false)}
-            />
-          </Form>
-        )}
-      </Formik>
+                {/* 3nd row */}
+                <Row gutter={24} className="form-section last">
+                  <Col xs={24} md={8}>
+                    <h3>Feature Image</h3>
+                    {/* <ImageUploader getImage={getImage} /> */}
+                  </Col>
+                  <Col xs={24} md={16}>
+                    <h3>Article Body</h3>
+                    <Field name="body">
+                      {({ field, form: { touched, errors }, meta }) => (
+                        <div
+                          className={
+                            meta.touched && meta.error
+                              ? "has-feedback has-error ant-form-item-control"
+                              : "ant-form-item-control"
+                          }
+                        >
+                          <ReactQuill
+                            theme="snow"
+                            placeholder="Write something..."
+                            modules={UpdateArticleForm.modules}
+                            formats={UpdateArticleForm.formats}
+                            value={field.value}
+                            onChange={field.onChange(field.name)}
+                          />
+                          {meta.touched && meta.error ? (
+                            <div className="ant-form-explain">{meta.error}</div>
+                          ) : null}
+                        </div>
+                      )}
+                    </Field>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <DisplayFormikState {...props} />
+                </Row>
+
+                <div className="form-actions">
+                  <Button style={{ marginRight: 10 }}>
+                    <Link to="/therapy-areas">Cancel</Link>
+                  </Button>
+                  <Button htmlType="submit" type="primary">
+                    Apply
+                  </Button>
+                </div>
+
+                <RouteLeavingGuard
+                  when={props.dirty}
+                  navigate={path => history.push(path)}
+                  shouldBlockNavigation={location =>
+                    props.dirty ? true : false
+                  }
+                />
+              </Form>
+            )}
+          </Formik>
+        </TabPane>
+        <TabPane tab="Prescription Info" disabled key="2">
+          Content of Tab Pane 2
+        </TabPane>
+        <TabPane tab="Clinical Trials" disabled key="3">
+          Content of Tab Pane 3
+        </TabPane>
+        <TabPane tab="Other References" disabled key="4">
+          Content of Tab Pane 3
+        </TabPane>
+      </Tabs>
     </>
   );
 };

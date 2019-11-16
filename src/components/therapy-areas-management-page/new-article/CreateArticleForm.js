@@ -30,6 +30,8 @@ import ImageUploader from "./ImageUploader";
 //import ThumbnailGenerator from "./ThumbnailGenerator";
 //import ImagePreview from "./ImagePreview";
 
+import { sampleZincFormat } from "../../../utils/constant";
+
 // validation schema
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
@@ -53,10 +55,6 @@ const schema = Yup.object().shape({
     .required("This field is required"),
   body: Yup.string().required("This field is required")
 });
-
-// sample format tooltip text
-const sampleZincFormat =
-  "Sample format: SAPH.TJO.19.05.0200 | Version 2.5 | 30 May 2019";
 
 const CreateArticleForm = ({
   notifs,
@@ -98,6 +96,7 @@ const CreateArticleForm = ({
       case "CREATE_ARTICLE_SUCCESS":
         clearNotifications();
         message.success(notifs.notifications.success);
+        history.push("/therapy-areas");
         break;
       case "CREATE_ARTICLE_FAILED":
         clearNotifications();
@@ -129,9 +128,7 @@ const CreateArticleForm = ({
   };
 
   const submitForm = (values, action) => {
-    const formatSlug = values.page_slug.replace(/\s+/g, "-").toLowerCase();
     action.setSubmitting(true);
-
     let formData = new FormData();
 
     formData.set("category_id", values.category_id);
@@ -145,7 +142,7 @@ const CreateArticleForm = ({
     formData.set("zinc_code", values.zinc_code);
     formData.set("page_title", values.page_title);
     formData.set("meta_description", values.meta_description);
-    formData.set("page_slug", formatSlug);
+    formData.set("page_slug", values.page_slug);
     formData.set("meta_keywords", values.meta_keywords);
     formData.set("body", values.body);
 

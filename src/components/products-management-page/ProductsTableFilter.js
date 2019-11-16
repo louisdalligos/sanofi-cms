@@ -5,23 +5,20 @@ import { Row, Col, Form, Input, Button, Select } from "antd";
 // redux actions import
 import { fetchSpecializations } from "../../redux/actions/post-management-actions/postManagementActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
-import { fetchCategories } from "../../redux/actions/product-management-actions/productManagementActions";
+import { fetchCategories } from "../../redux/actions/post-management-actions/postManagementActions";
 
 const { Option } = Select;
 const Search = Input.Search;
 
 const ProductsTableFilter = ({
   fetchSpecializations,
-  //fetchCategories,
+  fetchCategories,
   postManagement,
   notifs,
   clearNotifications,
   ...props
 }) => {
-  const [categories, setCategories] = useState([
-    { id: 1, name: "Product Category One" },
-    { id: 2, name: "Product Category Two" }
-  ]);
+  const [categories, setCategories] = useState([]);
   const [status, setStatus] = useState([
     "published",
     "unpublished",
@@ -30,7 +27,7 @@ const ProductsTableFilter = ({
   const [specializations, setSpecializations] = useState([]);
 
   useEffect(() => {
-    //fetchCategories();
+    fetchCategories();
     fetchSpecializations();
   }, []);
 
@@ -41,7 +38,7 @@ const ProductsTableFilter = ({
         clearNotifications();
         break;
       case "FETCH_CATEGORIES_SUCCESS":
-        //setCategories(postManagement.categories.results);
+        setCategories(postManagement.categories.results);
         clearNotifications();
         break;
       default:
@@ -180,7 +177,7 @@ export default connect(
   mapStateToProps,
   {
     clearNotifications,
-    fetchSpecializations
-    //fetchCategories
+    fetchSpecializations,
+    fetchCategories
   }
 )(ProductsTableFilter);
