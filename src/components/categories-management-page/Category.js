@@ -73,29 +73,41 @@ const Category = ({
     const { card, index } = findCard(id);
     setCards(
       update(cards, {
-        $splice: [[index, 1], [atIndex, 0 + 1, card]]
+        $splice: [[index, 1], [atIndex, 0, card]]
       })
     );
 
-    let val = [parseInt(id), atIndex + 1];
-    console.log(val);
+    console.log("ID: ", id, "Index: ", atIndex);
+    console.log("card item", card);
 
-    try {
-      const res = axios({
-        url: `${API}/sub-categories/sort`,
-        method: "put",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.access_token}`
-        },
-        data: val
+    //let val = {[parseInt(id), atIndex + 1]};
+    let val = "[1, 2], [2, 1], [3, 3], [5, 4], [13, 5], [14, 6]";
+
+    axios({
+      url: `${API}/categories/sort`,
+      method: "put",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth.access_token}`
+      },
+      data: val
+    })
+      .then(res => {
+        console.log(res);
+        message.success(
+          res.data ? res.data.success : "Categories successfully sorted"
+        );
+        console.log("cards on move new state", cards);
+      })
+      .catch(err => {
+        console.log(err);
+        message.error(
+          err.response.data.error
+            ? err.response.data.error
+            : "Oops! Something went wrong!"
+        );
       });
-
-      console.log(res.data);
-    } catch (error) {
-      console.log(error);
-    }
   };
   const findCard = id => {
     console.log(id, "id");

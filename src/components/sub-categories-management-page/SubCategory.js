@@ -77,25 +77,37 @@ const SubCategory = ({
       })
     );
 
-    let val = [id, atIndex];
-    console.log(val);
+    console.log("ID: ", id, "Index: ", atIndex);
+    console.log("card item", card);
 
-    try {
-      const res = axios({
-        url: `${API}/sub-categories/sort`,
-        method: "put",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.access_token}`
-        },
-        data: val
+    //let val = {[parseInt(id), atIndex + 1]};
+    let val = "[10, 11], [11, 10], [12, 12], [13, 13]";
+
+    axios({
+      url: `${API}/sub-categories/sort`,
+      method: "put",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth.access_token}`
+      },
+      data: val
+    })
+      .then(res => {
+        console.log(res);
+        message.success(
+          res.data ? res.data.success : "Subcategories successfully sorted"
+        );
+        console.log("cards on move new state", cards);
+      })
+      .catch(err => {
+        console.log(err);
+        message.error(
+          err.response.data.error
+            ? err.response.data.error
+            : "Oops! Something went wrong!"
+        );
       });
-
-      console.log(res.data);
-    } catch (error) {
-      console.log(error);
-    }
   };
   const findCard = id => {
     const card = cards.filter(c => `${c.id}` === id)[0];

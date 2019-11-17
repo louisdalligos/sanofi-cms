@@ -135,8 +135,6 @@ const CreateArticleForm = ({
 
     // do our custom formating of data here
     if (values.slug) {
-      console.log(values.slug);
-      debugger;
       formattedSlug = values.slug.replace(/\s+/g, "-").toLowerCase();
     } else {
       formattedSlug = "";
