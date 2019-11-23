@@ -132,16 +132,16 @@ const UpdateProductForm = ({
 
   const setComponentState = currentProduct => {
     console.log(currentProduct);
-    setOtherTags(
-      currentProduct.other_tags ? currentProduct.other_tags.split(",") : []
-    );
-    setSelectedSpecializations(
-      currentProduct.specializations
-        ? currentProduct.specializations.split(",").map(item => {
-            return parseInt(item, 10);
-          })
-        : []
-    );
+    // let formatTags = currentProduct.other_tags
+    //   ? currentProduct.other_tags.split(",")
+    //   : [];
+    // let formatSpecialization = currentProduct.specializations
+    //   ? currentProduct.specializations.split(",").map(item => {
+    //       return parseInt(item, 10);
+    //     })
+    //   : [];
+    setOtherTags(currentProduct.other_tags);
+    setSelectedSpecializations(currentProduct.specializations);
     setCategoryId(currentProduct.category_id);
     setPageTitle(currentProduct.page_title);
     setProductName(currentProduct.product_name);
