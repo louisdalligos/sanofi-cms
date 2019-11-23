@@ -9,7 +9,8 @@ import {
   Tooltip,
   Pagination,
   Tag,
-  Switch
+  Switch,
+  Typography
 } from "antd";
 import { Link } from "react-router-dom";
 
@@ -28,6 +29,9 @@ import { clearNotifications } from "../../redux/actions/notification-actions/not
 import WrappedProductsTableFilter from "./ProductsTableFilter";
 import PageBreadcrumb from "./PageBreadcrumb";
 
+// Import our table config settings
+import { COLUMN_ITEM_LINK, COLUMN_ITEM_SHORT_DESC } from "../../utils/config";
+
 const { confirm } = Modal;
 
 const ProductsTable = ({
@@ -42,6 +46,7 @@ const ProductsTable = ({
       title: "New",
       dataIndex: "new",
       rowKey: "id",
+      width: 60,
       render: (text, record) => (
         <Tooltip placement="top" title="Tag as new product?">
           <Switch className="switch-new-trigger" />
@@ -90,6 +95,7 @@ const ProductsTable = ({
       dataIndex: "product_name",
       rowKey: "id",
       sorter: true,
+      width: 400,
       render: (text, record) => (
         <div className="table-title-featured-wrap">
           {/* <img src={record.thumbnail_image} alt="" width="70" /> */}
@@ -103,9 +109,16 @@ const ProductsTable = ({
               type="link"
               onClick={e => handleSelectProduct(record.id, e)}
             >
-              <Link to={`/products/${record.id}`}>{text}</Link>
+              <Link to={`/products/${record.id}`}>
+                <Typography.Text ellipsis={true} style={COLUMN_ITEM_LINK}>
+                  {text}
+                </Typography.Text>
+              </Link>
             </Button>
-            <small>{record.short_description}</small>
+
+            <Typography.Text ellipsis={true} style={COLUMN_ITEM_SHORT_DESC}>
+              {record.short_description}
+            </Typography.Text>
           </div>
         </div>
       )
@@ -326,7 +339,7 @@ const ProductsTable = ({
         onChange={handleTableChange}
         size="small"
         locale={{ emptyText: "No results found" }}
-        scroll={{ x: 1100 }}
+        scroll={{ x: 1300 }}
       />
 
       {!loading && total !== null ? (
