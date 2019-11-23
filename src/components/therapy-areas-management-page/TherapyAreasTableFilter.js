@@ -20,6 +20,7 @@ const TherapyAreasTableFilter = ({
   postManagement,
   notifs,
   clearNotifications,
+  setStatePageSize,
   ...props
 }) => {
   const { getFieldDecorator } = props.form;
@@ -62,37 +63,38 @@ const TherapyAreasTableFilter = ({
 
   // search function
   function onSearch(e) {
-    let obj = { search: e };
+    let obj = { search: e, per_page: setStatePageSize() };
     props.filterFetch({ ...obj }); // call filter fetch method for diff set of total result count
   }
 
   // filter category
   function onFilterCategory(e) {
-    let obj = { categories: e };
+    let obj = { categories: e, per_page: setStatePageSize() };
     props.filterFetch({ ...obj });
   }
 
   // filter subcategory
   function onFilterSubCategory(e) {
-    let obj = { sub_categories: e };
+    let obj = { sub_categories: e, per_page: setStatePageSize() };
     props.filterFetch({ ...obj });
   }
 
   // filter status
   function onFilterStatus(e) {
-    let obj = { status: e };
+    let obj = { status: e, per_page: setStatePageSize() };
     props.filterFetch({ ...obj });
   }
 
   // filter specialization
   function onFilterSpecialization(e) {
-    let obj = { specializations: e };
+    let obj = { specializations: e, per_page: setStatePageSize() };
     props.filterFetch({ ...obj });
   }
 
   // Reset function
   const handleResetFilters = () => {
-    props.fetch();
+    let obj = { per_page: 10 };
+    props.fetch({ ...obj });
     props.form.resetFields();
   };
 
@@ -127,14 +129,13 @@ const TherapyAreasTableFilter = ({
                 <Form.Item label="">
                   {getFieldDecorator("filter_specialization", {})(
                     <Select
-                      defaultValue="All specializations"
                       placeholder="Select a specialization"
                       onChange={onFilterSpecialization}
                     >
                       <Option value="">All specializations</Option>
                       {specializations
                         ? specializations.map(c => (
-                            <Option key={c.id} value={c.title}>
+                            <Option key={c.id} value={c.id}>
                               {c.title}
                             </Option>
                           ))
@@ -147,7 +148,6 @@ const TherapyAreasTableFilter = ({
                 <Form.Item label="">
                   {getFieldDecorator("filter_category", {})(
                     <Select
-                      defaultValue="All category"
                       placeholder="Select a category"
                       onChange={onFilterCategory}
                     >
@@ -167,8 +167,7 @@ const TherapyAreasTableFilter = ({
                 <Form.Item label="">
                   {getFieldDecorator("filter_subCategory", {})(
                     <Select
-                      defaultValue="All subcategory"
-                      placeholder="Select a category"
+                      placeholder="Select a subcategory"
                       onChange={onFilterSubCategory}
                     >
                       <Option value="">All subcategory</Option>
@@ -183,22 +182,16 @@ const TherapyAreasTableFilter = ({
                   )}
                 </Form.Item>
               </Col>
-              <Col xs={24} md={5}>
-                <Form.Item>
-                  {getFieldDecorator("filter_search", {})(
-                    <Search placeholder="title, tag..." onSearch={onSearch} />
-                  )}
-                </Form.Item>
-              </Col>
-              <Col xs={24} md={1}>
+              <Col xs={24} md={3}>
                 <Form.Item label="">
-                  <Button
-                    type="primary"
-                    size="small"
-                    onClick={handleResetFilters}
-                  >
+                  <Button type="primary" onClick={handleResetFilters}>
                     Reset
                   </Button>
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={4}>
+                <Form.Item>
+                  <Search placeholder="title, tag..." onSearch={onSearch} />
                 </Form.Item>
               </Col>
             </Row>

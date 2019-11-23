@@ -2,7 +2,17 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
-import { Button, Row, Col, message, Icon, Tooltip, Tabs } from "antd";
+import {
+  Button,
+  Row,
+  Col,
+  message,
+  Icon,
+  Tooltip,
+  Tabs,
+  Spin,
+  Switch
+} from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
@@ -11,10 +21,15 @@ import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
 import {
-  createArticle,
   fetchCategories,
   fetchSpecializations
 } from "../../../redux/actions/post-management-actions/postManagementActions";
+import {
+  fetchCurrentProduct,
+  updateProduct,
+  changeProductStatus,
+  fetchCurrentProductArticlesByCategoryId
+} from "../../../redux/actions/product-management-actions/productManagementActions";
 import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
 
 // Form elements
@@ -26,126 +41,278 @@ import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 
 // Other components
 import ImageUploader from "./ImageUploader";
+import FileUploader from "./FileUploader";
+import ClinicalTrialsForm from "./clinical-trial-form/ClinicalTrialsForm";
+import ResourcesForm from "./resources-form/ResourcesForm";
+
+import { sampleZincFormat } from "../../../utils/constant";
 
 // validation schema
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
   //specializations: Yup.string().required("This field is required"),
-  short_details: Yup.string()
-    .min(2, "Description is too short")
-    .max(150, "Headline is too long")
+  short_description: Yup.string()
+    .min(1, "Short description is too short")
+    .max(150, "Short description is too long")
     .required("This field is required"),
-  headline: Yup.string()
-    .min(2, "Title is too short")
-    .max(150, "Headline is too long")
+  product_name: Yup.string()
+    .min(1, "Product name is too short")
+    .max(60, "Product name is too long")
     .required("This field is required"),
-  zinc_code: Yup.string().required("This field is required"),
+  //zinc_code: Yup.string().required("This field is required"),
   page_title: Yup.string()
-    .min(2, "Title is too short")
+    .min(1, "Page title is too short")
     .max(60, "Page title is too long")
     .required("This field is required"),
   meta_description: Yup.string()
     .max(150, "Meta description is too long")
     .required("This field is required"),
-  body: Yup.string().required("This field is required")
+  body: Yup.string().required("This field is required"),
+  zinc_code1: Yup.string().required("Required field"),
+  zinc_code2: Yup.string().required("Required field"),
+  zinc_code3: Yup.string().required("Required field")
 });
-
-// sample format tooltip text
-const sampleZincFormat =
-  "Sample format: SAPH.TJO.19.05.0200 | Version 2.5 | 30 May 2019";
 
 const { TabPane } = Tabs;
 
-const UpdateArticleForm = ({
+const UpdateProductForm = ({
   notifs,
   postManagement,
   fetchCategories,
   fetchSpecializations,
-  createArticle,
+  fetchCurrentProduct,
+  currentProduct,
+  updateProduct,
   history,
+  match,
   data,
+  fetchCurrentProductArticlesByCategoryId,
   ...props
 }) => {
+  const [currentProductId, setCurrentProductId] = useState(match.params.id);
+  const [loading, setLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
+  const [statusOptions, setStatusOptions] = useState([]);
+
+  // form data state values
   const [categories, setCategories] = useState([]);
   const [specializations, setSpecializations] = useState([]);
+  const [categoryId, setCategoryId] = useState("");
+  const [otherTags, setOtherTags] = useState([]);
+  const [selectedSpecializations, setSelectedSpecializations] = useState([]);
+  const [pageTitle, setPageTitle] = useState("");
+  const [productName, setProductName] = useState("");
+  //const [zincCode, setZincCode] = useState("");
+  const [shortDescription, setShortDescription] = useState("");
+  const [slug, setSlug] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [metaKeywords, setMetaKeywords] = useState("");
+  const [body, setBody] = useState("");
+  const [status, setStatus] = useState("");
+  const [zincode1, setZinCode1] = useState("");
+  const [zincode2, setZincCode2] = useState("");
+  const [zincode3, setZincCode3] = useState("");
 
-  const [mastheadImageInfo, setmastheadImageInfo] = useState("");
-  const [featuredImageInfo, setfeaturedImageInfo] = useState("");
-  const [thumbnailImageInfo, setthumbnailImageInfo] = useState("");
+  const [imageGalleryFiles, setImageGalleryFiles] = useState([]);
 
   useEffect(() => {
+    setLoading(true);
+    fetchCurrentProduct(currentProductId);
     fetchCategories();
     fetchSpecializations();
+
+    setStatusOptions([
+      { id: "unpublished", name: "unpublished" },
+      { id: "published", name: "published" },
+      { id: "archived", name: "archived" }
+    ]);
+    //eslint-disable-next-line
   }, []);
+
+  const setComponentState = currentProduct => {
+    console.log(currentProduct);
+    setOtherTags(
+      currentProduct.other_tags ? currentProduct.other_tags.split(",") : []
+    );
+    setSelectedSpecializations(
+      currentProduct.specializations
+        ? currentProduct.specializations.split(",").map(item => {
+            return parseInt(item, 10);
+          })
+        : []
+    );
+    setCategoryId(currentProduct.category_id);
+    setPageTitle(currentProduct.page_title);
+    setProductName(currentProduct.product_name);
+    //setZincCode(currentProduct.zinc_code);
+    setShortDescription(currentProduct.short_description);
+    setSlug(currentProduct.slug);
+    setMetaDescription(currentProduct.meta_description);
+    setMetaKeywords(currentProduct.meta_keywords);
+    setBody(currentProduct.body);
+    setStatus(currentProduct.status);
+    setImageGalleryFiles(currentProduct.product_images);
+  };
+
+  useEffect(() => {
+    setLoading(true);
+
+    // check if our fetched request from api is available
+    if (currentProduct) {
+      console.log(currentProduct);
+      setCategoryId(currentProduct.category_id);
+      setOtherTags(
+        currentProduct.other_tags ? currentProduct.other_tags.split(",") : []
+      );
+      setSelectedSpecializations(
+        currentProduct.specializations
+          ? currentProduct.specializations.split(",").map(item => {
+              return parseInt(item, 10);
+            })
+          : []
+      );
+      setPageTitle(currentProduct.page_title);
+      setProductName(currentProduct.product_name);
+      //setZincCode(currentProduct.zinc_code);
+      setShortDescription(currentProduct.short_description);
+      setSlug(currentProduct.slug);
+      setMetaDescription(currentProduct.meta_description);
+      setMetaKeywords(currentProduct.meta_keywords);
+      setBody(currentProduct.body);
+      setStatus(currentProduct.status);
+
+      // work on our zinc code
+      const str = currentProduct.zinc_code.split("|");
+      setZinCode1(str[0].trim());
+      setZincCode2(str[1].trim());
+      setZincCode3(str[2].trim());
+
+      // work on our gallery images
+      setImageGalleryFiles(currentProduct.product_images);
+
+      // if product has been fetched, fetch our articles by the category id provided
+      fetchCurrentProductArticlesByCategoryId(currentProduct.category_id);
+      setLoading(false);
+    }
+  }, [
+    currentProduct,
+    setLoading,
+    setSelectedSpecializations,
+    setOtherTags,
+    setImageGalleryFiles
+  ]);
 
   useEffect(() => {
     switch (notifs.id) {
+      case "CHANGE_PRODUCT_STATUS_SUCCESS":
+        message.success(
+          notifs.notifications
+            ? notifs.notifications.success
+            : "Product successfully publised"
+        );
+        break;
+      case "CHANGE_PRODUCT_STATUS_FAILED":
+        message.error(
+          notifs.notifications
+            ? notifs.notifications.error
+            : "There was an error on processing your request"
+        );
+        break;
       case "FETCH_SPECIALIZATIONS_SUCCESS":
         setSpecializations(postManagement.specializations);
+        setLoading(false);
         break;
       case "FETCH_CATEGORIES_SUCCESS":
         setCategories(postManagement.categories.results);
         break;
-      case "CREATE_ARTICLE_SUCCESS":
-        clearNotifications();
+      case "UPDATE_PRODUCT_SUCCESS":
         message.success(notifs.notifications.success);
+        fetchCurrentProduct(currentProduct.id);
+        setLoading(false);
         break;
-      case "CREATE_ARTICLE_FAILED":
+      case "UPDATE_PRODUCT_FAILED":
         clearNotifications();
         message.error(
           notifs.notifications
             ? notifs.notifications
             : "There was an error on processing your request"
         );
+        setLoading(false);
         break;
       default:
         return;
     }
+
+    setLoading(false);
     //eslint-disable-next-line
-  }, [notifs.id]);
+  }, [notifs.id, notifs.notifications]);
 
   // get the file
   const getImage = (name, file) => {
     console.log(file);
     console.log(name);
-    if (name === "masthead") {
-      setmastheadImageInfo(file);
-    }
-    if (name === "featured") {
-      setfeaturedImageInfo(file);
-    }
-    if (name === "thumbnail") {
-      setthumbnailImageInfo(file);
+
+    if (name === "image_gallery") {
+      setImageGalleryFiles([...imageGalleryFiles, file]);
     }
   };
 
+  // Submit form action
   const submitForm = (values, action) => {
+    clearNotifications(); // clear our notifs
     action.setSubmitting(true);
     let formData = new FormData();
-    formData.set("category_id", values.category_id);
-    formData.set("other_tags", values.other_tags);
+
+    formData.append("category_id", values.category_id);
+    formData.append("other_tags", values.other_tags);
     values.specializations.length === 0
-      ? formData.set("specializations", null)
-      : formData.set("specializations", values.specializations);
-    formData.set("headline", values.headline);
-    formData.set("short_details", values.short_details);
-    formData.set("zinc_code", values.zinc_code);
-    formData.set("page_title", values.page_title);
-    formData.set("meta_description", values.meta_description);
-    formData.set("page_slug", values.page_slug);
-    formData.set("meta_keywords", values.meta_keywords);
-    formData.set("body", values.body);
+      ? formData.append("specializations[]", null)
+      : formData.append("specializations[]", values.specializations);
+    formData.append("product_name", values.product_name);
+    formData.append("short_description", values.short_description);
+    formData.append(
+      "zinc_code",
+      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
+    );
+    formData.append("page_title", values.page_title);
+    formData.append("meta_description", values.meta_description);
+    formData.append("slug", values.slug.replace(/\s+/g, "-").toLowerCase());
+    formData.append("meta_keywords", values.meta_keywords);
+    formData.append("body", values.body);
+    formData.append("_method", "PUT");
+
+    updateProduct(currentProduct.id, formData); // redux action
+    action.setSubmitting(false);
+
+    // const formatTags = currentProduct.other_tags
+    //     ? currentProduct.other_tags.split(",")
+    //     : [];
+    // const formatSelectedSpecialization = currentProduct.specializations
+    //     ? currentProduct.specializations.split(",").map(item => {
+    //           return parseInt(item, 10);
+    //       })
+    //     : [];
 
     //if theres an uploaded image include these field on our form data
-    if (values.masthead) {
-      formData.set("masthead", mastheadImageInfo);
-      formData.set("featured", featuredImageInfo);
-      formData.set("thumbnail", thumbnailImageInfo);
+    if (values.image_gallery) {
+      //formData.set("image_gallery[]", imageGalleryFiles);
+      for (let i = 0; i < imageGalleryFiles.length; i++) {
+        formData.append("image_gallery[]", imageGalleryFiles[i]);
+      }
     }
 
-    createArticle(formData);
-    action.setSubmitting(false);
-    action.resetForm(); // rest form action if success
+    // Set the state
+    setComponentState(values);
+  };
+
+  // Save status update
+  const saveStatus = val => {
+    setLoading(true);
+    const id = currentProduct.id;
+    const values = {
+      status: val
+    };
+    changeProductStatus(id, values); // redux action
   };
 
   const callback = key => {
@@ -153,17 +320,91 @@ const UpdateArticleForm = ({
   };
 
   return (
-    <>
-      <Tabs onChange={callback} type="card">
+    <Spin spinning={loading}>
+      <Row gutter={24} className="change-status-row">
+        <Col xs={24} md={12}>
+          <Formik
+            enableReinitialize={true}
+            initialValues={{
+              status: status
+            }}
+          >
+            {props => (
+              <Form>
+                <label>Current status: </label>
+                <SelectFormField
+                  options={statusOptions}
+                  name="status"
+                  onChange={props.setFieldValue}
+                  disabled={isDisabled}
+                  style={{ width: 200 }}
+                />
+
+                {!isDisabled ? (
+                  <div className="set-status-form-control">
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        saveStatus(props.values.status);
+                      }}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setIsDisabled(true);
+                        props.values.status = currentProduct.status;
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="set-status-form-control">
+                    <Button type="primary" onClick={() => setIsDisabled(false)}>
+                      Change
+                    </Button>
+                  </div>
+                )}
+              </Form>
+            )}
+          </Formik>
+        </Col>
+        <Col xs={24} md={12}>
+          <h3 style={{ float: "left", marginRight: 10 }}>New</h3>
+          <Tooltip placement="top" title="Tag as new product?">
+            <Switch className="switch-new-trigger" />
+          </Tooltip>
+        </Col>
+      </Row>
+      <Tabs onChange={callback} type="card" style={{ marginTop: 30 }}>
         <TabPane tab="Main Product Info" key="1">
           <Formik
             enableReinitialize={true}
-            initialValues={data}
+            initialValues={{
+              category_id: categoryId,
+              other_tags: otherTags,
+              specializations: selectedSpecializations,
+              product_name: productName,
+              short_description: shortDescription,
+              //zinc_code: zincCode,
+              page_title: pageTitle,
+              meta_description: metaDescription,
+              slug: slug,
+              meta_keywords: metaKeywords ? metaKeywords : "",
+              body: body,
+              zinc_code1: zincode1,
+              zinc_code2: zincode2,
+              zinc_code3: zincode3,
+              image_gallery: imageGalleryFiles
+            }}
             onSubmit={submitForm}
             validationSchema={schema}
+            validateOnChange={false}
+            validateOnBlur={false}
           >
             {props => (
-              <Form className="therapy-article-form">
+              <Form className="product-form">
                 <Row gutter={24} className="form-section">
                   <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
                   <Col xs={24} md={8}>
@@ -172,62 +413,74 @@ const UpdateArticleForm = ({
                       label="Category"
                       name="category_id"
                       onChange={props.setFieldValue}
-                      isRequired={true}
+                      requiredlabel="true"
                     />
                     <TagsSuggestionFormField
                       placeholder={"Select a tag"}
                       label="Other tags"
                       name="other_tags"
                       onChange={props.setFieldValue}
-                      isRequired={false}
                     />
                   </Col>
-                  <Col xs={24} md={8}>
+                  <Col xs={24} md={7}>
                     <SelectTagsFormField
                       options={specializations}
                       label="Specializations"
                       name="specializations"
                       onChange={props.setFieldValue}
-                      isRequired={false}
                       placeholder="Please select a specialization"
                     />
                   </Col>
-                  <Col xs={24} md={8}>
+                  <Col xs={24} md={9}>
                     <TextFormField
-                      name="short_details"
+                      name="short_description"
                       type="text"
-                      label="Short Details"
-                      isRequired={true}
-                      placeholder="Enter a short detail"
+                      label="Short Description"
+                      requiredlabel="true"
+                      placeholder="Enter a short description"
                     />
                     <TextFormField
-                      name="headline"
+                      name="product_name"
                       type="text"
-                      label="Headline"
-                      isRequired={true}
-                      placeholder="Enter a headline"
+                      label="Product Name"
+                      requiredlabel="true"
+                      placeholder="Enter a product name"
                     />
 
+                    <label
+                      style={{
+                        display: "block",
+                        margin: "15px 0"
+                      }}
+                    >
+                      <span>Zinc Code </span>{" "}
+                      <Tooltip placement="top" title={sampleZincFormat}>
+                        <Icon type="info-circle" style={{ color: "#1890ff" }} />
+                      </Tooltip>
+                    </label>
                     <ZincCodeFormField
-                      className="zinc-code-field"
-                      name="zinc_code"
+                      className="zinc-code-field1"
+                      name="zinc_code1"
                       type="text"
                       onChange={props.setFieldValue}
-                      label={
-                        <div>
-                          <span>Zinc Code </span>{" "}
-                          <Tooltip placement="top" title={sampleZincFormat}>
-                            <Icon
-                              type="info-circle"
-                              style={{
-                                color: "#1890ff"
-                              }}
-                            />
-                          </Tooltip>
-                        </div>
-                      }
-                      isRequired={true}
-                      placeholder="Enter a zinc code"
+                      maskValidation="AAAA.AAA.11.11.11"
+                      size="small"
+                    />
+                    <ZincCodeFormField
+                      className="zinc-code-field2"
+                      name="zinc_code2"
+                      type="text"
+                      onChange={props.setFieldValue}
+                      maskValidation="Version 1.1"
+                      size="small"
+                    />
+                    <ZincCodeFormField
+                      className="zinc-code-field3"
+                      name="zinc_code3"
+                      type="text"
+                      onChange={props.setFieldValue}
+                      maskValidation="11 A** 1111"
+                      size="small"
                     />
                   </Col>
                 </Row>
@@ -239,32 +492,30 @@ const UpdateArticleForm = ({
                       name="page_title"
                       type="text"
                       label="Page Title"
-                      isRequired={true}
+                      requiredlabel="true"
                       placeholder="Enter a page title"
                     />
                     <TextFormField
                       name="meta_description"
                       type="text"
                       label="Meta Description"
-                      isRequired={true}
+                      requiredlabel="true"
                       placeholder="Enter a meta description"
                     />
                   </Col>
 
                   <Col xs={24} md={12}>
                     <TextFormField
-                      name="page_slug"
+                      name="slug"
                       type="text"
                       label="Page Slug(Optional - system will generate if empty"
                       placeholder="Enter a page slug"
-                      isRequired={false}
                     />
                     <TextFormField
                       name="meta_keywords"
                       type="text"
                       label="Meta Keywords(Optional)"
                       placeholder="Enter meta keywords"
-                      isRequired={false}
                     />
                   </Col>
                 </Row>
@@ -272,11 +523,14 @@ const UpdateArticleForm = ({
                 {/* 3nd row */}
                 <Row gutter={24} className="form-section last">
                   <Col xs={24} md={8}>
-                    <h3>Feature Image</h3>
-                    {/* <ImageUploader getImage={getImage} /> */}
+                    <h3>Gallery Images</h3>
+                    <ImageUploader
+                      getImage={getImage}
+                      data={imageGalleryFiles}
+                    />
                   </Col>
                   <Col xs={24} md={16}>
-                    <h3>Article Body</h3>
+                    <h3>Product Description</h3>
                     <Field name="body">
                       {({ field, form: { touched, errors }, meta }) => (
                         <div
@@ -289,8 +543,8 @@ const UpdateArticleForm = ({
                           <ReactQuill
                             theme="snow"
                             placeholder="Write something..."
-                            modules={UpdateArticleForm.modules}
-                            formats={UpdateArticleForm.formats}
+                            modules={UpdateProductForm.modules}
+                            formats={UpdateProductForm.formats}
                             value={field.value}
                             onChange={field.onChange(field.name)}
                           />
@@ -309,7 +563,7 @@ const UpdateArticleForm = ({
 
                 <div className="form-actions">
                   <Button style={{ marginRight: 10 }}>
-                    <Link to="/therapy-areas">Cancel</Link>
+                    <Link to="/products">Cancel</Link>
                   </Button>
                   <Button htmlType="submit" type="primary">
                     Apply
@@ -327,21 +581,51 @@ const UpdateArticleForm = ({
             )}
           </Formik>
         </TabPane>
-        <TabPane tab="Prescription Info" disabled key="2">
-          Content of Tab Pane 2
+        <TabPane tab="Prescription Info" key="2">
+          <Row>
+            <h3 style={{ marginBottom: 20 }}>Upload file/s</h3>
+            <Col md={12}>
+              <FileUploader
+                productId={currentProductId}
+                updateAction={updateProduct}
+              />
+            </Col>
+          </Row>
         </TabPane>
-        <TabPane tab="Clinical Trials" disabled key="3">
-          Content of Tab Pane 3
+        <TabPane tab="Clinical Trials" key="3">
+          <Row>
+            <h3 style={{ marginBottom: 20 }}>Select article link</h3>
+            <Col md={12}>
+              <ClinicalTrialsForm />
+
+              <div className="form-actions">
+                <Button htmlType="submit" type="primary">
+                  Save Draft
+                </Button>
+              </div>
+            </Col>
+          </Row>
         </TabPane>
-        <TabPane tab="Other References" disabled key="4">
-          Content of Tab Pane 3
+        <TabPane tab="Other References" key="4">
+          <Row>
+            <h3 style={{ marginBottom: 20 }}>Select other resources</h3>
+            <Col md={12}>
+              <ResourcesForm />
+
+              <div className="form-actions">
+                <Button htmlType="submit" type="primary">
+                  Save Draft
+                </Button>
+              </div>
+            </Col>
+          </Row>
         </TabPane>
       </Tabs>
-    </>
+    </Spin>
   );
 };
 
-UpdateArticleForm.modules = {
+UpdateProductForm.modules = {
   toolbar: [
     [{ header: "1" }, { header: "2" }, { font: [] }],
     [{ size: [] }],
@@ -361,7 +645,7 @@ UpdateArticleForm.modules = {
   }
 };
 
-UpdateArticleForm.formats = [
+UpdateProductForm.formats = [
   "header",
   "font",
   "size",
@@ -381,11 +665,18 @@ UpdateArticleForm.formats = [
 const mapStateToProps = state => {
   return {
     postManagement: state.postManagementReducer,
-    notifs: state.notificationReducer
+    notifs: state.notificationReducer,
+    currentProduct: state.productManagementReducer.currentProduct
   };
 };
 
 export default connect(
   mapStateToProps,
-  { createArticle, fetchSpecializations, fetchCategories }
-)(UpdateArticleForm);
+  {
+    updateProduct,
+    fetchSpecializations,
+    fetchCategories,
+    fetchCurrentProduct,
+    fetchCurrentProductArticlesByCategoryId
+  }
+)(UpdateProductForm);

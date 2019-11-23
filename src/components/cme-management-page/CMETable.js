@@ -25,12 +25,12 @@ import {
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 // Table components
-import WrappedProductsTableFilter from "./ProductsTableFilter";
+import WrappedCMETableFilter from "./CMETableFilter";
 import PageBreadcrumb from "./PageBreadcrumb";
 
 const { confirm } = Modal;
 
-const ProductsTable = ({
+const CMETable = ({
   notifs,
   clearNotifications,
   archiveProduct,
@@ -86,7 +86,7 @@ const ProductsTable = ({
       )
     },
     {
-      title: "Product Name/Description",
+      title: "Event Name/Description",
       dataIndex: "product_name",
       rowKey: "id",
       sorter: true,
@@ -103,7 +103,7 @@ const ProductsTable = ({
               type="link"
               onClick={e => handleSelectProduct(record.id, e)}
             >
-              <Link to={`/products/${record.id}`}>{text}</Link>
+              <Link to={`/cme/${record.id}`}>{text}</Link>
             </Button>
             <small>{record.short_description}</small>
           </div>
@@ -132,7 +132,7 @@ const ProductsTable = ({
       title: "Actions",
       rowKey: "id",
       render: (text, record) => (
-        <Tooltip placement="right" title="Archive this product">
+        <Tooltip placement="right" title="Archive this event">
           <Button
             type="danger"
             onClick={e => showArchiveConfirm(record.id, e)}
@@ -311,7 +311,7 @@ const ProductsTable = ({
       <PageBreadcrumb />
 
       {/* filters */}
-      <WrappedProductsTableFilter
+      <WrappedCMETableFilter
         filterFetch={filterFetch}
         fetch={fetch}
         setStatePageSize={setStatePageSize}
@@ -365,4 +365,4 @@ export default connect(
     archiveProduct,
     changeProductStatus
   }
-)(ProductsTable);
+)(CMETable);

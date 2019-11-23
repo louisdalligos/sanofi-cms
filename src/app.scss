@@ -269,10 +269,6 @@ body {
     margin: 0;
   }
 
-  .ant-switch-checked {
-    background-color: #52c41a;
-  }
-
   .table-title-featured-wrap {
     display: flex;
   }
@@ -283,12 +279,19 @@ body {
   }
 }
 
+.switch-new-trigger {
+  &.ant-switch-checked {
+    background-color: #52c41a !important;
+  }
+}
+
 .form-actions {
   float: right;
   margin-top: 50px;
 }
 
-.therapy-article-form {
+.therapy-article-form,
+.product-form {
   .form-section {
     padding: 50px 0;
     border-bottom: 1px solid #ccc;
@@ -307,6 +310,11 @@ body {
 
 .ant-input-number {
   width: 200px !important;
+}
+
+.zinc-code-field {
+  float: left;
+  display: block;
 }
 
 // table pagination
@@ -375,16 +383,20 @@ body {
 
 .set-status-form-control {
   margin-left: 10px;
-  position: relative;
-  top: 8px;
 
   .ant-btn-primary {
     margin-right: 5px;
   }
 }
 
-.article-status-row {
-  //display: flex !important;
+.change-status-row {
+  form {
+    display: flex;
+    label {
+      line-height: 30px;
+      margin-right: 10px;
+    }
+  }
 }
 
 #preview {
@@ -415,5 +427,46 @@ body {
 }
 
 .ant-form-inline .ant-form-item > .ant-form-item-control-wrapper {
-  display: contents;
+  display: contents !important;
+}
+
+.ant-modal-close-x {
+  display: none !important;
+}
+
+.ant-form-explain {
+  font-size: 12px;
+}
+
+.zinc-code-field1,
+.zinc-code-field2,
+.zinc-code-field3 {
+  float: left;
+  display: block;
+  margin-right: 10px;
+
+  .zinc-code-field3 {
+    margin-right: 0;
+  }
+  input {
+    font-size: 12px;
+    padding-right: 0 !important;
+  }
+}
+
+.zinc-code-field2 input {
+  width: 80px;
+}
+.zinc-code-field3 input {
+  width: 95px;
+}
+
+// gallery product action
+.upload-gallery-action {
+  display: flex;
+  justify-content: space-between;
+
+  .ant-btn-link {
+    margin-top: 15px;
+  }
 }

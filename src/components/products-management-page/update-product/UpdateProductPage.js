@@ -1,34 +1,23 @@
 import React, { Fragment, useEffect, useState } from "react";
+import { connect } from "react-redux";
 import { PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
-import CreateProductForm from "./UpdateProductForm";
+import UpdateProductForm from "./UpdateProductForm";
+
+// redux action
+import { fetchCurrentProduct } from "../../../redux/actions/product-management-actions/productManagementActions";
 
 const pageTitle = "Update product";
 
 // Component
-const UpdateProductPage = ({ history, ...props }) => {
-  const [formData, setFormData] = useState({
-    category_id: "",
-    other_tags: [],
-    specializations: [],
-    headline: "",
-    short_details: "",
-    zinc_code: "",
-    page_title: "",
-    meta_description: "",
-    page_slug: "",
-    meta_keywords: "",
-    body: "",
-    featured: "",
-    masthead: "",
-    thumbnail: ""
-  });
-
-  useEffect(() => {
-    console.log("product page mounted");
-  }, []);
-
+const UpdateProductPage = ({
+  fetchCurrentProduct,
+  currentProduct,
+  history,
+  match,
+  ...props
+}) => {
   return (
     <Fragment>
       <div className="box-layout-custom">
@@ -47,9 +36,19 @@ const UpdateProductPage = ({ history, ...props }) => {
           </div>
         </div>
 
-        <CreateProductForm data={formData} history={history} />
+        <UpdateProductForm history={history} match={match} />
       </div>
     </Fragment>
   );
 };
-export default UpdateProductPage;
+
+const mapStateToProps = state => {
+  return {
+    currentProduct: state.productManagementReducer.currentProduct
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  { fetchCurrentProduct }
+)(UpdateProductPage);

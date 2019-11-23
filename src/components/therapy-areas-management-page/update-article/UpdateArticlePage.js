@@ -20,33 +20,6 @@ const UpdateArticlePage = ({
   match,
   ...props
 }) => {
-  const [currentArticleId, setCurrentArticleId] = useState(match.params.id);
-  //const [loading, setLoading] = useState(false);
-
-  // const [formData, setFormData] = useState({
-  //     category_id: "",
-  //     subcategory_id: "",
-  //     other_tags: "",
-  //     specializations: "",
-  //     headline: "",
-  //     short_details: "",
-  //     zinc_code: "",
-  //     page_title: "",
-  //     meta_description: "",
-  //     page_slug: "",
-  //     meta_keywords: "",
-  //     body: "",
-  //     featured: "",
-  //     masthead: "",
-  //     thumbnail: ""
-  // });
-  const [formData, setFormData] = useState(null);
-
-  useEffect(() => {
-    fetchCurrentArticle(currentArticleId);
-    console.log("article page mounted");
-  }, []);
-
   return (
     <Fragment>
       <div className="box-layout-custom">
@@ -65,7 +38,7 @@ const UpdateArticlePage = ({
           </div>
         </div>
 
-        <UpdateArticleForm history={history} />
+        <UpdateArticleForm history={history} match={match} />
       </div>
     </Fragment>
   );

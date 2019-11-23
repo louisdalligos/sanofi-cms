@@ -31,13 +31,7 @@ const MainMenu = ({ user, ...props }) => {
 
         {(user && user.role === "superadmin") ||
         (user && user.role === "admin") ? (
-          <SubMenu
-            title={
-              <span className="submenu-title-wrapper" key="users">
-                <Link to="/users">Users</Link>
-              </span>
-            }
-          >
+          <SubMenu title={<span className="submenu-title-wrapper">Users</span>}>
             <Menu.Item key="doctors">
               <Link to="/doctors">Doctors</Link>
             </Menu.Item>

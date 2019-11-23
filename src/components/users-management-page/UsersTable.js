@@ -121,7 +121,7 @@ const UsersTable = ({
           ) : (
             <TableAction
               title="Block user?"
-              iconType="cross"
+              iconType="close"
               recordId={record.id}
               handleTableAction={showBlockConfirm}
             />
@@ -144,6 +144,7 @@ const UsersTable = ({
 
   const fetch = (params = {}) => {
     setLoading(true);
+    setPageSize(params.per_page ? params.per_page : 10);
     axios({
       url: `${API}/users`,
       method: "get",
@@ -362,11 +363,17 @@ const UsersTable = ({
 
   // handle table sort
   const handleTableChange = (pagination, filters, sorter) => {
+    console.log(pagination);
     const obj = {
       order_by_field: sorter.field,
-      order_by_sort: sorter.order && sorter.order === "ascend" ? "ASC" : "DESC"
+      order_by_sort: sorter.order && sorter.order === "ascend" ? "ASC" : "DESC",
+      per_page: pageSize
     };
     filterFetch({ ...obj });
+  };
+
+  const setStatePageSize = () => {
+    return pageSize;
   };
 
   return (
@@ -375,7 +382,11 @@ const UsersTable = ({
       <PageBreadcrumb />
 
       {/* filters */}
-      <WrappedUsersTableFilter filterFetch={filterFetch} fetch={fetch} />
+      <WrappedUsersTableFilter
+        filterFetch={filterFetch}
+        fetch={fetch}
+        setStatePageSize={setStatePageSize}
+      />
 
       <Table
         columns={columns}
@@ -385,7 +396,7 @@ const UsersTable = ({
         loading={loading}
         onChange={handleTableChange}
         size="small"
-        locale={{ emptyText: "No result found" }}
+        locale={{ emptyText: "No results found" }}
         scroll={{ x: 1200 }}
       />
 

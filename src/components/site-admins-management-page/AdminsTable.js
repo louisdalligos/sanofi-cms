@@ -143,6 +143,7 @@ const AdminsTable = ({
 
   const fetch = (params = {}) => {
     setLoading(true);
+    setPageSize(params.per_page ? params.per_page : 10);
     axios({
       url: `${API}/cms`,
       method: "get",
@@ -322,13 +323,16 @@ const AdminsTable = ({
 
   // handle table sort
   const handleTableChange = (pagination, filters, sorter) => {
-    console.log(filters);
-
     const obj = {
       order_by_field: sorter.field,
-      order_by_sort: sorter.order && sorter.order === "ascend" ? "ASC" : "DESC"
+      order_by_sort: sorter.order && sorter.order === "ascend" ? "ASC" : "DESC",
+      per_page: pageSize
     };
     filterFetch({ ...obj });
+  };
+
+  const setStatePageSize = () => {
+    return pageSize;
   };
 
   return (
@@ -337,7 +341,11 @@ const AdminsTable = ({
       <PageBreadcrumb />
 
       {/* filters */}
-      <WrappedAdminsTableFilter filterFetch={filterFetch} fetch={fetch} />
+      <WrappedAdminsTableFilter
+        filterFetch={filterFetch}
+        fetch={fetch}
+        setStatePageSize={setStatePageSize}
+      />
 
       <Table
         columns={columns}
@@ -347,7 +355,7 @@ const AdminsTable = ({
         pagination={false}
         onChange={handleTableChange}
         size="small"
-        locale={{ emptyText: "No result found" }}
+        locale={{ emptyText: "No results found" }}
         scroll={{ x: 1100 }}
       />
 

@@ -15,6 +15,8 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { API } from "../../utils/api";
 
+import { noImage } from "../../utils/constant";
+
 // redux actions import
 import {
   archiveArticle,
@@ -31,22 +33,10 @@ const { confirm } = Modal;
 const TherapyAreasTable = ({
   notifs,
   clearNotifications,
-  postManagement,
   archiveArticle,
-  changeArticleStatus,
   auth
 }) => {
   const columns = [
-    // {
-    //     title: "Featured",
-    //     dataIndex: "featured",
-    //     rowKey: "id",
-    //     render: (text, record) => (
-    //         <Tooltip placement="top" title="Featured article">
-    //             <Icon type="star" />
-    //         </Tooltip>
-    //     )
-    // },
     {
       title: "Status",
       dataIndex: "status",
@@ -106,8 +96,11 @@ const TherapyAreasTable = ({
       rowKey: "id",
       width: 150,
       render: (text, record) => (
-        // <img src={record.thumbnail_image} width="100" alt="" />
-        <img src={record.thumbnail_image} alt="" width="70" />
+        <img
+          src={record.thumbnail_image ? record.thumbnail_image : noImage}
+          alt={text}
+          className="table-list-thumbnail-image"
+        />
       )
     },
     {
@@ -134,7 +127,7 @@ const TherapyAreasTable = ({
       render: (text, record) => (
         <Tooltip placement="right" title="Archive this article">
           <Button type="danger" onClick={e => showArchiveConfirm(record.id, e)}>
-            <Icon type="file-exclamation" />
+            <Icon type="delete" />
           </Button>
         </Tooltip>
       )
@@ -155,6 +148,7 @@ const TherapyAreasTable = ({
   // Table event handlers
   const fetch = (params = {}) => {
     setLoading(true);
+    setPageSize(params.per_page ? params.per_page : 10);
     axios({
       url: `${API}/therapy-areas`,
       method: "get",
@@ -288,13 +282,16 @@ const TherapyAreasTable = ({
 
   // handle table sort
   const handleTableChange = (pagination, filters, sorter) => {
-    console.log(filters);
-
     const obj = {
       order_by_field: sorter.field,
-      order_by_sort: sorter.order && sorter.order === "ascend" ? "ASC" : "DESC"
+      order_by_sort: sorter.order && sorter.order === "ascend" ? "ASC" : "DESC",
+      per_page: pageSize
     };
     filterFetch({ ...obj });
+  };
+
+  const setStatePageSize = () => {
+    return pageSize;
   };
 
   return (
@@ -303,7 +300,11 @@ const TherapyAreasTable = ({
       <PageBreadcrumb />
 
       {/* filters */}
-      <WrappedTherapyAreasTableFilter filterFetch={filterFetch} fetch={fetch} />
+      <WrappedTherapyAreasTableFilter
+        filterFetch={filterFetch}
+        fetch={fetch}
+        setStatePageSize={setStatePageSize}
+      />
 
       <Table
         columns={columns}
@@ -313,7 +314,7 @@ const TherapyAreasTable = ({
         pagination={false}
         onChange={handleTableChange}
         size="small"
-        locale={{ emptyText: "No result found" }}
+        locale={{ emptyText: "No results found" }}
         scroll={{ x: 1100 }}
       />
 

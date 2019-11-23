@@ -6,7 +6,7 @@ import { Button, Row, Col, message, Icon, Tooltip } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
-//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
@@ -38,22 +38,25 @@ const schema = Yup.object().shape({
   subcategory_id: Yup.string().required("This field is required"),
   //specializations: Yup.string().required("This field is required"),
   short_details: Yup.string()
-    .min(2, "Description is too short")
-    .max(150, "Headline is too long")
+    .min(1, "Short descriptions too short")
+    .max(150, "Short description is too long")
     .required("This field is required"),
   headline: Yup.string()
-    .min(2, "Title is too short")
+    .min(1, "Headline is too short")
     .max(150, "Headline is too long")
     .required("This field is required"),
-  zinc_code: Yup.string().required("This field is required"),
+  //zinc_code: Yup.string().required("This field is required"),
   page_title: Yup.string()
-    .min(2, "Title is too short")
+    .min(1, "Page title is too short")
     .max(60, "Page title is too long")
     .required("This field is required"),
   meta_description: Yup.string()
     .max(150, "Meta description is too long")
     .required("This field is required"),
-  body: Yup.string().required("This field is required")
+  body: Yup.string().required("This field is required"),
+  zinc_code1: Yup.string().required("Required field"),
+  zinc_code2: Yup.string().required("Required field"),
+  zinc_code3: Yup.string().required("Required field")
 });
 
 const CreateArticleForm = ({
@@ -128,17 +131,9 @@ const CreateArticleForm = ({
   };
 
   const submitForm = (values, action) => {
+    console.log(values);
     action.setSubmitting(true);
     let formData = new FormData();
-
-    let formattedSlug;
-
-    // do our custom formating of data here
-    if (values.slug) {
-      formattedSlug = values.slug.replace(/\s+/g, "-").toLowerCase();
-    } else {
-      formattedSlug = "";
-    }
 
     formData.set("category_id", values.category_id);
     formData.set("subcategory_id", values.subcategory_id);
@@ -148,10 +143,13 @@ const CreateArticleForm = ({
       : formData.set("specializations", values.specializations);
     formData.set("headline", values.headline);
     formData.set("short_details", values.short_details);
-    formData.set("zinc_code", values.zinc_code);
+    formData.append(
+      "zinc_code",
+      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
+    );
     formData.set("page_title", values.page_title);
     formData.set("meta_description", values.meta_description);
-    formData.set("slug", formattedSlug);
+    formData.set("slug", values.slug);
     formData.set("meta_keywords", values.meta_keywords);
     formData.set("body", values.body);
 
@@ -164,7 +162,6 @@ const CreateArticleForm = ({
 
     createArticle(formData);
     action.setSubmitting(false);
-    action.resetForm(); // rest form action if success
   };
 
   return (
@@ -187,14 +184,14 @@ const CreateArticleForm = ({
                   label="Category"
                   name="category_id"
                   onChange={props.setFieldValue}
-                  isRequired={true}
+                  requiredlabel="true"
                 />
                 <SelectFormField
                   options={subCategories}
                   label="Sub Category"
                   name="subcategory_id"
                   onChange={props.setFieldValue}
-                  isRequired={true}
+                  requiredlabel="true"
                 />
                 <TagsSuggestionFormField
                   placeholder={"Select a tag"}
@@ -204,7 +201,7 @@ const CreateArticleForm = ({
                   isRequired={false}
                 />
               </Col>
-              <Col xs={24} md={8}>
+              <Col xs={24} md={7}>
                 <SelectTagsFormField
                   options={specializations}
                   label="Specializations"
@@ -214,37 +211,56 @@ const CreateArticleForm = ({
                   placeholder="Please select a specialization"
                 />
               </Col>
-              <Col xs={24} md={8}>
+              <Col xs={24} md={9}>
                 <TextFormField
                   name="short_details"
                   type="text"
-                  label="Short Details"
-                  isRequired={true}
-                  placeholder="Enter a short detail"
+                  label="Short Description"
+                  requiredlabel="true"
+                  placeholder="Enter a short description"
                 />
                 <TextFormField
                   name="headline"
                   type="text"
                   label="Headline"
-                  isRequired={true}
+                  requiredlabel="true"
                   placeholder="Enter a headline"
                 />
 
+                <label
+                  style={{
+                    display: "block",
+                    margin: "15px 0"
+                  }}
+                >
+                  <span>Zinc Code </span>{" "}
+                  <Tooltip placement="top" title={sampleZincFormat}>
+                    <Icon type="info-circle" style={{ color: "#1890ff" }} />
+                  </Tooltip>
+                </label>
                 <ZincCodeFormField
-                  className="zinc-code-field"
-                  name="zinc_code"
+                  className="zinc-code-field1"
+                  name="zinc_code1"
                   type="text"
                   onChange={props.setFieldValue}
-                  label={
-                    <div>
-                      <span>Zinc Code </span>{" "}
-                      <Tooltip placement="top" title={sampleZincFormat}>
-                        <Icon type="info-circle" style={{ color: "#1890ff" }} />
-                      </Tooltip>
-                    </div>
-                  }
-                  isRequired={true}
-                  placeholder="Enter a zinc code"
+                  maskValidation="AAAA.AAA.11.11.11"
+                  size="small"
+                />
+                <ZincCodeFormField
+                  className="zinc-code-field2"
+                  name="zinc_code2"
+                  type="text"
+                  onChange={props.setFieldValue}
+                  maskValidation="Version 1.1"
+                  size="small"
+                />
+                <ZincCodeFormField
+                  className="zinc-code-field3"
+                  name="zinc_code3"
+                  type="text"
+                  onChange={props.setFieldValue}
+                  maskValidation="11 A** 1111"
+                  size="small"
                 />
               </Col>
             </Row>
@@ -256,14 +272,14 @@ const CreateArticleForm = ({
                   name="page_title"
                   type="text"
                   label="Page Title"
-                  isRequired={true}
+                  requiredlabel="true"
                   placeholder="Enter a page title"
                 />
                 <TextFormField
                   name="meta_description"
                   type="text"
                   label="Meta Description"
-                  isRequired={true}
+                  requiredlabel="true"
                   placeholder="Enter a meta description"
                 />
               </Col>
@@ -321,9 +337,9 @@ const CreateArticleForm = ({
               </Col>
             </Row>
 
-            {/* <Row>
+            <Row>
               <DisplayFormikState {...props} />
-            </Row> */}
+            </Row>
 
             <div className="form-actions">
               <Button style={{ marginRight: 10 }}>

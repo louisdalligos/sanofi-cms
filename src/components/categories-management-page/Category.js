@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Row, Button, Spin, Modal, message } from "antd";
 import { useDrop } from "react-dnd";
-import { Formik, Form, Field, useFormikContext } from "formik";
-import * as Yup from "yup";
 
 import CategoryItem from "./CategoryItem";
 import update from "immutability-helper";
@@ -13,31 +11,18 @@ import axios from "axios";
 import { API } from "../../utils/api";
 
 // redux actions
-import {
-  fetchCategories,
-  addCategory
-} from "../../redux/actions/post-management-actions/postManagementActions";
+import { fetchCategories } from "../../redux/actions/post-management-actions/postManagementActions";
+
+// Add categoryForm
+import AddCategoryForm from "./AddCategoryForm";
 
 const style = {
   width: 400,
   marginTop: 30
 };
 
-const CategorySchema = Yup.object().shape({
-  name: Yup.string()
-    .min(2, "Title is too short")
-    .max(50, "Title is too long")
-    .required("This field is required")
-});
-
 // Component
-const Category = ({
-  auth,
-  fetchCategories,
-  addCategory,
-  notification,
-  postManagement
-}) => {
+const Category = ({ auth, fetchCategories, notification, postManagement }) => {
   const [cards, setCards] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -50,18 +35,6 @@ const Category = ({
     switch (notification.id) {
       case "FETCH_CATEGORIES_SUCCESS":
         setCards(postManagement.categories.results);
-        break;
-      case "ADD_CATEGORY_FAILED":
-        message.error(
-          notification.notifications ? notification.notifications.error : null
-        );
-        break;
-      case "ADD_CATEGORY_SUCCESS":
-        message.success(
-          notification.notifications ? notification.notifications.success : null
-        );
-        setModalVisible(postManagement.modal);
-        fetchCategories();
         break;
       default:
         return;
@@ -125,8 +98,7 @@ const Category = ({
     setModalVisible(true);
   };
 
-  const handleCancel = () => {
-    console.log("Clicked cancel button");
+  const handleModalClose = () => {
     setModalVisible(false);
   };
 
@@ -165,45 +137,8 @@ const Category = ({
           title="New Category"
           visible={modalVisible}
           className="modal-form"
-          onCancel={handleCancel}
         >
-          <Formik
-            initialValues={{
-              name: ""
-            }}
-            validationSchema={CategorySchema}
-            onSubmit={(values, { setFieldValue }) => {
-              console.log(values);
-              addCategory(values);
-            }}
-          >
-            {({ errors, touched }) => (
-              <Form>
-                <div
-                  className={
-                    errors.name && touched.name
-                      ? "has-feedback has-error"
-                      : null
-                  }
-                >
-                  <Field name="name" className="ant-input" id="category_name" />
-                  {errors.name && touched.name ? (
-                    <div className="ant-form-explain">{errors.name}</div>
-                  ) : null}
-                </div>
-                <div className="modal-form-footer">
-                  <Button onClick={handleCancel}>Cancel</Button>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={postManagement.loading}
-                  >
-                    Submit
-                  </Button>
-                </div>
-              </Form>
-            )}
-          </Formik>
+          <AddCategoryForm handleModalClose={handleModalClose} />
         </Modal>
       </Row>
     </>
@@ -220,5 +155,5 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  { addCategory, fetchCategories }
+  { fetchCategories }
 )(Category);

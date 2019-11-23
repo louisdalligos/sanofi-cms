@@ -4,7 +4,7 @@ import { Row, Col, Form, Input, Button, Select } from "antd";
 const { Option } = Select;
 const Search = Input.Search;
 
-const AdminsTableFilter = ({ ...props }) => {
+const AdminsTableFilter = ({ setStatePageSize, ...props }) => {
   const [status, setStatus] = useState([
     "active",
     "pending",
@@ -16,13 +16,13 @@ const AdminsTableFilter = ({ ...props }) => {
 
   // search function
   function onSearch(e) {
-    let obj = { search: e };
+    let obj = { search: e, per_page: setStatePageSize() };
     props.filterFetch({ ...obj }); // call filter fetch method for diff set of total result count
   }
 
   // filter accessed
   function onFilterAccessed(e) {
-    let obj = { accessed: e };
+    let obj = { accessed: e, per_page: setStatePageSize() };
     props.filterFetch({ ...obj });
   }
 
@@ -32,13 +32,14 @@ const AdminsTableFilter = ({ ...props }) => {
 
   // filter status
   function onFilterStatus(e) {
-    let obj = { status: e };
+    let obj = { status: e, per_page: setStatePageSize() };
     props.filterFetch({ ...obj });
   }
 
   // Reset function
   const handleResetFilters = () => {
-    props.fetch();
+    let obj = { per_page: 10 };
+    props.fetch({ ...obj });
     props.form.resetFields();
   };
 
@@ -87,22 +88,16 @@ const AdminsTableFilter = ({ ...props }) => {
                 )}
               </Form.Item>
             </Col>
-            <Col xs={24} md={5}>
-              <Form.Item>
-                {getFieldDecorator("filter_search", {})(
-                  <Search placeholder="name, email..." onSearch={onSearch} />
-                )}
-              </Form.Item>
-            </Col>
             <Col xs={24} md={4}>
               <Form.Item label="">
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={handleResetFilters}
-                >
+                <Button type="primary" onClick={handleResetFilters}>
                   Reset
                 </Button>
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={5}>
+              <Form.Item>
+                <Search placeholder="name, email..." onSearch={onSearch} />
               </Form.Item>
             </Col>
           </Row>

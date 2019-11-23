@@ -18,22 +18,17 @@ import {
   addSubCategory
 } from "../../redux/actions/post-management-actions/postManagementActions";
 
+// Add subcategoryForm
+import AddSubCategoryForm from "./AddSubCategoryForm";
+
 const style = {
   width: 400,
   marginTop: 30
 };
 
-const SubCategorySchema = Yup.object().shape({
-  name: Yup.string()
-    .min(2, "Title is too short")
-    .max(50, "Title is too long")
-    .required("This field is required")
-});
-
 // Component
 const SubCategory = ({
   auth,
-  addSubCategory,
   fetchSubCategories,
   notification,
   postManagement
@@ -50,18 +45,6 @@ const SubCategory = ({
     switch (notification.id) {
       case "FETCH_SUBCATEGORIES_SUCCESS":
         setCards(postManagement.subCategories.results);
-        break;
-      case "ADD_SUBCATEGORY_FAILED":
-        message.error(
-          notification.notifications ? notification.notifications.error : null
-        );
-        break;
-      case "ADD_SUBCATEGORY_SUCCESS":
-        message.success(
-          notification.notifications ? notification.notifications.success : null
-        );
-        setModalVisible(postManagement.modal);
-        fetchSubCategories();
         break;
       default:
         return;
@@ -123,8 +106,7 @@ const SubCategory = ({
     setModalVisible(true);
   };
 
-  const handleCancel = () => {
-    console.log("Clicked cancel button");
+  const handleModalClose = () => {
     setModalVisible(false);
   };
 
@@ -163,46 +145,8 @@ const SubCategory = ({
           title="New Subcategory"
           visible={modalVisible}
           className="modal-form"
-          onCancel={handleCancel}
         >
-          <Formik
-            initialValues={{
-              name: ""
-            }}
-            validationSchema={SubCategorySchema}
-            onSubmit={(values, { resetForm }) => {
-              console.log(values);
-              addSubCategory(values);
-              //resetForm();
-            }}
-          >
-            {({ errors, touched }) => (
-              <Form>
-                <div
-                  className={
-                    errors.name && touched.name
-                      ? "has-feedback has-error"
-                      : null
-                  }
-                >
-                  <Field name="name" className="ant-input" />
-                  {errors.name && touched.name ? (
-                    <div className="ant-form-explain">{errors.name}</div>
-                  ) : null}
-                </div>
-                <div className="modal-form-footer">
-                  <Button onClick={handleCancel}>Cancel</Button>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={postManagement.loading}
-                  >
-                    Submit
-                  </Button>
-                </div>
-              </Form>
-            )}
-          </Formik>
+          <AddSubCategoryForm handleModalClose={handleModalClose} />
         </Modal>
       </Row>
     </>
@@ -219,5 +163,5 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  { addSubCategory, fetchSubCategories }
+  { fetchSubCategories }
 )(SubCategory);

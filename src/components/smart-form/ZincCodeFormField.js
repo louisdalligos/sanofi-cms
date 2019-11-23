@@ -2,7 +2,12 @@ import React from "react";
 import { useField } from "formik";
 import MaskedInput from "antd-mask-input";
 
-const ZincCodeFormField = ({ label, placeholder, className, ...props }) => {
+const ZincCodeFormField = ({
+  placeholder,
+  className,
+  maskValidation,
+  ...props
+}) => {
   const [field, meta] = useField(props);
 
   const handleChange = e => {
@@ -18,23 +23,12 @@ const ZincCodeFormField = ({ label, placeholder, className, ...props }) => {
           : `${className} ant-form-item-control`
       }
     >
-      <label className={props.isRequired ? "ant-form-item-required" : null}>
-        {label}
-        {/* <input
-                    {...field}
-                    {...props}
-                    onChange={handleChange}
-                    className={"ant-input"}
-                    placeholder={placeholder}
-                /> */}
-
-        <MaskedInput
-          {...field}
-          {...props}
-          mask="AAAA.###.**.**.** | Version *.* | 11 ### 1111"
-          onChange={handleChange}
-        />
-      </label>
+      <MaskedInput
+        {...field}
+        {...props}
+        mask={maskValidation}
+        onChange={handleChange}
+      />
       {meta.touched && meta.error ? (
         <div className="ant-form-explain">{meta.error}</div>
       ) : null}

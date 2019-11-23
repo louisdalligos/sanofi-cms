@@ -12,17 +12,18 @@ const CreateProductPage = ({ history, ...props }) => {
     category_id: "",
     other_tags: [],
     specializations: [],
-    headline: "",
-    short_details: "",
+    product_name: "",
+    short_description: "",
     zinc_code: "",
     page_title: "",
     meta_description: "",
-    page_slug: "",
+    slug: "",
     meta_keywords: "",
     body: "",
-    featured: "",
-    masthead: "",
-    thumbnail: ""
+    image_gallery: [],
+    zinc_code1: "",
+    zinc_code2: "",
+    zinc_code3: ""
   });
 
   useEffect(() => {

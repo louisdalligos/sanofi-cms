@@ -3,13 +3,14 @@ import { useField } from "formik";
 import { Select } from "antd";
 const { Option } = Select;
 
-const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
+const EventTypeSelect = ({ label, placeholder, options, ...props }) => {
   const [field, meta] = useField(props);
+  const name = field.name;
+  const eventTypes = [{ id: 1, name: "Past" }, { id: 2, name: "Upcoming" }];
 
   const handleSelectChange = value => {
-    //let newValue = value.toString();
     console.log(value);
-    props.onChange(field.name, value);
+    props.onChange(name, value);
   };
 
   return (
@@ -30,18 +31,16 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
       <Select
         {...field}
         {...props}
-        mode="multiple"
-        placeholder={placeholder}
         onChange={handleSelectChange}
         notFoundContent="No results found"
       >
-        {options
-          ? options.map(c => (
-              <Option key={c.id} value={c.id} label={c.title}>
-                {c.title}
+        {eventTypes
+          ? eventTypes.map(c => (
+              <Option key={c.id} value={c.id}>
+                {c.name}
               </Option>
             ))
-          : null}
+          : []}
       </Select>
 
       {meta.touched && meta.error ? (
@@ -51,4 +50,4 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
   );
 };
 
-export default SelectTagsFormField;
+export default EventTypeSelect;

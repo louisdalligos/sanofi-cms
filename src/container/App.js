@@ -21,7 +21,7 @@ import CategoriesManagement from "../components/categories-management-page/Categ
 import SubCategoriesManagement from "../components/sub-categories-management-page/SubCategoriesManagement";
 import ProductsManagement from "../components/products-management-page/ProductsManagement";
 import CPDManagement from "../components/cpd-management-page/CPDManagement";
-import CMEManagement from "../components/cme-management/CMEManagement";
+import CMEManagement from "../components/cme-management-page/CMEManagement";
 import DoctorSpecialization from "../components/doctor-specialization-page/DoctorSpecialization";
 import OtherTags from "../components/other-tags-page/OtherTags";
 import Academy from "../components/academy-page/Academy";
@@ -39,6 +39,8 @@ import CreateArticlePage from "../components/therapy-areas-management-page/new-a
 import UpdateArticlePage from "../components/therapy-areas-management-page/update-article/UpdateArticlePage";
 import CreateProductPage from "../components/products-management-page/add-product/CreateProductPage";
 import UpdateProductPage from "../components/products-management-page/update-product/UpdateProductPage";
+import CreateCMEPage from "../components/cme-management-page/add-cme/CreateCMEPage";
+//import UpdateCMEPage from "../components/cme-management-page/update-cme/UpdateCMEPage";
 
 import { Role } from "../utils/role";
 import { getAuthUser } from "../redux/actions/auth-actions/authActions";
@@ -160,6 +162,18 @@ const App = ({ auth, ...props }) => {
               component={CMEManagement}
               roles={[Role.SuperAdmin, Role.Admin]}
             />
+            <PrivateRoute
+              exact
+              path="/cme/create"
+              component={CreateCMEPage}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            {/* <PrivateRoute
+                            exact
+                            path="/cme/:id"
+                            component={UpdateCMEPage}
+                            roles={[Role.SuperAdmin, Role.Admin]}
+                        /> */}
             <PrivateRoute
               exact
               path="/doctor-specialization"

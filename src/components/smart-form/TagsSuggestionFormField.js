@@ -20,7 +20,11 @@ const TagsSuggestionFormField = ({ label, placeholder, options, ...props }) => {
           : "ant-form-item-control"
       }
     >
-      <label className={props.isRequired ? "ant-form-item-required" : null}>
+      <label
+        className={
+          props.requiredlabel === "true" ? "ant-form-item-required" : null
+        }
+      >
         {label}
       </label>
       <Select

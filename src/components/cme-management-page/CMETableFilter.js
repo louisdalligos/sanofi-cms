@@ -5,38 +5,43 @@ import { Row, Col, Form, Input, Button, Select } from "antd";
 // redux actions import
 import { fetchSpecializations } from "../../redux/actions/post-management-actions/postManagementActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
+import { fetchCategories } from "../../redux/actions/post-management-actions/postManagementActions";
 
 const { Option } = Select;
 const Search = Input.Search;
 
-const UsersTableFilter = ({
+const ProductsTableFilter = ({
   fetchSpecializations,
+  fetchCategories,
   postManagement,
   notifs,
   clearNotifications,
   setStatePageSize,
   ...props
 }) => {
+  const { getFieldDecorator } = props.form;
+
+  const [categories, setCategories] = useState([]);
   const [status, setStatus] = useState([
-    "active",
-    "pending",
-    "blocked",
-    "deleted"
+    "published",
+    "unpublished",
+    "archived"
   ]);
   const [specializations, setSpecializations] = useState([]);
 
-  const { getFieldDecorator } = props.form;
-
   useEffect(() => {
+    fetchCategories();
     fetchSpecializations();
-    console.log(props.resetFields);
-    //eslint-disable-next-line
   }, []);
 
   useEffect(() => {
     switch (notifs.id) {
       case "FETCH_SPECIALIZATIONS_SUCCESS":
         setSpecializations(postManagement.specializations);
+        clearNotifications();
+        break;
+      case "FETCH_CATEGORIES_SUCCESS":
+        setCategories(postManagement.categories.results);
         clearNotifications();
         break;
       default:
@@ -51,9 +56,9 @@ const UsersTableFilter = ({
     props.filterFetch({ ...obj }); // call filter fetch method for diff set of total result count
   }
 
-  // filter accessed
-  function onFilterAccessed(e) {
-    let obj = { accessed: e, per_page: setStatePageSize() };
+  // filter category
+  function onFilterCategory(e) {
+    let obj = { categories: e, per_page: setStatePageSize() };
     props.filterFetch({ ...obj });
   }
 
@@ -92,6 +97,7 @@ const UsersTableFilter = ({
                       placeholder="Select a status"
                       onChange={onFilterStatus}
                     >
+                      <Option value="">All status</Option>
                       {status
                         ? status.map(s => (
                             <Option key={s} value={s}>
@@ -124,18 +130,19 @@ const UsersTableFilter = ({
               </Col>
               <Col xs={24} md={5}>
                 <Form.Item label="">
-                  {getFieldDecorator("filter_lastAccessed", {})(
+                  {getFieldDecorator("filter_subCategory", {})(
                     <Select
-                      placeholder="Select last accessed"
-                      onChange={onFilterAccessed}
+                      placeholder="Select a category"
+                      onChange={onFilterCategory}
                     >
-                      <Option value="anytime">Anytime</Option>
-                      <Option value="today">Today</Option>
-                      <Option value="within_seven_days">Within 7 days</Option>
-                      <Option value="within_thirty_days">Within 30 days</Option>
-                      <Option value="not_within_365_days">
-                        Not within 365 days
-                      </Option>
+                      <Option value="">All category</Option>
+                      {categories
+                        ? categories.map(c => (
+                            <Option key={c.id} value={c.id}>
+                              {c.name}
+                            </Option>
+                          ))
+                        : "No results found"}
                     </Select>
                   )}
                 </Form.Item>
@@ -149,7 +156,7 @@ const UsersTableFilter = ({
               </Col>
               <Col xs={24} md={5}>
                 <Form.Item>
-                  <Search placeholder="name, email..." onSearch={onSearch} />
+                  <Search placeholder="title, tag..." onSearch={onSearch} />
                 </Form.Item>
               </Col>
             </Row>
@@ -160,8 +167,8 @@ const UsersTableFilter = ({
   );
 };
 
-const WrappedUsersTableFilter = Form.create({ name: "user_filter" })(
-  UsersTableFilter
+const WrappedCMETableFilter = Form.create({ name: "products_filter" })(
+  ProductsTableFilter
 );
 
 const mapStateToProps = state => {
@@ -175,6 +182,7 @@ export default connect(
   mapStateToProps,
   {
     clearNotifications,
-    fetchSpecializations
+    fetchSpecializations,
+    fetchCategories
   }
-)(WrappedUsersTableFilter);
+)(WrappedCMETableFilter);

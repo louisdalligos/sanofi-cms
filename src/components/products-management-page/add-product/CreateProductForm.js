@@ -24,33 +24,38 @@ import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
 import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 
+// Other components
+import ImageUploader from "./ImageUploader";
+
+import { sampleZincFormat } from "../../../utils/constant";
+
 // validation schema
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
-  //specializations: Yup.string().required("This field is required"),
+  specializations: Yup.string().required("This field is required"),
+  other_tags: Yup.string().required("This field is required"),
   short_description: Yup.string()
     .min(1, "Short description is too short")
-    .max(150, "Product name is too long")
+    .max(150, "Short description is too long")
     .required("This field is required"),
   product_name: Yup.string()
     .min(1, "Product name is too short")
-    .max(150, "Product name is too long")
+    .max(60, "Product name is too long")
     .required("This field is required"),
-  zinc_code: Yup.string().required("This field is required"),
+  //zinc_code: Yup.string().required("This field is required"),
   page_title: Yup.string()
-    .min(1, "Title is too short")
+    .min(1, "Page title is too short")
     .max(60, "Page title is too long")
     .required("This field is required"),
   meta_description: Yup.string()
-    .min(1, "Description is too short")
+    .min(1, "Meta description is too short")
     .max(150, "Meta description is too long")
     .required("This field is required"),
-  body: Yup.string().required("This field is required")
+  body: Yup.string().required("This field is required"),
+  zinc_code1: Yup.string().required("Required field"),
+  zinc_code2: Yup.string().required("Required field"),
+  zinc_code3: Yup.string().required("Required field")
 });
-
-// sample format tooltip text
-const sampleZincFormat =
-  "Sample format: SAPH.TJO.19.05.0200 | Version 2.5 | 30 May 2019";
 
 const CreateProductForm = ({
   notifs,
@@ -64,6 +69,7 @@ const CreateProductForm = ({
 }) => {
   const [categories, setCategories] = useState([]);
   const [specializations, setSpecializations] = useState([]);
+  const [imageGalleryFiles, setImageGalleryFiles] = useState([]);
 
   useEffect(() => {
     fetchCategories();
@@ -82,6 +88,7 @@ const CreateProductForm = ({
       case "CREATE_PRODUCT_SUCCESS":
         clearNotifications();
         message.success(notifs.notifications.success);
+        history.push("/products");
         break;
       case "CREATE_PRODUCT_FAILED":
         clearNotifications();
@@ -95,38 +102,51 @@ const CreateProductForm = ({
         return;
     }
     //eslint-disable-next-line
-  }, [notifs.id]);
+  }, [notifs.id, notifs.notifications]);
+
+  // get the file
+  const getImage = (name, file) => {
+    console.log(file);
+    console.log(name);
+    //debugger;
+
+    if (name === "image_gallery") {
+      setImageGalleryFiles([...imageGalleryFiles, file]);
+    }
+  };
 
   const submitForm = (values, action) => {
     clearNotifications();
     action.setSubmitting(true);
-    let formData = new FormData();
-    let formattedSlug;
 
-    // do our custom formating of data here
-    if (values.slug) {
-      console.log(values.slug);
-      debugger;
-      formattedSlug = values.slug.replace(/\s+/g, "-").toLowerCase();
-    } else {
-      formattedSlug = "";
+    let formData = new FormData();
+
+    formData.append("category_id", values.category_id);
+    formData.append("other_tags", values.other_tags);
+    values.specializations.length === 0
+      ? formData.append("specializations", null)
+      : formData.append("specializations", values.specializations);
+    formData.append("product_name", values.product_name);
+    formData.append("short_description", values.short_description);
+    formData.append(
+      "zinc_code",
+      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
+    );
+    formData.append("page_title", values.page_title);
+    formData.append("meta_description", values.meta_description);
+    formData.append("slug", values.slug);
+    formData.append("meta_keywords", values.meta_keywords);
+    formData.append("body", values.body);
+
+    //if theres an uploaded image include these field on our form data
+    if (values.image_gallery) {
+      //formData.set("image_gallery[]", imageGalleryFiles);
+      for (let i = 0; i < imageGalleryFiles.length; i++) {
+        formData.append("image_gallery[]", imageGalleryFiles[i]);
+      }
     }
 
-    formData.set("category_id", values.category_id);
-    formData.set("other_tags", values.other_tags);
-    values.specializations.length === 0
-      ? formData.set("specializations", null)
-      : formData.set("specializations", values.specializations);
-    formData.set("product_name", values.product_name);
-    formData.set("short_description", values.short_description);
-    formData.set("zinc_code", values.zinc_code);
-    formData.set("page_title", values.page_title);
-    formData.set("meta_description", values.meta_description);
-    formData.set("slug", formattedSlug);
-    formData.set("meta_keywords", values.meta_keywords);
-    formData.set("body", values.body);
-
-    createProduct(formData);
+    createProduct(formData); // redux action
     action.setSubmitting(false);
   };
 
@@ -137,9 +157,11 @@ const CreateProductForm = ({
         initialValues={data}
         onSubmit={submitForm}
         validationSchema={schema}
+        validateOnChange={false}
+        validateOnBlur={false}
       >
         {props => (
-          <Form className="therapy-article-form">
+          <Form className="product-form">
             <Row gutter={24} className="form-section">
               <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
               <Col xs={24} md={8}>
@@ -148,57 +170,77 @@ const CreateProductForm = ({
                   label="Category"
                   name="category_id"
                   onChange={props.setFieldValue}
-                  required={true}
+                  requiredlabel="true"
                 />
                 <TagsSuggestionFormField
                   placeholder={"Select a tag"}
                   label="Other tags"
                   name="other_tags"
                   onChange={props.setFieldValue}
-                  required={false}
+                  requiredlabel="true"
                 />
               </Col>
-              <Col xs={24} md={8}>
+              <Col xs={24} md={7}>
                 <SelectTagsFormField
                   options={specializations}
                   label="Specializations"
                   name="specializations"
                   onChange={props.setFieldValue}
-                  required={false}
                   placeholder="Please select a specialization"
+                  requiredlabel="true"
                 />
               </Col>
-              <Col xs={24} md={8}>
+              <Col xs={24} md={9}>
                 <TextFormField
                   name="short_description"
                   type="text"
                   label="Short Description"
-                  required={true}
+                  requiredlabel="true"
                   placeholder="Enter a short description"
                 />
                 <TextFormField
                   name="product_name"
                   type="text"
                   label="Product Name"
-                  required={true}
+                  requiredlabel="true"
                   placeholder="Enter a product name"
                 />
 
+                <label
+                  style={{
+                    display: "block",
+                    margin: "15px 0"
+                  }}
+                  className="ant-form-item-required"
+                >
+                  <span>Zinc Code </span>{" "}
+                  <Tooltip placement="top" title={sampleZincFormat}>
+                    <Icon type="info-circle" style={{ color: "#1890ff" }} />
+                  </Tooltip>
+                </label>
                 <ZincCodeFormField
-                  className="zinc-code-field"
-                  name="zinc_code"
+                  className="zinc-code-field1"
+                  name="zinc_code1"
                   type="text"
                   onChange={props.setFieldValue}
-                  label={
-                    <div>
-                      <span>Zinc Code </span>{" "}
-                      <Tooltip placement="top" title={sampleZincFormat}>
-                        <Icon type="info-circle" style={{ color: "#1890ff" }} />
-                      </Tooltip>
-                    </div>
-                  }
-                  required={true}
-                  placeholder="Enter a zinc code"
+                  maskValidation="AAAA.AAA.11.11.11"
+                  size="small"
+                />
+                <ZincCodeFormField
+                  className="zinc-code-field2"
+                  name="zinc_code2"
+                  type="text"
+                  onChange={props.setFieldValue}
+                  maskValidation="Version 1.1"
+                  size="small"
+                />
+                <ZincCodeFormField
+                  className="zinc-code-field3"
+                  name="zinc_code3"
+                  type="text"
+                  onChange={props.setFieldValue}
+                  maskValidation="11 A** 1111"
+                  size="small"
                 />
               </Col>
             </Row>
@@ -210,14 +252,14 @@ const CreateProductForm = ({
                   name="page_title"
                   type="text"
                   label="Page Title"
-                  required={true}
+                  requiredlabel="true"
                   placeholder="Enter a page title"
                 />
                 <TextFormField
                   name="meta_description"
                   type="text"
                   label="Meta Description"
-                  required={true}
+                  requiredlabel="true"
                   placeholder="Enter a meta description"
                 />
               </Col>
@@ -228,14 +270,12 @@ const CreateProductForm = ({
                   type="text"
                   label="Page Slug(Optional - system will generate if empty"
                   placeholder="Enter a page slug"
-                  required={false}
                 />
                 <TextFormField
                   name="meta_keywords"
                   type="text"
                   label="Meta Keywords(Optional)"
                   placeholder="Enter meta keywords"
-                  required={false}
                 />
               </Col>
             </Row>
@@ -243,11 +283,11 @@ const CreateProductForm = ({
             {/* 3nd row */}
             <Row gutter={24} className="form-section last">
               <Col xs={24} md={8}>
-                <h3>Feature Image</h3>
-                {/* <ImageUploader getImage={getImage} /> */}
+                <h3>Gallery Images</h3>
+                <ImageUploader getImage={getImage} />
               </Col>
               <Col xs={24} md={16}>
-                <h3>Product Description</h3>
+                <h3 className="ant-form-item-required">Product Description</h3>
                 <Field name="body">
                   {({ field, form: { touched, errors }, meta }) => (
                     <div
@@ -283,7 +323,7 @@ const CreateProductForm = ({
                 <Link to="/therapy-areas">Cancel</Link>
               </Button>
               <Button htmlType="submit" type="primary">
-                Save
+                Save Draft
               </Button>
             </div>
 
