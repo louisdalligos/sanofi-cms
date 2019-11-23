@@ -192,18 +192,18 @@ const CreateProductForm = ({
               </Col>
               <Col xs={24} md={9}>
                 <TextFormField
-                  name="short_description"
-                  type="text"
-                  label="Short Description"
-                  requiredlabel="true"
-                  placeholder="Enter a short description"
-                />
-                <TextFormField
                   name="product_name"
                   type="text"
                   label="Product Name"
                   requiredlabel="true"
                   placeholder="Enter a product name"
+                />
+                <TextFormField
+                  name="short_description"
+                  type="text"
+                  label="Short Description"
+                  requiredlabel="true"
+                  placeholder="Enter a short description"
                 />
 
                 <label

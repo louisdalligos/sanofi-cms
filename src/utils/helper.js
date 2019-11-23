@@ -10,3 +10,18 @@ export function blobToFile(theBlob, fileName) {
   theBlob.name = fileName;
   return theBlob;
 }
+
+export const renameKeys = (keysMap, obj) => {
+  debugger;
+  return Object.keys(obj).reduce((acc, key) => {
+    debugger;
+    const renamedObject = {
+      [keysMap[key] || key]: obj[key]
+    };
+    debugger;
+    return {
+      ...acc,
+      ...renamedObject
+    };
+  }, {});
+};

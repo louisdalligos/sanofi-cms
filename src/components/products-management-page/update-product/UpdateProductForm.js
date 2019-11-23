@@ -114,6 +114,7 @@ const UpdateProductForm = ({
   const [zincode3, setZincCode3] = useState("");
 
   const [imageGalleryFiles, setImageGalleryFiles] = useState([]);
+  const [defaultList, setDefaultList] = useState([]); // image list shape per antd docu
 
   useEffect(() => {
     setLoading(true);
@@ -189,6 +190,13 @@ const UpdateProductForm = ({
 
       // work on our gallery images
       setImageGalleryFiles(currentProduct.product_images);
+      let modifiedData = currentProduct.product_images.map(item => {
+        item.status = "done";
+        item.name = item.filename;
+        return item;
+      });
+      console.log(modifiedData, "Modified");
+      setDefaultList(modifiedData);
 
       // if product has been fetched, fetch our articles by the category id provided
       fetchCurrentProductArticlesByCategoryId(currentProduct.category_id);
@@ -199,7 +207,8 @@ const UpdateProductForm = ({
     setLoading,
     setSelectedSpecializations,
     setOtherTags,
-    setImageGalleryFiles
+    setImageGalleryFiles,
+    fetchCurrentProductArticlesByCategoryId
   ]);
 
   useEffect(() => {
@@ -524,10 +533,7 @@ const UpdateProductForm = ({
                 <Row gutter={24} className="form-section last">
                   <Col xs={24} md={8}>
                     <h3>Gallery Images</h3>
-                    <ImageUploader
-                      getImage={getImage}
-                      data={imageGalleryFiles}
-                    />
+                    <ImageUploader getImage={getImage} data={defaultList} />
                   </Col>
                   <Col xs={24} md={16}>
                     <h3>Product Description</h3>

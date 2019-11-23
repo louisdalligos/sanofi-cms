@@ -1,13 +1,17 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Upload, Icon, message, Button } from "antd";
+import { Upload, Icon, message, Button, Spin } from "antd";
 import { useFormikContext } from "formik";
 
 import axios from "axios";
 import { API } from "../../../utils/api";
 
+import { renameKeys } from "../../../utils/helper";
+
 // library
 import Resizer from "../../library/ImageResizer";
+
+const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 const description = [
   <ul style={{ marginTop: 20 }}>
@@ -20,10 +24,10 @@ const description = [
   </ul>
 ];
 
-const ImageUploader = ({ auth, getImage, ...props }) => {
+const ImageUploader = ({ auth, data, getImage, ...props }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadedFileList, setUploadedFileList] = useState([]);
-  const [defaultList, setDefaultList] = useState([]);
+  const [isSpinning, setIsSpinning] = useState(true);
 
   const { setFieldValue, values } = useFormikContext();
 
@@ -37,32 +41,24 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
   }, [uploadedFileList, setUploadedFileList]);
 
   useEffect(() => {
-    setDefaultList(props.data);
-    //console.log(props.data);
-  }, [props.data, setDefaultList]);
+    if (data.length !== 0) {
+      setIsSpinning(false);
+    }
+  }, [data]);
 
   const handleRemove = file => {
-    console.log(file);
     const index = uploadedFileList.indexOf(file);
     const newFileList = uploadedFileList.slice();
     newFileList.splice(index, 1);
     setUploadedFileList(newFileList);
-
-    console.log(uploadedFileList);
-    debugger;
   };
 
   const handleBeforeUpload = file => {
-    console.log(file, "BEFORE UPLOAD");
     setUploadedFileList([...uploadedFileList, file]);
-    console.log(uploadedFileList, "UPDATED AFTER UPLOAD");
     return false;
   };
 
   const handleChange = ({ file, fileList }) => {
-    console.log(file, "on change");
-    debugger;
-
     // Generate a file image blob
     Resizer.imageFileResizer(
       file,
@@ -86,11 +82,9 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
   };
 
   const handleUpload = () => {
-    console.log(uploadedFileList, "UPLOADED LIST");
     const formData = new FormData();
 
     uploadedFileList.forEach(file => {
-      console.log("File uploaded", file);
       formData.append("image", file);
     });
 
@@ -106,14 +100,12 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
     })
       .then(async () => {
         // set our file
-        const file = uploadedFileList[0];
-        console.log(file);
+        //const file = uploadedFileList[0];
 
         setUploading(false);
         message.success("upload successfully.");
       })
       .catch(err => {
-        console.log(err.response);
         setUploading(false);
         message.error(
           err.response ? err.response.data.error : "Oops! Something went wrong!"
@@ -121,32 +113,50 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
       });
   };
 
+  // Handle clearing of images
+  const handleClearImages = () => {
+    setUploadedFileList([]);
+    setImageFormFieldStatus("image_gallery", "");
+  };
+
   return (
     <Fragment>
-      <Upload
-        onRemove={handleRemove}
-        beforeUpload={handleBeforeUpload}
-        onChange={handleChange}
-        //fileList={uploadedFileList}
-        defaultFileList={defaultList}
-        accept="image/*"
-      >
-        <Button disabled={uploadedFileList.length === 5}>
-          <Icon type="upload" /> Select File
-        </Button>
-      </Upload>
+      <Spin indicator={antIcon} spinning={isSpinning}>
+        <Upload
+          onRemove={handleRemove}
+          beforeUpload={handleBeforeUpload}
+          onChange={handleChange}
+          fileList={uploadedFileList}
+          defaultFileList={data}
+          accept="image/*"
+        >
+          <Button disabled={uploadedFileList.length === 5}>
+            <Icon type="upload" /> Select File
+          </Button>
+        </Upload>
 
-      {description}
+        {description}
 
-      <Button
-        type="primary"
-        onClick={handleUpload}
-        loading={uploading}
-        style={{ marginTop: 16 }}
-        disabled={uploadedFileList.length < 3}
-      >
-        {uploading ? "Uploading..." : "Upload"}
-      </Button>
+        <div className="upload-gallery-action">
+          <Button
+            type="primary"
+            onClick={handleUpload}
+            loading={uploading}
+            style={{ marginTop: 16 }}
+            disabled={uploadedFileList.length < 3}
+          >
+            {uploading ? "Uploading..." : "Upload"}
+          </Button>
+
+          <Button
+            type="link"
+            onClick={handleClearImages}
+            disabled={uploadedFileList.length === 0}
+          >
+            Clear images
+          </Button>
+        </div>
+      </Spin>
     </Fragment>
   );
 };
