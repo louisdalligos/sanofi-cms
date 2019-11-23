@@ -191,6 +191,7 @@ const UpdateProductForm = ({
       // work on our gallery images
       setImageGalleryFiles(currentProduct.product_images);
       let modifiedData = currentProduct.product_images.map(item => {
+        item.uid = item.id;
         item.status = "done";
         item.name = item.filename;
         return item;

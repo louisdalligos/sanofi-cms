@@ -41,9 +41,12 @@ const ImageUploader = ({ auth, data, getImage, ...props }) => {
   }, [uploadedFileList, setUploadedFileList]);
 
   useEffect(() => {
-    if (data.length !== 0) {
-      setIsSpinning(false);
-    }
+    console.log(data);
+    // temp data
+    setUploadedFileList(data);
+    setIsSpinning(false);
+    console.log(uploadedFileList);
+    //eslint-disable-next-line
   }, [data]);
 
   const handleRemove = file => {
@@ -127,7 +130,6 @@ const ImageUploader = ({ auth, data, getImage, ...props }) => {
           beforeUpload={handleBeforeUpload}
           onChange={handleChange}
           fileList={uploadedFileList}
-          defaultFileList={data}
           accept="image/*"
         >
           <Button disabled={uploadedFileList.length === 5}>
