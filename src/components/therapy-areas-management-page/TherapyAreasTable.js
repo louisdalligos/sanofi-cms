@@ -8,7 +8,8 @@ import {
   Modal,
   Tooltip,
   Pagination,
-  Tag
+  Tag,
+  Typography
 } from "antd";
 import { Link } from "react-router-dom";
 
@@ -27,6 +28,9 @@ import { clearNotifications } from "../../redux/actions/notification-actions/not
 // Table components
 import WrappedTherapyAreasTableFilter from "./TherapyAreasTableFilter";
 import PageBreadcrumb from "./PageBreadcrumb";
+
+// Import our table config settings
+import { COLUMN_ITEM_LINK, COLUMN_ITEM_SHORT_DESC } from "../../utils/config";
 
 const { confirm } = Modal;
 
@@ -80,27 +84,35 @@ const TherapyAreasTable = ({
       )
     },
     {
-      title: "Page Title",
+      title: "Article Title/Thumbnail",
       dataIndex: "page_title",
       rowKey: "id",
       sorter: true,
+      width: 400,
       render: (text, record) => (
-        <Button type="link" onClick={e => handleSelectArticle(record.id, e)}>
-          <Link to={`/therapy-areas/${record.id}`}>{text}</Link>
-        </Button>
-      )
-    },
-    {
-      title: "Thumbnail Image",
-      dataIndex: "thumbnail_image",
-      rowKey: "id",
-      width: 150,
-      render: (text, record) => (
-        <img
-          src={record.thumbnail_image ? record.thumbnail_image : noImage}
-          alt={text}
-          className="table-list-thumbnail-image"
-        />
+        <div className="table-title-featured-wrap">
+          <img
+            src={record.thumbnail_image ? record.thumbnail_image : noImage}
+            alt={text}
+            className="table-list-thumbnail-image"
+          />
+          <div>
+            <Button
+              type="link"
+              onClick={e => handleSelectArticle(record.id, e)}
+            >
+              <Link to={`/therapy-areas/${record.id}`}>
+                <Typography.Text ellipsis={true} style={COLUMN_ITEM_LINK}>
+                  {text}
+                </Typography.Text>
+              </Link>
+            </Button>
+
+            <Typography.Text ellipsis={true} style={COLUMN_ITEM_SHORT_DESC}>
+              {record.short_description}
+            </Typography.Text>
+          </div>
+        </div>
       )
     },
     {

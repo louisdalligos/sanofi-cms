@@ -98,7 +98,6 @@ const ProductsTable = ({
       width: 400,
       render: (text, record) => (
         <div className="table-title-featured-wrap">
-          {/* <img src={record.thumbnail_image} alt="" width="70" /> */}
           <img
             src={record.thumbnail_image ? record.thumbnail_image : noImage}
             alt={text}
