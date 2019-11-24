@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import { Select, Button, message } from "antd";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
@@ -164,8 +165,13 @@ const ClinicalTrialsForm = ({ articles, productId, auth, ...props }) => {
         </div>
       </DndProvider>
 
-      <div className="form-actions" onClick={handleSave}>
-        <Button type="primary">Save</Button>
+      <div className="form-actions">
+        <Button style={{ marginRight: 10 }}>
+          <Link to="/products">Cancel</Link>
+        </Button>
+        <Button type="primary" onClick={handleSave}>
+          Save
+        </Button>
       </div>
     </div>
   );

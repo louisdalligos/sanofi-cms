@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Upload, Icon, message, Button } from "antd";
+import { Link } from "react-router-dom";
 
 import axios from "axios";
 import { API } from "../../../utils/api";
@@ -95,6 +96,9 @@ const FileUploader = ({
       </Upload>
 
       <div className="form-actions">
+        <Button style={{ marginRight: 10 }}>
+          <Link to="/products">Cancel</Link>
+        </Button>
         <Button type="primary" onClick={handleUpload}>
           Save
         </Button>

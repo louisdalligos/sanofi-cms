@@ -122,7 +122,7 @@ const UpdateProductForm = ({
     false
   );
   const [isOtherReferencesDisabled, setOtherReferencesTabDisabled] = useState(
-    true
+    false
   );
 
   useEffect(() => {
@@ -609,7 +609,7 @@ const UpdateProductForm = ({
         <TabPane tab="Prescription Info" key="2">
           <Row>
             <h3 style={{ marginBottom: 20 }}>Upload file/s</h3>
-            <Col md={12}>
+            <Col>
               <FileUploader
                 productId={currentProductId}
                 //updateAction={updateProduct}
@@ -626,7 +626,7 @@ const UpdateProductForm = ({
         >
           <Row>
             <h3 style={{ marginBottom: 20 }}>Select article link</h3>
-            <Col md={12}>
+            <Col>
               <ClinicalTrialsForm
                 productId={currentProductId}
                 auth={auth}
@@ -642,14 +642,8 @@ const UpdateProductForm = ({
         >
           <Row>
             <h3 style={{ marginBottom: 20 }}>Select other resources</h3>
-            <Col md={12}>
-              <ResourcesForm />
-
-              <div className="form-actions">
-                <Button htmlType="submit" type="primary">
-                  Save Draft
-                </Button>
-              </div>
+            <Col>
+              <ResourcesForm productId={currentProductId} auth={auth} />
             </Col>
           </Row>
         </TabPane>
