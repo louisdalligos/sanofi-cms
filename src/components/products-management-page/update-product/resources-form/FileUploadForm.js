@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 import { withFormik, Field } from "formik";
 import { Button, message } from "antd";
 import * as Yup from "yup";
+
 import axios from "axios";
-
-import TextFormField from "../../../smart-form/TextFormField";
-
-import UploadFile from "./UploadFile";
-
 import { API } from "../../../../utils/api";
+
+// Form components
+import TextFormField from "../../../smart-form/TextFormField";
+import UploadFile from "./UploadFile";
 
 // validation schema
 const schema = Yup.object().shape({
@@ -108,12 +108,14 @@ export default withFormik({
       data: formData
     })
       .then(res => {
+        setSubmitting(false);
         console.log(res);
         message.success(
           res.data.success ? res.data.success : "Updated product successfully"
         );
       })
       .catch(err => {
+        setSubmitting(false);
         console.log(err);
         // message.error(
         //   err.response.data.error
@@ -121,8 +123,6 @@ export default withFormik({
         //     : "There was an error on processing your request"
         // );
       });
-
-    setSubmitting(false);
   },
   displayName: "FileUploadForm"
 })(FileUploadForm);

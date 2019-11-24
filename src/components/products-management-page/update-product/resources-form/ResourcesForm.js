@@ -30,11 +30,11 @@ const ResourcesForm = ({ auth, productId }) => {
       </Select>
 
       {currentForm === "video" ? (
-        <VideoEmbedForm />
+        <VideoEmbedForm productId={productId} auth={auth} />
       ) : currentForm === "file" ? (
         <FileUploadForm productId={productId} auth={auth} />
       ) : currentForm === "link" ? (
-        <LinkForm />
+        <LinkForm productId={productId} auth={auth} />
       ) : null}
     </div>
   );

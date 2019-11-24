@@ -1,9 +1,13 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { withFormik, Field } from "formik";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import * as Yup from "yup";
 
+import axios from "axios";
+import { API } from "../../../../utils/api";
+
+// Form components
 import TextFormField from "../../../smart-form/TextFormField";
 
 // validation schema
@@ -80,9 +84,33 @@ export default withFormik({
     };
   },
   validationSchema: schema,
-  handleSubmit: (values, { setSubmitting }) => {
-    console.log(values);
-    setSubmitting(false);
+  handleSubmit: (values, { props, setSubmitting }) => {
+    axios({
+      url: `${API}/products/update/${props.productId}`,
+      method: "post",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${props.auth.access_token}`
+      },
+      data: values
+    })
+      .then(res => {
+        setSubmitting(false);
+        console.log(res);
+        message.success(
+          res.data.success ? res.data.success : "Updated product successfully"
+        );
+      })
+      .catch(err => {
+        setSubmitting(false);
+        console.log(err);
+        // message.error(
+        //   err.response.data.error
+        //     ? err.response.data.error
+        //     : "There was an error on processing your request"
+        // );
+      });
   },
   displayName: "LinkForm"
 })(LinkForm);
