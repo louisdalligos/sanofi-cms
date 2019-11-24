@@ -5,15 +5,14 @@ import { Button } from "antd";
 import * as Yup from "yup";
 
 import TextFormField from "../../../smart-form/TextFormField";
-import TextAreaFormField from "../../../smart-form/TextAreaFormField";
 
 // validation schema
 const schema = Yup.object().shape({
-  video_embed: Yup.string().required("This field is required"),
+  links: Yup.string().required("This field is required"),
   title: Yup.string().required("This field is required")
 });
 
-const VideoEmbedForm = props => {
+const LinkForm = props => {
   const {
     values,
     handleChange,
@@ -25,12 +24,12 @@ const VideoEmbedForm = props => {
 
   useEffect(() => {
     setSubmitting(false);
-
     return () => {
       resetForm();
     };
     //eslint-disable-next-line
   }, []);
+
   useEffect(() => {
     if (onChange) {
       onChange(values);
@@ -39,14 +38,14 @@ const VideoEmbedForm = props => {
 
   return (
     <form className="form" onSubmit={handleSubmit}>
-      <h3>Video Information</h3>
+      <h3>File Upload Information</h3>
+
       <Field
-        as={TextAreaFormField}
-        rows={4}
-        name="video_embed"
+        as={TextFormField}
+        name="links"
         onChange={handleChange}
-        values={values.video_embed}
-        label="Video Embed Code:"
+        values={values.links}
+        label="Link"
         requiredlabel="true"
       />
 
@@ -55,7 +54,7 @@ const VideoEmbedForm = props => {
         name="title"
         onChange={handleChange}
         values={values.title}
-        label="Video Title"
+        label="Link Title"
         requiredlabel="true"
       />
 
@@ -76,7 +75,7 @@ const VideoEmbedForm = props => {
 export default withFormik({
   mapPropsToValues: () => {
     return {
-      video_embed: "",
+      links: "",
       title: ""
     };
   },
@@ -85,5 +84,5 @@ export default withFormik({
     console.log(values);
     setSubmitting(false);
   },
-  displayName: "VideoEmbedForm"
-})(VideoEmbedForm);
+  displayName: "LinkForm"
+})(LinkForm);

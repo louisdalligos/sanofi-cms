@@ -641,7 +641,6 @@ const UpdateProductForm = ({
           disabled={isOtherReferencesDisabled}
         >
           <Row>
-            <h3 style={{ marginBottom: 20 }}>Select other resources</h3>
             <Col>
               <ResourcesForm productId={currentProductId} auth={auth} />
             </Col>
