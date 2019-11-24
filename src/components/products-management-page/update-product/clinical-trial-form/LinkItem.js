@@ -12,7 +12,7 @@ const style = {
 };
 
 const Card = React.forwardRef(
-  ({ text, isDragging, connectDragSource, connectDropTarget }, ref) => {
+  ({ key, text, isDragging, connectDragSource, connectDropTarget }, ref) => {
     const elementRef = useRef(null);
     connectDragSource(elementRef);
     connectDropTarget(elementRef);
@@ -25,7 +25,7 @@ const Card = React.forwardRef(
       console.log(connectDragSource);
     };
     return (
-      <div ref={elementRef} style={{ ...style, opacity }}>
+      <div ref={elementRef} style={{ ...style, opacity }} key={key}>
         <span style={{ marginRight: "auto" }}>{text}</span>
 
         <Button

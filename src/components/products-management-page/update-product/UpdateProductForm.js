@@ -628,6 +628,7 @@ const UpdateProductForm = ({
             <h3 style={{ marginBottom: 20 }}>Select article link</h3>
             <Col md={12}>
               <ClinicalTrialsForm
+                productId={currentProductId}
                 auth={auth}
                 enableOtherReferencesTab={enableOtherReferencesTab}
               />
