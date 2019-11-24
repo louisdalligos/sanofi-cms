@@ -76,6 +76,7 @@ const schema = Yup.object().shape({
 const { TabPane } = Tabs;
 
 const UpdateProductForm = ({
+  auth,
   notifs,
   postManagement,
   fetchCategories,
@@ -115,6 +116,14 @@ const UpdateProductForm = ({
 
   const [imageGalleryFiles, setImageGalleryFiles] = useState([]);
   const [defaultList, setDefaultList] = useState([]); // image list shape per antd docu
+
+  // Tabs state
+  const [isClinalTrialsTabDisabled, setIsClinalTrialsTabDisabled] = useState(
+    false
+  );
+  const [isOtherReferencesDisabled, setOtherReferencesTabDisabled] = useState(
+    true
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -327,6 +336,15 @@ const UpdateProductForm = ({
 
   const callback = key => {
     console.log(key);
+  };
+
+  const enableClinicalTrialsTab = val => {
+    console.log(val);
+    setIsClinalTrialsTabDisabled(val);
+  };
+
+  const enableOtherReferencesTab = val => {
+    setOtherReferencesTabDisabled(val);
   };
 
   return (
@@ -594,26 +612,33 @@ const UpdateProductForm = ({
             <Col md={12}>
               <FileUploader
                 productId={currentProductId}
-                updateAction={updateProduct}
+                //updateAction={updateProduct}
+                auth={auth}
+                enableClinicalTrialsTab={enableClinicalTrialsTab}
               />
             </Col>
           </Row>
         </TabPane>
-        <TabPane tab="Clinical Trials" key="3">
+        <TabPane
+          tab="Clinical Trials"
+          key="3"
+          disabled={isClinalTrialsTabDisabled}
+        >
           <Row>
             <h3 style={{ marginBottom: 20 }}>Select article link</h3>
             <Col md={12}>
-              <ClinicalTrialsForm />
-
-              <div className="form-actions">
-                <Button htmlType="submit" type="primary">
-                  Save Draft
-                </Button>
-              </div>
+              <ClinicalTrialsForm
+                auth={auth}
+                enableOtherReferencesTab={enableOtherReferencesTab}
+              />
             </Col>
           </Row>
         </TabPane>
-        <TabPane tab="Other References" key="4">
+        <TabPane
+          tab="Other References"
+          key="4"
+          disabled={isOtherReferencesDisabled}
+        >
           <Row>
             <h3 style={{ marginBottom: 20 }}>Select other resources</h3>
             <Col md={12}>
@@ -671,6 +696,7 @@ UpdateProductForm.formats = [
 
 const mapStateToProps = state => {
   return {
+    auth: state.authReducer,
     postManagement: state.postManagementReducer,
     notifs: state.notificationReducer,
     currentProduct: state.productManagementReducer.currentProduct

@@ -9,7 +9,7 @@ import ClinicalTrialLinks from "./ClinicalTrialLinks";
 
 const { Option } = Select;
 
-const ClinicalTrialsForm = ({ articles, ...props }) => {
+const ClinicalTrialsForm = ({ articles, auth, ...props }) => {
   // Clinical trial article state
   const [clinicalTrialArticles, setClinicalTrialArticles] = useState(null);
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -37,6 +37,10 @@ const ClinicalTrialsForm = ({ articles, ...props }) => {
 
   const handleSelectArticle = () => {
     console.log(selectedArticle);
+  };
+
+  const handleSave = () => {
+    props.enableOtherReferencesTab(false);
   };
 
   return (
@@ -70,12 +74,17 @@ const ClinicalTrialsForm = ({ articles, ...props }) => {
       <DndProvider backend={HTML5Backend}>
         <ClinicalTrialLinks />
       </DndProvider>
+
+      <div className="form-actions" onClick={handleSave}>
+        <Button type="primary">Save</Button>
+      </div>
     </div>
   );
 };
 
 const mapStateToProps = state => {
   return {
+    auth: state.authReducer,
     articles: state.productManagementReducer.articlesByCategory.results
   };
 };

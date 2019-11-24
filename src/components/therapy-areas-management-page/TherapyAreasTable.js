@@ -101,7 +101,7 @@ const TherapyAreasTable = ({
               type="link"
               onClick={e => handleSelectArticle(record.id, e)}
             >
-              <Link to={`/therapy-areas/${record.id}`}>
+              <Link to={`/therapy-areas/${record.id}`} title={text}>
                 <Typography.Text ellipsis={true} style={COLUMN_ITEM_LINK}>
                   {text}
                 </Typography.Text>

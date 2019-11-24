@@ -1,6 +1,9 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Upload, Icon, message, Button } from "antd";
 
+import axios from "axios";
+import { API } from "../../../utils/api";
+
 const FileUploader = ({
   auth,
   getImage,
@@ -18,6 +21,10 @@ const FileUploader = ({
 
   const handleRemove = file => {
     console.log(file);
+    const index = uploadedFileList.indexOf(file);
+    const newFileList = uploadedFileList.slice();
+    newFileList.splice(index, 1);
+    setUploadedFileList(newFileList);
   };
 
   const handleBeforeUpload = file => {
@@ -44,7 +51,33 @@ const FileUploader = ({
 
     console.log(productId, formData);
 
-    updateAction(productId, formData);
+    //updateAction(productId, formData);
+
+    axios({
+      url: `${API}/products/update/${productId}`,
+      method: "post",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth.access_token}`
+      },
+      data: formData
+    })
+      .then(res => {
+        console.log(res);
+        message.success(
+          res.data.success ? res.data.success : "Updated product successfully"
+        );
+        props.enableClinicalTrialsTab(false);
+      })
+      .catch(err => {
+        console.log(err.response.data);
+        message.error(
+          err.response.data.error
+            ? err.response.data.error
+            : "There was an error on processing your request"
+        );
+      });
   };
 
   return (
@@ -63,7 +96,7 @@ const FileUploader = ({
 
       <div className="form-actions">
         <Button type="primary" onClick={handleUpload}>
-          Save Draft
+          Save
         </Button>
       </div>
     </Fragment>

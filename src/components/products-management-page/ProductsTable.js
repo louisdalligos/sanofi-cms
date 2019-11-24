@@ -108,7 +108,7 @@ const ProductsTable = ({
               type="link"
               onClick={e => handleSelectProduct(record.id, e)}
             >
-              <Link to={`/products/${record.id}`}>
+              <Link to={`/products/${record.id}`} title={text}>
                 <Typography.Text ellipsis={true} style={COLUMN_ITEM_LINK}>
                   {text}
                 </Typography.Text>
