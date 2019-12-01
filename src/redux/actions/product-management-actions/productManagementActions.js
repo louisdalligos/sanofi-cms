@@ -188,6 +188,7 @@ export function changeProductStatus(id, values) {
     await dispatch({
       type: CHANGE_PRODUCT_STATUS_REQUEST
     });
+
     try {
       const res = await ProductManagementServices.changeProductStatusRequest(
         id,

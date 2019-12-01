@@ -19,10 +19,7 @@ import { API } from "../../utils/api";
 
 import { noImage } from "../../utils/constant";
 
-import {
-  archiveProduct,
-  changeProductStatus
-} from "../../redux/actions/product-management-actions/productManagementActions";
+import { changeProductStatus } from "../../redux/actions/product-management-actions/productManagementActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 // Table components
@@ -37,7 +34,6 @@ const { confirm } = Modal;
 const ProductsTable = ({
   notifs,
   clearNotifications,
-  archiveProduct,
   changeProductStatus,
   auth
 }) => {
@@ -48,8 +44,19 @@ const ProductsTable = ({
       rowKey: "id",
       width: 60,
       render: (text, record) => (
-        <Tooltip placement="top" title="Tag as new product?">
-          <Switch className="switch-new-trigger" />
+        <Tooltip
+          placement="top"
+          title={
+            record.is_new && record.is_new === "Yes"
+              ? "Untag as new product"
+              : "Tag as new product?"
+          }
+        >
+          <Switch
+            className="switch-new-trigger"
+            onChange={handleSwitchChange}
+            defaultChecked={record.is_new && record.is_new === "Yes"}
+          />
         </Tooltip>
       )
     },
@@ -60,20 +67,25 @@ const ProductsTable = ({
       sorter: true,
       width: 90,
       render: (text, record) => (
-        <Tag
-          color={
-            record.status === "published"
-              ? "green"
-              : record.status === "archived"
-              ? "volcano"
-              : record.status === "unpublished"
-              ? "geekblue"
-              : "blue"
-          }
-          key={record.id}
-        >
-          {text}
-        </Tag>
+        <Fragment>
+          <Tag
+            color={
+              record.status === "published"
+                ? "green"
+                : record.status === "archived"
+                ? "volcano"
+                : record.status === "unpublished"
+                ? "geekblue"
+                : "blue"
+            }
+            key={record.id}
+          >
+            {text}
+          </Tag>
+          <small style={{ display: "block" }}>
+            {record.deleted_at ? record.deleted_at : null}
+          </small>
+        </Fragment>
       )
     },
     {
@@ -234,7 +246,7 @@ const ProductsTable = ({
 
   useEffect(() => {
     switch (notifs.id) {
-      case "ARCHIVE_PRODUCT_SUCCESS":
+      case "CHANGE_PRODUCT_STATUS_SUCCESS":
         message.success(
           notifs.notifications
             ? notifs.notifications.success
@@ -244,7 +256,7 @@ const ProductsTable = ({
         clearNotifications(); // cleanup our notification object
         setPageNumber(1);
         break;
-      case "ARCHIVE_PRODUCT_FAILED":
+      case "CHANGE_PRODUCT_STATUS_FAILED":
         message.error(
           notifs.notifications
             ? notifs.notifications.error
@@ -262,13 +274,17 @@ const ProductsTable = ({
   function showArchiveConfirm(id, e) {
     e.stopPropagation();
 
+    const values = {
+      status: "archived"
+    };
+
     confirm({
       title: "Are you sure you want to archive this product?",
       okText: "Yes",
       okType: "primary",
       cancelText: "No",
       onOk() {
-        archiveProduct(id);
+        changeProductStatus(id, values);
       },
       onCancel() {
         console.log("Cancel");
@@ -316,6 +332,11 @@ const ProductsTable = ({
   const setStatePageSize = () => {
     return pageSize;
   };
+
+  // handle set to featured switch
+  function handleSwitchChange(checked) {
+    console.log(checked);
+  }
 
   return (
     <Fragment>
@@ -374,7 +395,6 @@ export default connect(
   mapStateToProps,
   {
     clearNotifications,
-    archiveProduct,
     changeProductStatus
   }
 )(ProductsTable);

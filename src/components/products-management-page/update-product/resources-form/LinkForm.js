@@ -13,7 +13,9 @@ import TextFormField from "../../../smart-form/TextFormField";
 // validation schema
 const schema = Yup.object().shape({
   links: Yup.string().required("This field is required"),
-  title: Yup.string().required("This field is required")
+  title: Yup.string()
+    .required("This field is required")
+    .max(150, "Link name is too long")
 });
 
 const LinkForm = props => {
@@ -62,7 +64,7 @@ const LinkForm = props => {
         requiredlabel="true"
       />
 
-      <pre>{JSON.stringify(values, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(values, null, 2)}</pre> */}
 
       <div className="form-actions">
         <Button style={{ marginRight: 10 }}>
@@ -85,6 +87,12 @@ export default withFormik({
   },
   validationSchema: schema,
   handleSubmit: (values, { props, setSubmitting }) => {
+    const formData = new FormData();
+    formData.append("links", values.links);
+    formData.append("title", values.title);
+    formData.append("type", "3");
+    formData.append("_method", "PUT");
+
     axios({
       url: `${API}/products/update/${props.productId}`,
       method: "post",
@@ -93,7 +101,7 @@ export default withFormik({
         "Content-Type": "application/json",
         Authorization: `Bearer ${props.auth.access_token}`
       },
-      data: values
+      data: formData
     })
       .then(res => {
         setSubmitting(false);
@@ -105,11 +113,11 @@ export default withFormik({
       .catch(err => {
         setSubmitting(false);
         console.log(err);
-        // message.error(
-        //   err.response.data.error
-        //     ? err.response.data.error
-        //     : "There was an error on processing your request"
-        // );
+        message.error(
+          err.response.data.error
+            ? err.response.data.error
+            : "There was an error on processing your request"
+        );
       });
   },
   displayName: "LinkForm"

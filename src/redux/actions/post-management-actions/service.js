@@ -3,8 +3,8 @@ import axiosInstance from "../../../utils/axiosInstance";
 function fetchSpecializationsRequest(body) {
   return axiosInstance({
     method: "get",
-    //baseURL: "/api/v1/specializations",
-    baseURL: "https://sanofi-qa.nuworks.ph:8443/api/v1/specializations",
+    baseURL: "/api/v1/specializations",
+    //baseURL: "https://sanofi-qa.nuworks.ph:8443/api/v1/specializations",
     data: body
   });
 }

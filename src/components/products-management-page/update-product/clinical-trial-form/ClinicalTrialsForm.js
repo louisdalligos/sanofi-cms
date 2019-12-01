@@ -19,28 +19,25 @@ const style = {
 
 const { Option } = Select;
 
-const ClinicalTrialsForm = ({ articles, productId, auth, ...props }) => {
+const ClinicalTrialsForm = ({
+  articles,
+  clinicalTrialsData,
+  productId,
+  auth,
+  ...props
+}) => {
   // Current link added state
-  const [cards, setCards] = useState([]);
+  const [cards, setCards] = useState(
+    clinicalTrialsData ? clinicalTrialsData : []
+  );
 
   // Clinical trial article state
-  const [clinicalTrialArticles, setClinicalTrialArticles] = useState([
-    {
-      id: "1",
-      headline: "Molestiae",
-      links: "http://localhost/therapy-areas/diabetes/clinical-trials/molestiae"
-    },
-    {
-      id: "2",
-      headline: "Est conseq",
-      links:
-        "http://localhost/therapy-areas/diabetes/clinical-trials/est-conseq"
-    }
-  ]);
+  const [clinicalTrialArticles, setClinicalTrialArticles] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
 
   useEffect(() => {
     console.log(articles, "articles from the form");
+    setClinicalTrialArticles(articles);
   }, [articles]);
 
   // on select article change
@@ -77,6 +74,10 @@ const ClinicalTrialsForm = ({ articles, productId, auth, ...props }) => {
 
   // Submit update
   const handleSave = () => {
+    const formData = new FormData();
+    formData.append("clinical_trials", JSON.stringify(cards));
+    formData.append("_method", "PUT");
+
     axios({
       url: `${API}/products/update/${productId}`,
       method: "post",
@@ -85,7 +86,7 @@ const ClinicalTrialsForm = ({ articles, productId, auth, ...props }) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${auth.access_token}`
       },
-      data: cards
+      data: formData
     })
       .then(res => {
         console.log(res);
@@ -113,6 +114,34 @@ const ClinicalTrialsForm = ({ articles, productId, auth, ...props }) => {
     );
   };
 
+  // delete link
+  const deleteLink = () => {
+    console.log("delete clinical trial");
+    axios({
+      url: `${API}/clinical-trial/delete/${productId}`,
+      method: "delete",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth.access_token}`
+      }
+    })
+      .then(res => {
+        console.log(res);
+        message.success(
+          res.data.success ? res.data.success : "Deleted link successfully"
+        );
+      })
+      .catch(err => {
+        console.log(err);
+        message.error(
+          err.response.data.error
+            ? err.response.data.error
+            : "There was an error on processing your request"
+        );
+      });
+  };
+
   return (
     <div>
       <Select
@@ -129,14 +158,8 @@ const ClinicalTrialsForm = ({ articles, productId, auth, ...props }) => {
           // option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
           console.log("FILTER PROP:", option)
         }
+        notFoundContent="No results found"
       >
-        {/* {articles
-          ? articles.map(item => (
-              <Option key={item.id} value={item.id}>
-                {item.headline}
-              </Option>
-            ))
-          : []} */}
         {articles
           ? clinicalTrialArticles.map(item => (
               <Option key={item.id} value={item.id}>
@@ -155,11 +178,12 @@ const ClinicalTrialsForm = ({ articles, productId, auth, ...props }) => {
           <h3>Selected Clinical Trials</h3>
           {cards.map((card, i) => (
             <LinkItem
-              key={card.id}
+              key={card.article_id}
               index={i}
-              id={card.id}
-              text={card.name}
+              id={card.article_id}
+              text={card.links}
               moveCard={moveCard}
+              deleteLink={deleteLink}
             />
           ))}
         </div>

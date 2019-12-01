@@ -1,3 +1,6 @@
+@import "./_variables.scss";
+@import "./_all.scss";
+@import "./_sitemap.scss";
 html {
   min-height: 100%;
 }
@@ -288,6 +291,9 @@ body {
 .form-actions {
   float: right;
   margin-top: 50px;
+  position: relative;
+  z-index: 10;
+  margin-bottom: 30px;
 }
 
 .therapy-article-form,
@@ -468,5 +474,27 @@ body {
 
   .ant-btn-link {
     margin-top: 15px;
+  }
+}
+
+.headingListActions {
+  button {
+    margin-right: 10px;
+  }
+}
+
+// dashboard layout
+.dashboard-layout {
+  //width: 100%;
+  margin: 30px 20px;
+  padding: 0 20px 40px;
+
+  @media screen and (min-width: 1200px) {
+    width: 1100px;
+    margin: 30px auto;
+  }
+
+  .list-entry {
+    margin-bottom: 30px;
   }
 }

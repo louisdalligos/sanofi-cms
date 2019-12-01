@@ -18,10 +18,7 @@ import { API } from "../../utils/api";
 
 import { noImage } from "../../utils/constant";
 
-import {
-  archiveProduct,
-  changeProductStatus
-} from "../../redux/actions/product-management-actions/productManagementActions";
+import { changeEventStatus } from "../../redux/actions/cme-actions/cmeActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 // Table components
@@ -30,20 +27,14 @@ import PageBreadcrumb from "./PageBreadcrumb";
 
 const { confirm } = Modal;
 
-const CMETable = ({
-  notifs,
-  clearNotifications,
-  archiveProduct,
-  changeProductStatus,
-  auth
-}) => {
+const CMETable = ({ notifs, clearNotifications, changeEventStatus, auth }) => {
   const columns = [
     {
-      title: "New",
+      title: "Featured",
       dataIndex: "new",
       rowKey: "id",
       render: (text, record) => (
-        <Tooltip placement="top" title="Tag as new product?">
+        <Tooltip placement="top" title="Tag as featured?">
           <Switch className="switch-new-trigger" />
         </Tooltip>
       )
@@ -55,20 +46,25 @@ const CMETable = ({
       sorter: true,
       width: 90,
       render: (text, record) => (
-        <Tag
-          color={
-            record.status === "published"
-              ? "green"
-              : record.status === "archived"
-              ? "volcano"
-              : record.status === "unpublished"
-              ? "geekblue"
-              : "blue"
-          }
-          key={record.id}
-        >
-          {text}
-        </Tag>
+        <Fragment>
+          <Tag
+            color={
+              record.status === "published"
+                ? "green"
+                : record.status === "archived"
+                ? "volcano"
+                : record.status === "unpublished"
+                ? "geekblue"
+                : "blue"
+            }
+            key={record.id}
+          >
+            {text}
+          </Tag>
+          <small style={{ display: "block" }}>
+            {record.deleted_at ? record.deleted_at : null}
+          </small>
+        </Fragment>
       )
     },
     {
@@ -76,9 +72,9 @@ const CMETable = ({
       rowKey: "id",
       width: 50,
       render: (text, record) => (
-        <Tooltip placement="top" title="Edit product">
-          <Button type="link" onClick={e => handleSelectProduct(record.id, e)}>
-            <Link to={`/products/${record.id}`}>
+        <Tooltip placement="top" title="Edit event">
+          <Button type="link">
+            <Link to={`/cme/${record.id}`}>
               <Icon type="form" />
             </Link>
           </Button>
@@ -87,7 +83,7 @@ const CMETable = ({
     },
     {
       title: "Event Name/Description",
-      dataIndex: "product_name",
+      dataIndex: "event_name",
       rowKey: "id",
       sorter: true,
       render: (text, record) => (
@@ -99,15 +95,26 @@ const CMETable = ({
             className="table-list-thumbnail-image"
           />
           <div>
-            <Button
-              type="link"
-              onClick={e => handleSelectProduct(record.id, e)}
-            >
+            <Button type="link">
               <Link to={`/cme/${record.id}`}>{text}</Link>
             </Button>
             <small>{record.short_description}</small>
           </div>
         </div>
+      )
+    },
+    {
+      title: "Event Type",
+      dataIndex: "event_type",
+      rowKey: "id",
+      sorter: true,
+      render: (text, record) => (
+        <Tag
+          color={record.event_type === "Upcoming" ? "green" : "blue"}
+          key={record.id}
+        >
+          {record.event_type}
+        </Tag>
       )
     },
     {
@@ -145,14 +152,33 @@ const CMETable = ({
     }
   ];
 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([
+    {
+      id: 1,
+      event_name: "Event One",
+      event_type: "upcoming",
+      status: "unpublished",
+      short_description: "Lorem ipsum",
+      zinc_code: "AAAA.AAA.12.06.16 | Version 0.6 | 06 DEC 2016",
+      date_created: new Date()
+    },
+    {
+      id: 2,
+      event_name: "Event Two",
+      event_type: "past",
+      status: "unpublished",
+      short_description: "Lorem ipsum",
+      zinc_code: "FFXFE.DFE.12.06.16 | Version 1.6 | 12 DEC 1998",
+      date_created: new Date()
+    }
+  ]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
 
   useEffect(() => {
-    fetch(); // fetch initial list of products
+    fetch(); // fetch initial list of events
     //eslint-disable-next-line
   }, []);
 
@@ -161,7 +187,7 @@ const CMETable = ({
     setLoading(true);
     setPageSize(params.per_page ? params.per_page : 10);
     axios({
-      url: `${API}/products`,
+      url: `${API}/cme`,
       method: "get",
       headers: {
         Accept: "application/json",
@@ -173,7 +199,6 @@ const CMETable = ({
       .then(response => {
         setTotal(response.data.info ? response.data.info.total_count : null); // get total count from server and set to state
         setLoading(false);
-        console.log(response.data.results, "products response");
         setData(response.data.results);
       })
       .catch(err => {
@@ -190,7 +215,7 @@ const CMETable = ({
   const filterFetch = (params = {}) => {
     setLoading(true);
     axios({
-      url: `${API}/products`,
+      url: `${API}/cme`,
       method: "get",
       headers: {
         Accept: "application/json",
@@ -201,7 +226,6 @@ const CMETable = ({
     })
       .then(response => {
         setLoading(false);
-
         if (response.data.success === "No results found") {
           setTotal(0);
           message.error("No results found");
@@ -222,17 +246,17 @@ const CMETable = ({
 
   useEffect(() => {
     switch (notifs.id) {
-      case "ARCHIVE_PRODUCT_SUCCESS":
+      case "CHANGE_EVENT_STATUS_SUCCESS":
         message.success(
           notifs.notifications
             ? notifs.notifications.success
-            : "Product successfully archived!"
+            : "Event successfully archived!"
         );
         fetch(); // call our api to fetch updated data
         clearNotifications(); // cleanup our notification object
         setPageNumber(1);
         break;
-      case "ARCHIVE_PRODUCT_FAILED":
+      case "CHANGE_EVENT_STATUS_FAILED":
         message.error(
           notifs.notifications
             ? notifs.notifications.error
@@ -244,19 +268,23 @@ const CMETable = ({
         return;
     }
     //eslint-disable-next-line
-  }, [notifs.id]);
+  }, [notifs.id, notifs.notifications]);
 
   // table actions
   function showArchiveConfirm(id, e) {
     e.stopPropagation();
 
+    const values = {
+      status: "archived"
+    };
+
     confirm({
-      title: "Are you sure you want to archive this product?",
+      title: "Are you sure you want to archive this event?",
       okText: "Yes",
       okType: "primary",
       cancelText: "No",
       onOk() {
-        archiveProduct(id);
+        changeEventStatus(id, values);
       },
       onCancel() {
         console.log("Cancel");
@@ -362,7 +390,6 @@ export default connect(
   mapStateToProps,
   {
     clearNotifications,
-    archiveProduct,
-    changeProductStatus
+    changeEventStatus
   }
 )(CMETable);

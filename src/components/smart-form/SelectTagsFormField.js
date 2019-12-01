@@ -7,9 +7,11 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
   const [field, meta] = useField(props);
 
   const handleSelectChange = value => {
-    //let newValue = value.toString();
-    console.log(value);
     props.onChange(field.name, value);
+  };
+
+  const handleSelectBlur = value => {
+    console.log(value);
   };
 
   return (
@@ -33,6 +35,7 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
         mode="multiple"
         placeholder={placeholder}
         onChange={handleSelectChange}
+        onBlur={handleSelectBlur}
         notFoundContent="No results found"
       >
         {options

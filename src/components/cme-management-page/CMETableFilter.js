@@ -27,6 +27,10 @@ const ProductsTableFilter = ({
     "unpublished",
     "archived"
   ]);
+  const [eventType, setEventType] = useState([
+    { id: 0, name: "upcoming" },
+    { id: 1, name: "past" }
+  ]);
   const [specializations, setSpecializations] = useState([]);
 
   useEffect(() => {
@@ -54,6 +58,12 @@ const ProductsTableFilter = ({
   function onSearch(e) {
     let obj = { search: e, per_page: setStatePageSize() };
     props.filterFetch({ ...obj }); // call filter fetch method for diff set of total result count
+  }
+
+  // filter category
+  function onFilterEventType(e) {
+    let obj = { event_type: e, per_page: setStatePageSize() };
+    props.filterFetch({ ...obj });
   }
 
   // filter category
@@ -109,7 +119,26 @@ const ProductsTableFilter = ({
                   )}
                 </Form.Item>
               </Col>
-              <Col xs={24} md={5}>
+              <Col xs={24} md={4}>
+                <Form.Item label="">
+                  {getFieldDecorator("filter_eventType", {})(
+                    <Select
+                      placeholder="Select an event type"
+                      onChange={onFilterEventType}
+                    >
+                      <Option value="">All event types</Option>
+                      {eventType
+                        ? eventType.map(e => (
+                            <Option key={e.id} value={e.id}>
+                              {e.name}
+                            </Option>
+                          ))
+                        : "No results found"}
+                    </Select>
+                  )}
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={4}>
                 <Form.Item label="">
                   {getFieldDecorator("filter_specialization", {})(
                     <Select
@@ -128,7 +157,7 @@ const ProductsTableFilter = ({
                   )}
                 </Form.Item>
               </Col>
-              <Col xs={24} md={5}>
+              <Col xs={24} md={4}>
                 <Form.Item label="">
                   {getFieldDecorator("filter_subCategory", {})(
                     <Select
@@ -147,7 +176,7 @@ const ProductsTableFilter = ({
                   )}
                 </Form.Item>
               </Col>
-              <Col xs={24} md={4}>
+              <Col xs={24} md={2}>
                 <Form.Item label="">
                   <Button type="primary" onClick={handleResetFilters}>
                     Reset

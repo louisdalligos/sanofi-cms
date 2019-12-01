@@ -18,7 +18,7 @@ const CreateArticlePage = ({ history, ...props }) => {
     zinc_code: "",
     page_title: "",
     meta_description: "",
-    page_slug: "",
+    slug: "",
     meta_keywords: "",
     body: "",
     featured: "",

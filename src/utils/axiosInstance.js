@@ -1,9 +1,10 @@
 import axios from "axios";
-import store from "../stores/store-dev";
+import store from "../stores/store-prod";
 import { logout } from "../redux/actions/auth-actions/authActions";
 import { API } from "./api";
 import history from "../utils/history";
 
+const cors = true;
 const token = sessionStorage.getItem("access_token");
 
 const axiosInstance = axios.create({
@@ -13,6 +14,22 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`
   }
+});
+
+// cors
+axiosInstance.interceptors.request.use(function(config) {
+  if (cors) {
+    if (
+      config.method === "OPTION" ||
+      typeof config.headers["X-CSRF-TOKEN"] === "undefined"
+    ) {
+      delete config.headers["X-CSRF-TOKEN"];
+      delete config.headers["X-Requested-With"];
+      delete config.headers.common["X-CSRF-TOKEN"];
+      delete config.headers.common["X-Requested-With"];
+    }
+  }
+  return config;
 });
 
 axiosInstance.interceptors.request.use(

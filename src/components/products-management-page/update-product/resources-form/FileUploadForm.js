@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { withFormik, Field } from "formik";
 import { Button, message } from "antd";
@@ -13,7 +13,9 @@ import UploadFile from "./UploadFile";
 
 // validation schema
 const schema = Yup.object().shape({
-  document_name: Yup.string().required("This field is required"),
+  document_name: Yup.string()
+    .required("This field is required")
+    .max(150, "Document name is too long"),
   other_resources: Yup.mixed().required("This field is required!")
   // .test(
   //   "fileSize",
@@ -32,6 +34,8 @@ const FileUploadForm = props => {
     resetForm
   } = props;
 
+  const [uploadedFile, setUploadedFile] = useState(null);
+
   useEffect(() => {
     setSubmitting(false);
     return () => {
@@ -46,6 +50,12 @@ const FileUploadForm = props => {
     }
   }, [values, onChange]);
 
+  const getFile = file => {
+    console.log(file);
+    debugger;
+    setUploadedFile(file); // put our file on state
+  };
+
   return (
     <form className="form" onSubmit={handleSubmit}>
       <h3>File Upload Information</h3>
@@ -56,6 +66,7 @@ const FileUploadForm = props => {
         label="other_resources"
         requiredlabel="true"
         values={values.other_resources}
+        getFile={getFile}
       />
 
       <Field
@@ -67,7 +78,7 @@ const FileUploadForm = props => {
         requiredlabel="true"
       />
 
-      <pre>{JSON.stringify(values, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(values, null, 2)}</pre> */}
 
       <div className="form-actions">
         <Button style={{ marginRight: 10 }}>
@@ -93,6 +104,7 @@ export default withFormik({
     console.log(props);
     const formData = new FormData();
     formData.append("document_name", values.document_name);
+    formData.append("other_resources", values.other_resources);
     formData.append("_method", "PUT");
 
     console.log(formData);

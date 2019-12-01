@@ -6,7 +6,7 @@ import { Button, Row, Col, message, Icon, Tooltip } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
-import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
@@ -28,6 +28,9 @@ import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 import ImageUploader from "./ImageUploader";
 
 import { sampleZincFormat } from "../../../utils/constant";
+
+import axios from "axios";
+import { API } from "../../../utils/api";
 
 // validation schema
 const schema = Yup.object().shape({
@@ -58,6 +61,7 @@ const schema = Yup.object().shape({
 });
 
 const CreateProductForm = ({
+  auth,
   notifs,
   postManagement,
   fetchCategories,
@@ -87,8 +91,6 @@ const CreateProductForm = ({
         break;
       case "CREATE_PRODUCT_SUCCESS":
         clearNotifications();
-        message.success(notifs.notifications.success);
-        history.push("/products");
         break;
       case "CREATE_PRODUCT_FAILED":
         clearNotifications();
@@ -106,18 +108,14 @@ const CreateProductForm = ({
 
   // get the file
   const getImage = (name, file) => {
-    console.log(file);
-    console.log(name);
-    //debugger;
-
     if (name === "image_gallery") {
       setImageGalleryFiles([...imageGalleryFiles, file]);
     }
   };
 
   const submitForm = (values, action) => {
-    clearNotifications();
     action.setSubmitting(true);
+    console.log(action);
 
     let formData = new FormData();
 
@@ -146,8 +144,34 @@ const CreateProductForm = ({
       }
     }
 
-    createProduct(formData); // redux action
-    action.setSubmitting(false);
+    axios({
+      url: `${API}/products/create`,
+      method: "post",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth.access_token}`
+      },
+      data: formData
+    })
+      .then(res => {
+        action.resetForm();
+        action.setSubmitting(false);
+        console.log(res);
+        message.success(
+          res.data.success ? res.data.success : "Updated product successfully"
+        );
+        history.push("/products");
+      })
+      .catch(err => {
+        action.setSubmitting(false);
+        console.log(err);
+        message.error(
+          err.response.data.error
+            ? err.response.data.error
+            : "There was an error on processing your request"
+        );
+      });
   };
 
   return (
@@ -213,7 +237,7 @@ const CreateProductForm = ({
                   }}
                   className="ant-form-item-required"
                 >
-                  <span>Zinc Code </span>{" "}
+                  <span>Zinc Code </span>
                   <Tooltip placement="top" title={sampleZincFormat}>
                     <Icon type="info-circle" style={{ color: "#1890ff" }} />
                   </Tooltip>
@@ -314,9 +338,9 @@ const CreateProductForm = ({
               </Col>
             </Row>
 
-            <Row>
-              <DisplayFormikState {...props} />
-            </Row>
+            {/* <Row>
+                            <DisplayFormikState {...props} />
+                        </Row> */}
 
             <div className="form-actions">
               <Button style={{ marginRight: 10 }}>
@@ -378,6 +402,7 @@ CreateProductForm.formats = [
 
 const mapStateToProps = state => {
   return {
+    auth: state.authReducer,
     postManagement: state.postManagementReducer,
     notifs: state.notificationReducer
   };

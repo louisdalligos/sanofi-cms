@@ -1,44 +1,35 @@
 import React, { Fragment, useEffect, useState } from "react";
+import { connect } from "react-redux";
 import { PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
-import CreateCMEForm from "./CreateCMEForm";
+import CreateCMEFormWrapper from "./CreateCMEForm";
 
 const pageTitle = "Create a new CME";
 
 // Component
-const CreateCMEPage = ({ history, ...props }) => {
-  const [formData, setFormData] = useState({
+const CreateCMEPage = ({ history, auth, postManagement, match, ...props }) => {
+  const [data, setData] = useState({
     category_id: "",
-    other_tags: [],
+    event_name: "",
+    event_description: "",
+    event_date: "",
+    event_type: "",
+    event_location: "",
     specializations: [],
-    product_name: "",
-    short_description: "",
-    zinc_code: "",
+    other_tags: [],
+    event_body: "",
     page_title: "",
-    meta_description: "",
     slug: "",
+    meta_description: "",
     meta_keywords: "",
-    body: "",
-    image_gallery: [],
     zinc_code1: "",
     zinc_code2: "",
     zinc_code3: "",
-    event_type: "",
-    event_location: "",
-    event_headings: [
-      {
-        name: "Heading Title 1"
-      },
-      {
-        name: "Heading Title 1"
-      }
-    ]
+    zinc_code: "",
+    featured: "",
+    thumbnail: ""
   });
-
-  useEffect(() => {
-    console.log("product page mounted");
-  }, []);
 
   return (
     <Fragment>
@@ -51,14 +42,31 @@ const CreateCMEPage = ({ history, ...props }) => {
               <Breadcrumb.Item key="cme">
                 <Link to="/cme">CME</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item key="cme-create">New CME</Breadcrumb.Item>
+              <Breadcrumb.Item key="cme-create">Create CME</Breadcrumb.Item>
             </Breadcrumb>
           </div>
         </div>
 
-        <CreateCMEForm data={formData} history={history} />
+        <CreateCMEFormWrapper
+          history={history}
+          auth={auth}
+          postManagement={postManagement}
+          data={data}
+        />
       </div>
     </Fragment>
   );
 };
-export default CreateCMEPage;
+
+const mapStateToProps = state => {
+  return {
+    auth: state.authReducer,
+    postManagement: state.postManagementReducer,
+    notifs: state.notificationReducer
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(CreateCMEPage);

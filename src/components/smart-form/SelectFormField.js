@@ -8,8 +8,12 @@ const SelectFormField = ({ label, placeholder, options, ...props }) => {
   const name = field.name;
 
   const handleSelectChange = value => {
-    console.log(value);
     props.onChange(name, value);
+    console.log(value);
+  };
+
+  const handleSelectBlur = value => {
+    console.log(value);
   };
 
   return (
@@ -31,7 +35,9 @@ const SelectFormField = ({ label, placeholder, options, ...props }) => {
         {...field}
         {...props}
         onChange={handleSelectChange}
+        onBlur={handleSelectBlur}
         notFoundContent="No results found"
+        placeholder="Select a category"
       >
         {options
           ? options.map(c => (

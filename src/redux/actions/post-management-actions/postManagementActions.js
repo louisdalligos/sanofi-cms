@@ -44,12 +44,10 @@ export function fetchSpecializations() {
 
     try {
       const res = await PostManagementServices.fetchSpecializationsRequest(); // GET request
-
       await dispatch({
         type: FETCH_SPECIALIZATIONS_SUCCESS,
         payload: res.data
       });
-
       dispatch(
         returnNotifications(
           res.data,

@@ -40,7 +40,12 @@ import UpdateArticlePage from "../components/therapy-areas-management-page/updat
 import CreateProductPage from "../components/products-management-page/add-product/CreateProductPage";
 import UpdateProductPage from "../components/products-management-page/update-product/UpdateProductPage";
 import CreateCMEPage from "../components/cme-management-page/add-cme/CreateCMEPage";
-//import UpdateCMEPage from "../components/cme-management-page/update-cme/UpdateCMEPage";
+import UpdateCMEPage from "../components/cme-management-page/update-cme/UpdateCMEPage";
+
+// Doms
+import SitemapManagementPage from "../components/sitemap-management-page/SitemapManagementPage";
+import UsersDeletedPage from "../components/users-deleted-page/UsersDeletedPage";
+import CategoriesManagementContainer from "../components/new-categories-management-page";
 
 import { Role } from "../utils/role";
 import { getAuthUser } from "../redux/actions/auth-actions/authActions";
@@ -141,7 +146,8 @@ const App = ({ auth, ...props }) => {
             <PrivateRoute
               exact
               path="/categories"
-              component={CategoriesManagement}
+              // component={CategoriesManagement}
+              component={CategoriesManagementContainer}
               roles={[Role.SuperAdmin, Role.Admin]}
             />
             <PrivateRoute
@@ -168,12 +174,12 @@ const App = ({ auth, ...props }) => {
               component={CreateCMEPage}
               roles={[Role.SuperAdmin, Role.Admin]}
             />
-            {/* <PrivateRoute
-                            exact
-                            path="/cme/:id"
-                            component={UpdateCMEPage}
-                            roles={[Role.SuperAdmin, Role.Admin]}
-                        /> */}
+            <PrivateRoute
+              exact
+              path="/cme/:id"
+              component={UpdateCMEPage}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
             <PrivateRoute
               exact
               path="/doctor-specialization"
@@ -203,6 +209,19 @@ const App = ({ auth, ...props }) => {
               path="/products/:id"
               component={UpdateProductPage}
               roles={[Role.SuperAdmin, Role.Admin]}
+            />
+
+            <PrivateRoute
+              exact
+              path="/sitemap"
+              component={SitemapManagementPage}
+              roles={[Role.SuperAdmin, Role.Admin]}
+            />
+            <PrivateRoute
+              exact
+              path="/doctors-audit-trail"
+              component={UsersDeletedPage}
+              roles={[Role.SuperAdmin]}
             />
             <PublicRoute
               exact

@@ -16,7 +16,7 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
-import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
@@ -44,6 +44,9 @@ import ImageUploader from "./ImageUploader";
 import FileUploader from "./FileUploader";
 import ClinicalTrialsForm from "./clinical-trial-form/ClinicalTrialsForm";
 import ResourcesForm from "./resources-form/ResourcesForm";
+
+import OtherReferencesComponent from "../tabs/OtherReferences/OtherReferencesComponent";
+import PrescriptionInfo from "../tabs/PrescriptionInfo/PrescriptionInfo";
 
 import { sampleZincFormat } from "../../../utils/constant";
 
@@ -88,12 +91,14 @@ const UpdateProductForm = ({
   match,
   data,
   fetchCurrentProductArticlesByCategoryId,
+  changeProductStatus,
   ...props
 }) => {
   const [currentProductId, setCurrentProductId] = useState(match.params.id);
   const [loading, setLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
   const [statusOptions, setStatusOptions] = useState([]);
+  const [isProductNew, setIsProductNew] = useState(true);
 
   // form data state values
   const [categories, setCategories] = useState([]);
@@ -116,6 +121,15 @@ const UpdateProductForm = ({
 
   const [imageGalleryFiles, setImageGalleryFiles] = useState([]);
   const [defaultList, setDefaultList] = useState([]); // image list shape per antd docu
+
+  // clinical trials data
+  const [clinicalTrialsData, setClinicalTrialsData] = useState([]);
+
+  // prescription info data
+  const [prescriptionInfoData, setPrescriptionInfoData] = useState([]);
+
+  // resources data
+  const [resourcesData, setResourcesData] = useState([]);
 
   // Tabs state
   const [isClinalTrialsTabDisabled, setIsClinalTrialsTabDisabled] = useState(
@@ -162,6 +176,7 @@ const UpdateProductForm = ({
     setBody(currentProduct.body);
     setStatus(currentProduct.status);
     setImageGalleryFiles(currentProduct.product_images);
+    setIsProductNew(currentProduct.is_new);
   };
 
   useEffect(() => {
@@ -199,17 +214,37 @@ const UpdateProductForm = ({
 
       // work on our gallery images
       setImageGalleryFiles(currentProduct.product_images);
-      let modifiedData = currentProduct.product_images.map(item => {
-        item.uid = item.id;
-        item.status = "done";
-        item.name = item.filename;
-        return item;
-      });
-      console.log(modifiedData, "Modified");
-      setDefaultList(modifiedData);
+      if (currentProduct.product_images) {
+        const modifiedData = currentProduct.product_images.map(item => {
+          item.uid = item.id;
+          item.status = "done";
+          item.name = item.filename;
+          return item;
+        });
+        console.log(modifiedData, "Modified");
+        setDefaultList(modifiedData);
+      }
 
       // if product has been fetched, fetch our articles by the category id provided
       fetchCurrentProductArticlesByCategoryId(currentProduct.category_id);
+
+      // Set clinical trials data
+      setClinicalTrialsData(currentProduct.clinical_trials);
+
+      if (currentProduct.prescription_info) {
+        const modifiedData = currentProduct.prescription_info.map(item => {
+          item.uid = item.id;
+          item.status = "done";
+          item.name = item.filename;
+          return item;
+        });
+        console.log(modifiedData, "Modified");
+        setPrescriptionInfoData(modifiedData);
+      }
+
+      setResourcesData(currentProduct.other_resources);
+      setIsProductNew(currentProduct.is_new);
+
       setLoading(false);
     }
   }, [
@@ -224,6 +259,8 @@ const UpdateProductForm = ({
   useEffect(() => {
     switch (notifs.id) {
       case "CHANGE_PRODUCT_STATUS_SUCCESS":
+        setLoading(false);
+        setIsDisabled(true);
         message.success(
           notifs.notifications
             ? notifs.notifications.success
@@ -231,6 +268,7 @@ const UpdateProductForm = ({
         );
         break;
       case "CHANGE_PRODUCT_STATUS_FAILED":
+        setLoading(false);
         message.error(
           notifs.notifications
             ? notifs.notifications.error
@@ -285,8 +323,8 @@ const UpdateProductForm = ({
     formData.append("category_id", values.category_id);
     formData.append("other_tags", values.other_tags);
     values.specializations.length === 0
-      ? formData.append("specializations[]", null)
-      : formData.append("specializations[]", values.specializations);
+      ? formData.append("specializations", null)
+      : formData.append("specializations", values.specializations);
     formData.append("product_name", values.product_name);
     formData.append("short_description", values.short_description);
     formData.append(
@@ -314,9 +352,8 @@ const UpdateProductForm = ({
 
     //if theres an uploaded image include these field on our form data
     if (values.image_gallery) {
-      //formData.set("image_gallery[]", imageGalleryFiles);
       for (let i = 0; i < imageGalleryFiles.length; i++) {
-        formData.append("image_gallery[]", imageGalleryFiles[i]);
+        formData.append("image_gallery", imageGalleryFiles[i]);
       }
     }
 
@@ -346,6 +383,11 @@ const UpdateProductForm = ({
   const enableOtherReferencesTab = val => {
     setOtherReferencesTabDisabled(val);
   };
+
+  // handle set to featured switch
+  function handleSwitchChange(checked) {
+    console.log(checked);
+  }
 
   return (
     <Spin spinning={loading}>
@@ -400,8 +442,19 @@ const UpdateProductForm = ({
         </Col>
         <Col xs={24} md={12}>
           <h3 style={{ float: "left", marginRight: 10 }}>New</h3>
-          <Tooltip placement="top" title="Tag as new product?">
-            <Switch className="switch-new-trigger" />
+          <Tooltip
+            placement="top"
+            title={
+              isProductNew && isProductNew === "Yes"
+                ? "Untag as new product"
+                : "Tag as new product?"
+            }
+          >
+            <Switch
+              className="switch-new-trigger"
+              defaultChecked={isProductNew && isProductNew === "Yes"}
+              onChange={handleSwitchChange}
+            />
           </Tooltip>
         </Col>
       </Row>
@@ -582,16 +635,16 @@ const UpdateProductForm = ({
                   </Col>
                 </Row>
 
-                <Row>
-                  <DisplayFormikState {...props} />
-                </Row>
+                {/* <Row>
+                                    <DisplayFormikState {...props} />
+                                </Row> */}
 
                 <div className="form-actions">
                   <Button style={{ marginRight: 10 }}>
                     <Link to="/products">Cancel</Link>
                   </Button>
                   <Button htmlType="submit" type="primary">
-                    Apply
+                    Save
                   </Button>
                 </div>
 
@@ -607,17 +660,21 @@ const UpdateProductForm = ({
           </Formik>
         </TabPane>
         <TabPane tab="Prescription Info" key="2">
-          <Row>
-            <h3 style={{ marginBottom: 20 }}>Upload file/s</h3>
-            <Col>
-              <FileUploader
-                productId={currentProductId}
-                //updateAction={updateProduct}
-                auth={auth}
-                enableClinicalTrialsTab={enableClinicalTrialsTab}
-              />
-            </Col>
-          </Row>
+          {/*<Row>
+                        <h3 style={{ marginBottom: 20 }}>Upload file/s</h3>
+                        <Col>
+                            <FileUploader
+                                productId={currentProductId}
+                                //updateAction={updateProduct}
+                                auth={auth}
+                                prescriptionInfoData={prescriptionInfoData}
+                                enableClinicalTrialsTab={
+                                    enableClinicalTrialsTab
+                                }
+                            />
+                        </Col>
+                    </Row>*/}
+          <PrescriptionInfo auth={auth} id={currentProductId} />
         </TabPane>
         <TabPane
           tab="Clinical Trials"
@@ -630,22 +687,29 @@ const UpdateProductForm = ({
               <ClinicalTrialsForm
                 productId={currentProductId}
                 auth={auth}
+                clinicalTrialsData={clinicalTrialsData}
                 enableOtherReferencesTab={enableOtherReferencesTab}
               />
             </Col>
           </Row>
         </TabPane>
+
+        {/* Doms:Start */}
         <TabPane
-          tab="Other References"
+          tab="Other Resources"
           key="4"
           disabled={isOtherReferencesDisabled}
         >
-          <Row>
-            <Col>
-              <ResourcesForm productId={currentProductId} auth={auth} />
-            </Col>
-          </Row>
+          {/* <Row><Col>
+                    <ResourcesForm
+                        productId={currentProductId}
+                        auth={auth}
+                        resourcesData={resourcesData}/>
+                    </Col></Row> */}
+
+          <OtherReferencesComponent auth={auth} id={currentProductId} />
         </TabPane>
+        {/* Doms:End */}
       </Tabs>
     </Spin>
   );
@@ -704,6 +768,7 @@ export default connect(
     fetchSpecializations,
     fetchCategories,
     fetchCurrentProduct,
-    fetchCurrentProductArticlesByCategoryId
+    fetchCurrentProductArticlesByCategoryId,
+    changeProductStatus
   }
 )(UpdateProductForm);

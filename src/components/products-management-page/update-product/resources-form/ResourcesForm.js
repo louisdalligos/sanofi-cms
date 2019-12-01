@@ -4,10 +4,11 @@ import { Select } from "antd";
 import VideoEmbedForm from "./VideoEmbedForm";
 import FileUploadForm from "./FileUploadForm";
 import LinkForm from "./LinkForm";
+import OtherResourcesTable from "./OtherResourcesTable";
 
 const { Option } = Select;
 
-const ResourcesForm = ({ auth, productId }) => {
+const ResourcesForm = ({ auth, productId, resourcesData }) => {
   const [currentForm, setCurrentForm] = useState("video");
 
   const handleChange = value => {
@@ -36,6 +37,9 @@ const ResourcesForm = ({ auth, productId }) => {
       ) : currentForm === "link" ? (
         <LinkForm productId={productId} auth={auth} />
       ) : null}
+
+      {/* Table List */}
+      <OtherResourcesTable resourcesData={resourcesData} auth={auth} />
     </div>
   );
 };

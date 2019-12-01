@@ -45,6 +45,9 @@ const MainMenu = ({ user, ...props }) => {
                 <Link to="/admins">Site Admins</Link>
               </Menu.Item>
             ) : null}
+            <Menu.Item key="doctors-audit-trail">
+              <Link to="/doctors-audit-trail">Audit Trail</Link>
+            </Menu.Item>
           </SubMenu>
         ) : null}
         <SubMenu title={<span className="submenu-title-wrapper">Content</span>}>
@@ -105,6 +108,9 @@ const MainMenu = ({ user, ...props }) => {
             </Menu.Item>
             <Menu.Item key="site-logo-seo">Site Logo, General SEO</Menu.Item>
             <Menu.Item key="email-notifications">Email Notifications</Menu.Item>
+            <Menu.Item key="sitemap">
+              <Link to="/sitemap">Sitemap</Link>
+            </Menu.Item>
           </SubMenu>
         ) : null}
       </Menu>

@@ -32,7 +32,9 @@ const UploadFile = ({ ...props }) => {
 
   const handleChange = ({ file, fileList }) => {
     console.log(file, "on change");
-    setFieldValue("other_resources", "1");
+    setFieldValue("other_resources", file);
+    //setFieldValue("other_resources", "1");
+    //props.getFile(file);
   };
 
   return (

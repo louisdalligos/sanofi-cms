@@ -1,22 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { Formik, Field, Form, FieldArray } from "formik";
-import { Button, Row, Col, message, Icon, Tooltip } from "antd";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import { withFormik, Field } from "formik";
+import { Button, Row, Col, Tooltip, Icon, message, Tabs } from "antd";
 import * as Yup from "yup";
-import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+// import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
-// redux actions
-import {
-  createArticle,
-  fetchCategories,
-  fetchSubCategories,
-  fetchSpecializations
-} from "../../../redux/actions/post-management-actions/postManagementActions";
-import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
+import axios from "axios";
+import { API } from "../../../utils/api";
 
 // Form elements
 import TextFormField from "../../smart-form/TextFormField";
@@ -25,399 +17,366 @@ import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
 import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 import DatePickerFormField from "../../smart-form/DatePickerFormField";
-import EventTypeSelect from "../../smart-form/EventTypeSelect";
-import EventHighlightsField from "./EventHighlightsField";
+import TextEditorFormField from "../../smart-form/TextEditorFormField";
 
 // Other components
 import ImageUploader from "./ImageUploader";
-//import ThumbnailGenerator from "./ThumbnailGenerator";
-//import ImagePreview from "./ImagePreview";
 
+// utils
 import { sampleZincFormat } from "../../../utils/constant";
 
 // validation schema
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
+  event_name: Yup.string()
+    .required("This field is required")
+    .max(60, "Event name is too long"),
+  event_description: Yup.string()
+    .required("This field is required")
+    .max(150, "Event description is too long"),
+  event_date: Yup.string().required("This field is required"),
+  event_type: Yup.string().required("This field is required"),
+  event_location: Yup.string().required("This field is required"),
   //specializations: Yup.string().required("This field is required"),
-  short_details: Yup.string()
-    .min(1, "Short descriptions too short")
-    .max(150, "Short description is too long")
-    .required("This field is required"),
-  headline: Yup.string()
-    .min(1, "Headline is too short")
-    .max(150, "Headline is too long")
-    .required("This field is required"),
-  //zinc_code: Yup.string().required("This field is required"),
+  other_tags: Yup.string().required("This field is required"),
   page_title: Yup.string()
-    .min(1, "Page title is too short")
-    .max(60, "Page title is too long")
-    .required("This field is required"),
-  meta_description: Yup.string()
-    .max(150, "Meta description is too long")
-    .required("This field is required"),
-  body: Yup.string().required("This field is required"),
+    .required("This field is required")
+    .max(60, "Page title is too long"),
+  meta_description: Yup.string().required("This field is required"),
+  event_body: Yup.string().required("This field is required"),
   zinc_code1: Yup.string().required("Required field"),
   zinc_code2: Yup.string().required("Required field"),
   zinc_code3: Yup.string().required("Required field")
 });
 
-const CreateCMEForm = ({
-  notifs,
-  postManagement,
-  fetchCategories,
-  fetchSpecializations,
-  createArticle,
-  history,
-  data,
-  ...props
-}) => {
-  const [categories, setCategories] = useState([]);
-  const [specializations, setSpecializations] = useState([]);
+const { TabPane } = Tabs;
 
-  const [mastheadImageInfo, setmastheadImageInfo] = useState("");
-  const [featuredImageInfo, setfeaturedImageInfo] = useState("");
-  const [thumbnailImageInfo, setthumbnailImageInfo] = useState("");
+const CreateCMEForm = ({ ...props }) => {
+  const {
+    values,
+    handleChange,
+    onChange,
+    handleSubmit,
+    setSubmitting,
+    resetForm,
+    setFieldValue
+  } = props;
+
+  // Event types
+  const [eventTypes, setEventTypes] = useState([
+    { id: 0, name: "Upcoming" },
+    { id: 1, name: "Past" }
+  ]);
+
+  // Fetch data state
+  const [specializationOptions, setSpecializationOptions] = useState([]);
+  const [categoryOptions, setCategoryOptions] = useState([]);
 
   useEffect(() => {
-    fetchCategories();
-    fetchSpecializations();
+    console.log("PROPS: ", props);
+
+    setSpecializationOptions(
+      props.postManagement.specializations
+        ? props.postManagement.specializations
+        : []
+    );
+    setCategoryOptions(
+      props.postManagement.categories.results
+        ? props.postManagement.categories.results
+        : []
+    );
+
+    return () => {
+      console.log("CME FORM unmount -------->");
+    };
     //eslint-disable-next-line
   }, []);
 
-  useEffect(() => {
-    switch (notifs.id) {
-      case "FETCH_CATEGORIES_SUCCESS":
-        setCategories(postManagement.categories.results);
-        break;
-      case "CREATE_ARTICLE_SUCCESS":
-        clearNotifications();
-        message.success(notifs.notifications.success);
-        history.push("/therapy-areas");
-        break;
-      case "CREATE_ARTICLE_FAILED":
-        clearNotifications();
-        message.error(
-          notifs.notifications
-            ? notifs.notifications
-            : "There was an error on processing your request"
-        );
-        break;
-      default:
-        return;
-    }
-    //eslint-disable-next-line
-  }, [notifs.id]);
-
-  // get the file
-  const getImage = (name, file) => {
-    console.log(file);
-    console.log(name);
-    if (name === "masthead") {
-      setmastheadImageInfo(file);
-    }
-    if (name === "featured") {
-      setfeaturedImageInfo(file);
-    }
-    if (name === "thumbnail") {
-      setthumbnailImageInfo(file);
-    }
+  // Tabs callback on change
+  const callback = key => {
+    console.log(key);
   };
 
-  const submitForm = (values, action) => {
+  return (
+    <form className="therapy-article-form" onSubmit={handleSubmit}>
+      <Row gutter={24} className="form-section">
+        <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
+        <Col xs={24} md={8}>
+          <Field
+            as={SelectFormField}
+            name="category_id"
+            onChange={setFieldValue}
+            values={values.category_id}
+            label="Category"
+            requiredlabel="true"
+            options={categoryOptions}
+            placeholder={"Select a category"}
+          />
+          <Field
+            as={DatePickerFormField}
+            placeholder={"Select a date"}
+            label="Event Date"
+            name="event_date"
+            onChange={setFieldValue}
+            requiredlabel="true"
+            values={values.event_date}
+          />
+          <Field
+            as={SelectFormField}
+            name="event_type"
+            onChange={setFieldValue}
+            values={values.event_type}
+            label="Event Type"
+            requiredlabel="true"
+            options={eventTypes}
+            placeholder={"Select an event type"}
+          />
+
+          <TextFormField
+            name="event_location"
+            type="text"
+            values={values.event_location ? values.event_location : null}
+            label="Event Location"
+            requiredlabel="true"
+            placeholder="Enter an event location"
+          />
+        </Col>
+        <Col xs={24} md={7}>
+          <Field
+            as={SelectTagsFormField}
+            name="specializations"
+            onChange={setFieldValue}
+            values={values.specializations}
+            label="Specializations"
+            requiredlabel="true"
+            options={specializationOptions}
+            placeholder="Please select a specialization"
+          />
+          <Field
+            as={TagsSuggestionFormField}
+            name="other_tags"
+            onChange={setFieldValue}
+            values={values.other_tags}
+            label="Other tags"
+            requiredlabel="true"
+            placeholder={"Select a tag"}
+          />
+        </Col>
+        <Col xs={24} md={9}>
+          <TextFormField
+            name="event_name"
+            type="text"
+            values={values.event_name}
+            label="Event Name"
+            requiredlabel="true"
+            placeholder="Enter an event name"
+          />
+
+          <TextFormField
+            name="event_description"
+            type="text"
+            values={values.event_description}
+            label="Event Description"
+            requiredlabel="true"
+            placeholder="Enter an event description"
+          />
+
+          <label
+            style={{
+              display: "block",
+              margin: "15px 0"
+            }}
+            className="ant-form-item-required"
+          >
+            <span>Zinc Code </span>
+            <Tooltip placement="top" title={sampleZincFormat}>
+              <Icon type="info-circle" style={{ color: "#1890ff" }} />
+            </Tooltip>
+          </label>
+          <ZincCodeFormField
+            className="zinc-code-field1"
+            name="zinc_code1"
+            type="text"
+            onChange={setFieldValue}
+            maskValidation="AAAA.AAA.11.11.11"
+            size="small"
+          />
+          <ZincCodeFormField
+            className="zinc-code-field2"
+            name="zinc_code2"
+            type="text"
+            onChange={setFieldValue}
+            maskValidation="Version 1.1"
+            size="small"
+          />
+          <ZincCodeFormField
+            className="zinc-code-field3"
+            name="zinc_code3"
+            type="text"
+            onChange={setFieldValue}
+            maskValidation="11 A** 1111"
+            size="small"
+          />
+        </Col>
+      </Row>
+
+      <Row gutter={24} className="form-section">
+        <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
+        <Col xs={24} md={12}>
+          <TextFormField
+            name="page_title"
+            type="text"
+            label="Page Title"
+            requiredlabel="true"
+            placeholder="Enter a page title"
+            values={values.page_title}
+          />
+          <TextFormField
+            name="meta_description"
+            type="text"
+            label="Meta Description"
+            requiredlabel="true"
+            placeholder="Enter a meta description"
+            values={values.meta_description}
+          />
+        </Col>
+
+        <Col xs={24} md={12}>
+          <TextFormField
+            name="slug"
+            type="text"
+            label="Page Slug(Optional - system will generate if empty"
+            placeholder="Enter a page slug"
+            values={values.slug}
+          />
+          <TextFormField
+            name="meta_keywords"
+            type="text"
+            label="Meta Keywords(Optional)"
+            placeholder="Enter meta keywords"
+            values={values.meta_keywords}
+          />
+        </Col>
+      </Row>
+
+      {/* 3nd row */}
+      <Row gutter={24} className="form-section last">
+        <Col xs={24} md={8}>
+          <h3>Feature Image</h3>
+          <ImageUploader />
+        </Col>
+        <Col xs={24} md={16}>
+          <h3 className="ant-form-item-required">Event Body</h3>
+          <TextEditorFormField
+            name="event_body"
+            values={values.event_body}
+            onChange={setFieldValue}
+          />
+        </Col>
+      </Row>
+
+      {/* <Row>
+                <DisplayFormikState {...values} />
+            </Row> */}
+
+      <div className="form-actions">
+        <Button style={{ marginRight: 10 }}>
+          <Link to="/cme">Cancel</Link>
+        </Button>
+        <Button htmlType="submit" type="primary">
+          Save
+        </Button>
+      </div>
+
+      <RouteLeavingGuard
+        when={props.dirty}
+        navigate={path => props.history.push(path)}
+        shouldBlockNavigation={location => (props.dirty ? true : false)}
+      />
+    </form>
+  );
+};
+
+const formikEnhancer = withFormik({
+  mapPropsToValues: props => props.data,
+  validationSchema: schema,
+  enableReinitialize: true,
+  handleSubmit: (values, { props, setSubmitting, resetForm }) => {
     console.log(values);
-    action.setSubmitting(true);
     let formData = new FormData();
 
-    formData.set("category_id", values.category_id);
-    formData.set("other_tags", values.other_tags);
+    formData.append("category_id", values.category_id);
+    formData.append("event_type", values.event_type);
+    formData.append("other_tags", values.other_tags);
     values.specializations.length === 0
-      ? formData.set("specializations", null)
-      : formData.set("specializations", values.specializations);
-    formData.set("headline", values.headline);
-    formData.set("short_details", values.short_details);
+      ? formData.append("specializations", null)
+      : formData.append("specializations", values.specializations);
+    formData.append("event_name", values.event_name);
+    formData.append("event_description", values.event_description);
     formData.append(
       "zinc_code",
       `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
     );
-    formData.set("page_title", values.page_title);
-    formData.set("meta_description", values.meta_description);
-    formData.set("slug", values.slug);
-    formData.set("meta_keywords", values.meta_keywords);
-    formData.set("body", values.body);
+    formData.append("event_date", values.event_date);
+    formData.append("page_title", values.page_title);
+    formData.append("meta_description", values.meta_description);
+    formData.append("slug", values.slug);
+    formData.append("meta_keywords", values.meta_keywords);
+    formData.append("event_body", values.event_body);
+    formData.append("event_location", values.event_location);
 
     //if theres an uploaded image include these field on our form data
-    if (values.masthead) {
-      formData.set("masthead", mastheadImageInfo);
-      formData.set("featured", featuredImageInfo);
-      formData.set("thumbnail", thumbnailImageInfo);
+    if (values.featured) {
+      formData.append("featured", values.featured); // get the blob file from component state
+      formData.append("thumbnail", values.thumbnail); // get the blob file from component state
     }
 
-    createArticle(formData);
-    action.setSubmitting(false);
-  };
+    axios({
+      url: `${API}/cme/create`,
+      method: "post",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${props.auth.access_token}`
+      },
+      data: formData
+    })
+      .then(res => {
+        setSubmitting(false);
+        console.log(res);
+        message.success(
+          res.data.success ? res.data.success : "Created event successfully"
+        );
+        resetForm();
+        props.history.push("/cme"); // redirect to table
+      })
+      .catch(err => {
+        setSubmitting(false);
+        console.log(err.response.data);
 
-  const handleChangeEvent = e => {
-    console.log(e);
-  };
-
-  return (
-    <>
-      <Formik
-        enableReinitialize={true}
-        initialValues={data}
-        onSubmit={submitForm}
-        validationSchema={schema}
-        validateOnChange={false}
-        validateOnBlur={false}
-      >
-        {props => (
-          <Form className="therapy-article-form">
-            <Row gutter={24} className="form-section">
-              <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
-              <Col xs={24} md={8}>
-                <SelectFormField
-                  options={categories}
-                  label="Category"
-                  name="category_id"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                />
-
-                <DatePickerFormField
-                  placeholder={"Select a date"}
-                  label="Event Date"
-                  name="event_date"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                />
-
-                <EventTypeSelect
-                  label="Event Type"
-                  name="event_type"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                />
-
-                <TextFormField
-                  name="event_location"
-                  type="text"
-                  label="Event Location"
-                  requiredlabel="true"
-                  placeholder="Enter an event location"
-                />
-
-                {/* <FieldArray
-                                    name="event_headings"
-                                    component={EventHighlightsField}
-                                /> */}
-              </Col>
-              <Col xs={24} md={7}>
-                <SelectTagsFormField
-                  options={specializations}
-                  label="Specializations"
-                  name="specializations"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                  requiredlabel="true"
-                  placeholder="Please select a specialization"
-                />
-                <TagsSuggestionFormField
-                  placeholder={"Select a tag"}
-                  label="Other tags"
-                  name="other_tags"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                />
-              </Col>
-              <Col xs={24} md={9}>
-                <TextFormField
-                  name="event_name"
-                  type="text"
-                  label="Event Name"
-                  requiredlabel="true"
-                  placeholder="Enter an event name"
-                />
-
-                <label
-                  style={{
-                    display: "block",
-                    margin: "15px 0"
-                  }}
-                >
-                  <span>Zinc Code </span>{" "}
-                  <Tooltip placement="top" title={sampleZincFormat}>
-                    <Icon type="info-circle" style={{ color: "#1890ff" }} />
-                  </Tooltip>
-                </label>
-                <ZincCodeFormField
-                  className="zinc-code-field1"
-                  name="zinc_code1"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="AAAA.AAA.11.11.11"
-                  size="small"
-                />
-                <ZincCodeFormField
-                  className="zinc-code-field2"
-                  name="zinc_code2"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="Version 1.1"
-                  size="small"
-                />
-                <ZincCodeFormField
-                  className="zinc-code-field3"
-                  name="zinc_code3"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="11 A** 1111"
-                  size="small"
-                />
-              </Col>
-            </Row>
-
-            <Row gutter={24} className="form-section">
-              <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
-              <Col xs={24} md={12}>
-                <TextFormField
-                  name="page_title"
-                  type="text"
-                  label="Page Title"
-                  requiredlabel="true"
-                  placeholder="Enter a page title"
-                />
-                <TextFormField
-                  name="meta_description"
-                  type="text"
-                  label="Meta Description"
-                  requiredlabel="true"
-                  placeholder="Enter a meta description"
-                />
-              </Col>
-
-              <Col xs={24} md={12}>
-                <TextFormField
-                  name="slug"
-                  type="text"
-                  label="Page Slug(Optional - system will generate if empty"
-                  placeholder="Enter a page slug"
-                  isRequired={false}
-                />
-                <TextFormField
-                  name="meta_keywords"
-                  type="text"
-                  label="Meta Keywords(Optional)"
-                  placeholder="Enter meta keywords"
-                  isRequired={false}
-                />
-              </Col>
-            </Row>
-
-            {/* 3nd row */}
-            <Row gutter={24} className="form-section last">
-              <Col xs={24} md={8}>
-                <h3>Feature Image</h3>
-                <ImageUploader getImage={getImage} />
-                {/* <ThumbnailGenerator getImages={getImages} /> */}
-              </Col>
-              <Col xs={24} md={16}>
-                <h3>Article Body</h3>
-                <Field name="body">
-                  {({ field, form: { touched, errors }, meta }) => (
-                    <div
-                      className={
-                        meta.touched && meta.error
-                          ? "has-feedback has-error ant-form-item-control"
-                          : "ant-form-item-control"
-                      }
-                    >
-                      <ReactQuill
-                        theme="snow"
-                        placeholder="Write something..."
-                        modules={CreateCMEForm.modules}
-                        formats={CreateCMEForm.formats}
-                        value={field.value}
-                        onChange={field.onChange(field.name)}
-                      />
-                      {meta.touched && meta.error ? (
-                        <div className="ant-form-explain">{meta.error}</div>
-                      ) : null}
-                    </div>
-                  )}
-                </Field>
-              </Col>
-            </Row>
-
-            <Row>
-              <DisplayFormikState {...props} />
-            </Row>
-
-            <div className="form-actions">
-              <Button style={{ marginRight: 10 }}>
-                <Link to="/therapy-areas">Cancel</Link>
-              </Button>
-              <Button htmlType="submit" type="primary">
-                Save
-              </Button>
-            </div>
-
-            <RouteLeavingGuard
-              when={props.dirty}
-              navigate={path => history.push(path)}
-              shouldBlockNavigation={location => (props.dirty ? true : false)}
-            />
-          </Form>
-        )}
-      </Formik>
-    </>
-  );
-};
-
-CreateCMEForm.modules = {
-  toolbar: [
-    [{ header: "1" }, { header: "2" }, { font: [] }],
-    [{ size: [] }],
-    ["bold", "italic", "underline", "strike", "blockquote"],
-    [
-      { list: "ordered" },
-      { list: "bullet" },
-      { indent: "-1" },
-      { indent: "+1" }
-    ],
-    ["link", "image", "video"],
-    ["clean"]
-  ],
-  clipboard: {
-    // toggle to add extra line breaks when pasting HTML:
-    matchVisual: false
-  }
-};
-
-CreateCMEForm.formats = [
-  "header",
-  "font",
-  "size",
-  "bold",
-  "italic",
-  "underline",
-  "strike",
-  "blockquote",
-  "list",
-  "bullet",
-  "indent",
-  "link",
-  "image",
-  "video"
-];
+        if (err.response.data.length > 0) {
+          console.log(err.response.data);
+        } else {
+          message.error(
+            err.response.data.error
+              ? err.response.data.error
+              : "There was an error on processing your request"
+          );
+        }
+      });
+  },
+  displayName: "CreateCMEForm"
+})(CreateCMEForm);
 
 const mapStateToProps = state => {
   return {
-    postManagement: state.postManagementReducer,
-    notifs: state.notificationReducer
+    cmeManagement: state.cmeManagementReducer
   };
 };
 
-export default connect(
+const CreateCMEFormWrapper = connect(
   mapStateToProps,
-  { createArticle, fetchSpecializations, fetchCategories, fetchSubCategories }
-)(CreateCMEForm);
+  null
+)(formikEnhancer);
+
+export default CreateCMEFormWrapper;

@@ -12,7 +12,10 @@ const style = {
 };
 
 const Card = React.forwardRef(
-  ({ key, text, isDragging, connectDragSource, connectDropTarget }, ref) => {
+  (
+    { key, text, isDragging, connectDragSource, connectDropTarget, deleteLink },
+    ref
+  ) => {
     const elementRef = useRef(null);
     connectDragSource(elementRef);
     connectDropTarget(elementRef);
@@ -21,9 +24,6 @@ const Card = React.forwardRef(
       getNode: () => elementRef.current
     }));
 
-    const handleDeleteLink = () => {
-      console.log(connectDragSource);
-    };
     return (
       <div ref={elementRef} style={{ ...style, opacity }} key={key}>
         <span style={{ marginRight: "auto" }}>{text}</span>
@@ -32,7 +32,7 @@ const Card = React.forwardRef(
           style={{ marginLeft: "auto" }}
           type="danger"
           size="small"
-          onClick={handleDeleteLink}
+          onClick={deleteLink}
         >
           <Icon type="delete" />
         </Button>

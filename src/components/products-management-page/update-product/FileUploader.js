@@ -10,9 +10,16 @@ const FileUploader = ({
   getImage,
   productId,
   updateAction,
+  prescriptionInfoData,
   ...props
 }) => {
-  const [uploadedFileList, setUploadedFileList] = useState([]);
+  const [uploadedFileList, setUploadedFileList] = useState(
+    prescriptionInfoData ? prescriptionInfoData : []
+  );
+
+  useEffect(() => {
+    console.log(prescriptionInfoData, "prescription info data");
+  }, []);
 
   useEffect(() => {
     console.log("in effect", uploadedFileList);
@@ -49,10 +56,6 @@ const FileUploader = ({
     });
 
     formData.append("_method", "PUT");
-
-    console.log(productId, formData);
-
-    //updateAction(productId, formData);
 
     axios({
       url: `${API}/products/update/${productId}`,

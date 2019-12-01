@@ -28,7 +28,6 @@ const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 const ImageUploader = ({ auth, getImage, ...props }) => {
   const [uploadedFileList, setUploadedFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [mastHeadImage, setMastHeadImage] = useState("");
   const [featuredImage, setFeaturedmage] = useState("");
   const [thumbnailImage, setThumbnailImage] = useState("");
   const [showThumbnails, setShowThumbnails] = useState(false);
@@ -50,7 +49,6 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
     const newFileList = uploadedFileList.slice();
     newFileList.splice(index, 1);
     setUploadedFileList(newFileList);
-    setImageFormFieldStatus("masthead", "");
     setImageFormFieldStatus("featured", "");
     setImageFormFieldStatus("thumbnail", "");
     setIsSpinning(false);
@@ -84,7 +82,6 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
   const handleClearImages = () => {
     setUploadedFileList([]);
     console.log("clear", uploadedFileList);
-    setImageFormFieldStatus("masthead", "");
     setImageFormFieldStatus("featured", "");
     setImageFormFieldStatus("thumbnail", "");
     setIsSpinning(false);
@@ -114,67 +111,33 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
         // set our file
         const file = uploadedFileList[0];
 
-        // Generate masthead image
-        Resizer.imageFileResizer(
-          file,
-          1000,
-          600,
-          "JPEG",
-          100,
-          0,
-          uri => {
-            console.log(uri);
-            setMastHeadImage(uri);
-            //@todo - for refactor - use React memo
-            setImageFormFieldStatus("masthead", "1"); // set form value status
-            getImage("masthead", uri); // pass value to the form
-          },
-          "base64"
-        );
-
-        // Generate masthead image - blob
-        Resizer.imageFileResizer(
-          file,
-          1000,
-          600,
-          "JPEG",
-          100,
-          0,
-          uri => {
-            console.log(uri);
-            getImage("masthead", uri);
-          },
-          "blob"
-        );
-
         // Generate featured image
         Resizer.imageFileResizer(
           file,
-          300,
-          300,
+          1000,
+          600,
           "JPEG",
           100,
           0,
           uri => {
             console.log(uri);
             setFeaturedmage(uri);
-            setImageFormFieldStatus("featured", "1"); // set form value status
-            getImage("featured", uri);
           },
           "base64"
         );
 
-        // Generate featured image - blob
+        // Generate featured - blob
         Resizer.imageFileResizer(
           file,
-          300,
-          300,
+          1000,
+          600,
           "JPEG",
           100,
           0,
           uri => {
             console.log(uri);
-            getImage("featured", uri);
+
+            setImageFormFieldStatus("featured", uri);
           },
           "blob"
         );
@@ -190,8 +153,6 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
           uri => {
             console.log(uri);
             setThumbnailImage(uri);
-            setImageFormFieldStatus("thumbnail", "1"); // set form value status
-            getImage("thumbnail", uri);
           },
           "base64"
         );
@@ -206,7 +167,7 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
           0,
           uri => {
             console.log(uri);
-            getImage("thumbnail", uri);
+            setImageFormFieldStatus("thumbnail", uri);
           },
           "blob"
         );
@@ -272,12 +233,10 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
             Images are optimized and cropped automatically
           </small>
 
-          {values.masthead ? (
+          {values.featured ? (
             <div>
-              <h4>Masthead</h4>
-              <img alt="" style={{ width: "300px" }} src={mastHeadImage} />
               <h4>Featured</h4>
-              <img alt="" style={{ width: "200px" }} src={featuredImage} />
+              <img alt="" style={{ width: "300px" }} src={featuredImage} />
               <h4>Thumbnail</h4>
               <img alt="" style={{ width: "180px" }} src={thumbnailImage} />
             </div>
