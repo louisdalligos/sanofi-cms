@@ -6,18 +6,18 @@ import { PageHeader } from "antd";
 import SubCategory from "./SubCategory";
 
 const SubCategoriesManagement = props => {
-  const pageTitle = "Subcategories/Sections";
+    const pageTitle = "Subcategories/Sections";
 
-  return (
-    <>
-      <div className="box-layout-custom">
-        <PageHeader title={pageTitle} />
-        <DndProvider backend={HTML5Backend}>
-          <SubCategory />
-        </DndProvider>
-      </div>
-    </>
-  );
+    return (
+        <>
+            <div className="box-layout-custom">
+                <PageHeader title={pageTitle} />
+                <DndProvider backend={HTML5Backend}>
+                    <SubCategory />
+                </DndProvider>
+            </div>
+        </>
+    );
 };
 
 export default SubCategoriesManagement;

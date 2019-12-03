@@ -17,143 +17,145 @@ import { fetchCategories } from "../../redux/actions/post-management-actions/pos
 import AddCategoryForm from "./AddCategoryForm";
 
 const style = {
-  width: 400,
-  marginTop: 30
+    width: 400,
+    marginTop: 30
 };
 
 // Component
 const Category = ({ auth, fetchCategories, notification, postManagement }) => {
-  const [cards, setCards] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
+    const [cards, setCards] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
 
-  useEffect(() => {
-    fetchCategories();
-    //eslint-disable-next-line
-  }, []);
+    useEffect(() => {
+        fetchCategories();
+        //eslint-disable-next-line
+    }, []);
 
-  useEffect(() => {
-    switch (notification.id) {
-      case "FETCH_CATEGORIES_SUCCESS":
-        setCards(postManagement.categories.results);
-        break;
-      default:
-        return;
-    }
-    // eslint-disable-next-line
-  }, [notification.id, notification.notifications]);
+    useEffect(() => {
+        switch (notification.id) {
+            case "FETCH_CATEGORIES_SUCCESS":
+                setCards(postManagement.categories.results);
+                break;
+            default:
+                return;
+        }
+        // eslint-disable-next-line
+    }, [notification.id, notification.notifications]);
 
-  const moveCard = (id, atIndex) => {
-    const { card, index } = findCard(id);
-    setCards(
-      update(cards, {
-        $splice: [[index, 1], [atIndex, 0, card]]
-      })
-    );
-
-    console.log("ID: ", id, "Index: ", atIndex);
-    console.log("card item", card);
-
-    //let val = {[parseInt(id), atIndex + 1]};
-    let val = "[1, 2], [2, 1], [3, 3], [5, 4], [13, 5], [14, 6]";
-
-    axios({
-      url: `${API}/categories/sort`,
-      method: "put",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${auth.access_token}`
-      },
-      data: val
-    })
-      .then(res => {
-        console.log(res);
-        message.success(
-          res.data ? res.data.success : "Categories successfully sorted"
+    const moveCard = (id, atIndex) => {
+        const { card, index } = findCard(id);
+        setCards(
+            update(cards, {
+                $splice: [[index, 1], [atIndex, 0, card]]
+            })
         );
-        console.log("cards on move new state", cards);
-      })
-      .catch(err => {
-        console.log(err);
-        message.error(
-          err.response.data.error
-            ? err.response.data.error
-            : "Oops! Something went wrong!"
-        );
-      });
-  };
-  const findCard = id => {
-    console.log(id, "id");
-    const card = cards.filter(c => `${c.id}` === id)[0];
 
-    return {
-      card,
-      index: cards.indexOf(card)
+        console.log("ID: ", id, "Index: ", atIndex);
+        console.log("card item", card);
+
+        //let val = {[parseInt(id), atIndex + 1]};
+        let val = "[1, 2], [2, 1], [3, 3], [5, 4], [13, 5], [14, 6]";
+
+        axios({
+            url: `${API}/categories/sort`,
+            method: "put",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${auth.access_token}`
+            },
+            data: val
+        })
+            .then(res => {
+                console.log(res);
+                message.success(
+                    res.data
+                        ? res.data.success
+                        : "Categories successfully sorted"
+                );
+                console.log("cards on move new state", cards);
+            })
+            .catch(err => {
+                console.log(err);
+                message.error(
+                    err.response.data.error
+                        ? err.response.data.error
+                        : "Oops! Something went wrong!"
+                );
+            });
     };
-  };
-  const [, drop] = useDrop({ accept: ItemTypes.CARD });
+    const findCard = id => {
+        console.log(id, "id");
+        const card = cards.filter(c => `${c.id}` === id)[0];
 
-  // show add category modal
-  const showAddCategoryModal = () => {
-    setModalVisible(true);
-  };
+        return {
+            card,
+            index: cards.indexOf(card)
+        };
+    };
+    const [, drop] = useDrop({ accept: ItemTypes.CARD });
 
-  const handleModalClose = () => {
-    setModalVisible(false);
-  };
+    // show add category modal
+    const showAddCategoryModal = () => {
+        setModalVisible(true);
+    };
 
-  return (
-    <>
-      <Row>
-        <Button type="primary" onClick={showAddCategoryModal}>
-          Add Category
-        </Button>
-        <Spin spinning={postManagement.requestInProgress}>
-          <table ref={drop} style={style}>
-            <thead>
-              <tr>
-                <th>Category Name</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cards
-                ? cards.map(card => (
-                    <CategoryItem
-                      key={card.id}
-                      id={`${card.id}`}
-                      name={card.name}
-                      moveCard={moveCard}
-                      findCard={findCard}
-                      auth={auth}
-                    />
-                  ))
-                : "No results found"}
-            </tbody>
-          </table>
-        </Spin>
+    const handleModalClose = () => {
+        setModalVisible(false);
+    };
 
-        <Modal
-          title="New Category"
-          visible={modalVisible}
-          className="modal-form"
-        >
-          <AddCategoryForm handleModalClose={handleModalClose} />
-        </Modal>
-      </Row>
-    </>
-  );
+    return (
+        <>
+            <Row>
+                <Button type="primary" onClick={showAddCategoryModal}>
+                    Add Category
+                </Button>
+                <Spin spinning={postManagement.requestInProgress}>
+                    <table ref={drop} style={style}>
+                        <thead>
+                            <tr>
+                                <th>Category Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {cards
+                                ? cards.map(card => (
+                                      <CategoryItem
+                                          key={card.id}
+                                          id={`${card.id}`}
+                                          name={card.name}
+                                          moveCard={moveCard}
+                                          findCard={findCard}
+                                          auth={auth}
+                                      />
+                                  ))
+                                : "No results found"}
+                        </tbody>
+                    </table>
+                </Spin>
+
+                <Modal
+                    title="New Category"
+                    visible={modalVisible}
+                    className="modal-form"
+                >
+                    <AddCategoryForm handleModalClose={handleModalClose} />
+                </Modal>
+            </Row>
+        </>
+    );
 };
 
 const mapStateToProps = state => {
-  return {
-    auth: state.authReducer,
-    notification: state.notificationReducer,
-    postManagement: state.postManagementReducer
-  };
+    return {
+        auth: state.authReducer,
+        notification: state.notificationReducer,
+        postManagement: state.postManagementReducer
+    };
 };
 
 export default connect(
-  mapStateToProps,
-  { fetchCategories }
+    mapStateToProps,
+    { fetchCategories }
 )(Category);

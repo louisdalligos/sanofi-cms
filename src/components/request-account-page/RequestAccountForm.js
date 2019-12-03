@@ -10,154 +10,159 @@ const { Content } = Layout;
 const { Option } = Select;
 
 const RequestAccountForm = ({
-  form,
-  form: { getFieldDecorator, resetFields },
-  requestInProgress,
-  requestAccount,
-  clearNotifications,
-  notifs,
-  notifId
+    form,
+    form: { getFieldDecorator, resetFields },
+    requestInProgress,
+    requestAccount,
+    clearNotifications,
+    notifs,
+    notifId
 }) => {
-  const [alert, setAlert] = useState(null);
-  const [alertType, setAlertType] = useState(null);
+    const [alert, setAlert] = useState(null);
+    const [alertType, setAlertType] = useState(null);
 
-  useEffect(() => {
-    if (notifId) {
-      if (notifId === "REQUEST_ACCOUNT_ERROR") {
-        setAlert(notifs.notifications.error);
-        setAlertType(notifs.uiType);
-      } else if (notifId === "REQUEST_ACCOUNT_SUCCESS") {
-        setAlert(notifs.notifications.success);
-        setAlertType(notifs.uiType);
-      } else {
+    useEffect(() => {
+        if (notifId) {
+            if (notifId === "REQUEST_ACCOUNT_ERROR") {
+                setAlert(notifs.notifications.error);
+                setAlertType(notifs.uiType);
+            } else if (notifId === "REQUEST_ACCOUNT_SUCCESS") {
+                setAlert(notifs.notifications.success);
+                setAlertType(notifs.uiType);
+            } else {
+                setAlert(null);
+            }
+        }
+
+        // eslint-disable-next-line
+    }, [notifId]);
+
+    const handleSubmit = e => {
+        e.preventDefault();
+        clearNotifications();
+
+        form.validateFields((err, values) => {
+            if (!err) {
+                requestAccount(values);
+                resetFields();
+            }
+        });
+    };
+
+    const onCloseAlert = e => {
+        clearNotifications();
         setAlert(null);
-      }
-    }
+    };
+    return (
+        <div className="full-page-layout">
+            <Layout>
+                <Content>
+                    <Row
+                        type="flex"
+                        justify="center"
+                        align="middle"
+                        style={{ minHeight: "100vh" }}
+                    >
+                        <Form onSubmit={handleSubmit} className="auth-form">
+                            <div className="heading">
+                                <img src={logo} alt="" />
+                                <h3>Request new account</h3>
+                            </div>
 
-    // eslint-disable-next-line
-  }, [notifId]);
+                            {/* Handle response messages on UI */}
+                            {alert ? (
+                                <Alert
+                                    type={alertType}
+                                    message={alert}
+                                    closable
+                                    onClose={onCloseAlert}
+                                />
+                            ) : null}
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    clearNotifications();
+                            <Form.Item label="Full Name">
+                                {getFieldDecorator("fullname", {
+                                    rules: [
+                                        {
+                                            required: true,
+                                            message:
+                                                "Please input your full name"
+                                        }
+                                    ]
+                                })(<Input placeholder="Full name" />)}
+                            </Form.Item>
 
-    form.validateFields((err, values) => {
-      if (!err) {
-        requestAccount(values);
-        resetFields();
-      }
-    });
-  };
+                            <Form.Item label="Your Sanofi Email">
+                                {getFieldDecorator("email", {
+                                    rules: [
+                                        {
+                                            type: "email",
+                                            message:
+                                                "Please enter a valid e-mail"
+                                        },
+                                        {
+                                            required: true,
+                                            message: "Please input your email"
+                                        }
+                                    ]
+                                })(<Input placeholder="Email" />)}
+                            </Form.Item>
 
-  const onCloseAlert = e => {
-    clearNotifications();
-    setAlert(null);
-  };
-  return (
-    <div className="full-page-layout">
-      <Layout>
-        <Content>
-          <Row
-            type="flex"
-            justify="center"
-            align="middle"
-            style={{ minHeight: "100vh" }}
-          >
-            <Form onSubmit={handleSubmit} className="auth-form">
-              <div className="heading">
-                <img src={logo} alt="" />
-                <h3>Request new account</h3>
-              </div>
+                            <Form.Item label="Department">
+                                {getFieldDecorator("department", {
+                                    rules: [
+                                        {
+                                            required: true,
+                                            message:
+                                                "Please select your department"
+                                        }
+                                    ]
+                                })(
+                                    <Select
+                                        placeholder="Select your department"
+                                        //   onChange={thandleSelectChange}
+                                    >
+                                        <Option value="BOSD">BOSD</Option>
+                                        <Option value="Marketing">
+                                            Marketing
+                                        </Option>
+                                        <Option value="Sales">Sales</Option>
+                                        <Option value="ITS">ITS</Option>
+                                        <Option value="Others">Others</Option>
+                                    </Select>
+                                )}
+                            </Form.Item>
 
-              {/* Handle response messages on UI */}
-              {alert ? (
-                <Alert
-                  type={alertType}
-                  message={alert}
-                  closable
-                  onClose={onCloseAlert}
-                />
-              ) : null}
-
-              <Form.Item label="Full Name">
-                {getFieldDecorator("fullname", {
-                  rules: [
-                    {
-                      required: true,
-                      message: "Please input your full name"
-                    }
-                  ]
-                })(<Input placeholder="Full name" />)}
-              </Form.Item>
-
-              <Form.Item label="Your Sanofi Email">
-                {getFieldDecorator("email", {
-                  rules: [
-                    {
-                      type: "email",
-                      message: "Please enter a valid e-mail"
-                    },
-                    {
-                      required: true,
-                      message: "Please input your email"
-                    }
-                  ]
-                })(<Input placeholder="Email" />)}
-              </Form.Item>
-
-              <Form.Item label="Department">
-                {getFieldDecorator("department", {
-                  rules: [
-                    {
-                      required: true,
-                      message: "Please select your department"
-                    }
-                  ]
-                })(
-                  <Select
-                    placeholder="Select your department"
-                    //   onChange={thandleSelectChange}
-                  >
-                    <Option value="BOSD">BOSD</Option>
-                    <Option value="Marketing">Marketing</Option>
-                    <Option value="Sales">Sales</Option>
-                    <Option value="ITS">ITS</Option>
-                    <Option value="Others">Others</Option>
-                  </Select>
-                )}
-              </Form.Item>
-
-              <Form.Item style={{ marginTop: 20 }}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  block
-                  loading={requestInProgress}
-                >
-                  Send Request
-                </Button>
-              </Form.Item>
-            </Form>
-          </Row>
-        </Content>
-      </Layout>
-    </div>
-  );
+                            <Form.Item style={{ marginTop: 20 }}>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    block
+                                    loading={requestInProgress}
+                                >
+                                    Send Request
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                    </Row>
+                </Content>
+            </Layout>
+        </div>
+    );
 };
 
 const WrappedRequestAccountForm = Form.create({ name: "request_account" })(
-  RequestAccountForm
+    RequestAccountForm
 );
 
 const mapStatetoProps = state => {
-  return {
-    requestInProgress: state.authReducer.requestInProgress,
-    notifs: state.notificationReducer,
-    notifId: state.notificationReducer.id
-  };
+    return {
+        requestInProgress: state.authReducer.requestInProgress,
+        notifs: state.notificationReducer,
+        notifId: state.notificationReducer.id
+    };
 };
 
 export default connect(
-  mapStatetoProps,
-  { requestAccount, clearNotifications }
+    mapStatetoProps,
+    { requestAccount, clearNotifications }
 )(WrappedRequestAccountForm);

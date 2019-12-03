@@ -10,163 +10,171 @@ import ZincCodeFormField from "../smart-form/ZincCodeFormField";
 
 import { connect } from "react-redux";
 import {
-  createMiscContent,
-  updateMiscContent,
-  addSpecialMessage
+    createMiscContent,
+    updateMiscContent,
+    addSpecialMessage
 } from "../../redux/actions/miscellaneous-actions/miscellaneousAction";
 
 const schema = Yup.object().shape({
-  zinc_code1: Yup.string().required("Required field"),
-  zinc_code2: Yup.string().required("Required field"),
-  zinc_code3: Yup.string().required("Required field")
+    zinc_code1: Yup.string().required("Required field"),
+    zinc_code2: Yup.string().required("Required field"),
+    zinc_code3: Yup.string().required("Required field")
 });
 
 class ZincCodeComponent extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      zincCode1: "",
-      zincCode2: "",
-      zincCode3: "",
+    constructor(props) {
+        super(props);
+        this.state = {
+            zincCode1: "",
+            zincCode2: "",
+            zincCode3: "",
 
-      prevValue: null,
-      prevIsExist: false
-    };
+            prevValue: null,
+            prevIsExist: false
+        };
 
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  // NEW: componentWillReceiveprops()
-  static getDerivedStateFromProps(props, state) {
-    if (
-      props.value !== state.prevValue ||
-      props.isExist !== state.prevIsExist
-    ) {
-      const format = props.value.split(",") || "";
-      return {
-        prevValue: props.value,
-        prevIsExist: props.isExist,
-        // read-only
-        zincCode1: format[0] || "",
-        zincCode2: format[1] || "",
-        zincCode3: format[2] || ""
-      };
-    }
-    return null;
-  }
-
-  handleSubmit(values, action) {
-    if (
-      values.zinc_code1.indexOf("_") !== -1 ||
-      values.zinc_code2.indexOf("_") !== -1 ||
-      values.zinc_code3.indexOf("_") !== -1
-    ) {
-      // return alert(JSON.stringify(values));
-      return this.props.addSpecialMessage("Invalid or Incomplete inputs.");
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    const finalValue = `${values.zinc_code1},${values.zinc_code2},${values.zinc_code3}`;
+    // NEW: componentWillReceiveprops()
+    static getDerivedStateFromProps(props, state) {
+        if (
+            props.value !== state.prevValue ||
+            props.isExist !== state.prevIsExist
+        ) {
+            const format = props.value.split(",") || "";
+            return {
+                prevValue: props.value,
+                prevIsExist: props.isExist,
+                // read-only
+                zincCode1: format[0] || "",
+                zincCode2: format[1] || "",
+                zincCode3: format[2] || ""
+            };
+        }
+        return null;
+    }
 
-    const { prevIsExist } = this.state;
-    const payload = {
-      type: "zinc_code",
-      content: finalValue
-    };
+    handleSubmit(values, action) {
+        if (
+            values.zinc_code1.indexOf("_") !== -1 ||
+            values.zinc_code2.indexOf("_") !== -1 ||
+            values.zinc_code3.indexOf("_") !== -1
+        ) {
+            // return alert(JSON.stringify(values));
+            return this.props.addSpecialMessage(
+                "Invalid or Incomplete inputs."
+            );
+        }
 
-    if (prevIsExist) this.props.updateMiscContent(payload);
-    else this.props.createMiscContent(payload);
-  }
+        const finalValue = `${values.zinc_code1},${values.zinc_code2},${values.zinc_code3}`;
 
-  render() {
-    const description = sampleZincFormat;
-    const { zincCode1, zincCode2, zincCode3 } = this.state;
-    const { isLoading } = this.props;
+        const { prevIsExist } = this.state;
+        const payload = {
+            type: "zinc_code",
+            content: finalValue
+        };
 
-    return (
-      <Spin spinning={isLoading}>
-        <div className="generic-wrapper">
-          {(this.props.errorMessage.length && (
-            <Alert
-              className="alert-custom-style"
-              message={this.props.errorMessage}
-              type="error"
-            />
-          )) ||
-            ""}
+        if (prevIsExist) this.props.updateMiscContent(payload);
+        else this.props.createMiscContent(payload);
+    }
 
-          <Formik
-            initialValues={{
-              zinc_code1: zincCode1,
-              zinc_code2: zincCode2,
-              zinc_code3: zincCode3
-            }}
-            onSubmit={this.handleSubmit}
-            validationSchema={schema}
-            validateOnChange={true}
-            validateOnBlur={true}
-          >
-            {props => (
-              <Form className="therapy-article-form">
-                <Row gutter={24}>
-                  <Col xs={24} md={4}>
-                    <span>Zinc Code Format </span>
-                    <Tooltip placement="top" title={description}>
-                      <Icon type="info-circle" style={{ color: "#1890ff" }} />
-                    </Tooltip>
-                  </Col>
+    render() {
+        const description = sampleZincFormat;
+        const { zincCode1, zincCode2, zincCode3 } = this.state;
+        const { isLoading } = this.props;
 
-                  <Col xs={24} md={20}>
-                    <ZincCodeFormField
-                      className="zinc-code-field1"
-                      name="zinc_code1"
-                      type="text"
-                      onChange={props.setFieldValue}
-                      maskValidation="AAAA.AAA.11.11.11"
-                    />
-                    <ZincCodeFormField
-                      className="zinc-code-field2"
-                      name="zinc_code2"
-                      type="text"
-                      onChange={props.setFieldValue}
-                      maskValidation="Version 1.1"
-                    />
-                    <ZincCodeFormField
-                      className="zinc-code-field3"
-                      name="zinc_code3"
-                      type="text"
-                      onChange={props.setFieldValue}
-                      maskValidation="11 A** 1111"
-                    />
-                  </Col>
-                </Row>
+        return (
+            <Spin spinning={isLoading}>
+                <div className="generic-wrapper">
+                    {(this.props.errorMessage.length && (
+                        <Alert
+                            className="alert-custom-style"
+                            message={this.props.errorMessage}
+                            type="error"
+                        />
+                    )) ||
+                        ""}
 
-                <div className="generic-btn-wrapper">
-                  <Button type="primary" htmlType="submit">
-                    {" "}
-                    Apply Changes
-                  </Button>
+                    <Formik
+                        initialValues={{
+                            zinc_code1: zincCode1,
+                            zinc_code2: zincCode2,
+                            zinc_code3: zincCode3
+                        }}
+                        onSubmit={this.handleSubmit}
+                        validationSchema={schema}
+                        validateOnChange={true}
+                        validateOnBlur={true}
+                    >
+                        {props => (
+                            <Form className="therapy-article-form">
+                                <Row gutter={24}>
+                                    <Col xs={24} md={4}>
+                                        <span>Zinc Code Format </span>
+                                        <Tooltip
+                                            placement="top"
+                                            title={description}
+                                        >
+                                            <Icon
+                                                type="info-circle"
+                                                style={{ color: "#1890ff" }}
+                                            />
+                                        </Tooltip>
+                                    </Col>
+
+                                    <Col xs={24} md={20}>
+                                        <ZincCodeFormField
+                                            className="zinc-code-field1"
+                                            name="zinc_code1"
+                                            type="text"
+                                            onChange={props.setFieldValue}
+                                            maskValidation="AAAA.AAA.11.11.11"
+                                        />
+                                        <ZincCodeFormField
+                                            className="zinc-code-field2"
+                                            name="zinc_code2"
+                                            type="text"
+                                            onChange={props.setFieldValue}
+                                            maskValidation="Version 1.1"
+                                        />
+                                        <ZincCodeFormField
+                                            className="zinc-code-field3"
+                                            name="zinc_code3"
+                                            type="text"
+                                            onChange={props.setFieldValue}
+                                            maskValidation="11 A** 1111"
+                                        />
+                                    </Col>
+                                </Row>
+
+                                <div className="generic-btn-wrapper">
+                                    <Button type="primary" htmlType="submit">
+                                        {" "}
+                                        Apply Changes
+                                    </Button>
+                                </div>
+                            </Form>
+                        )}
+                    </Formik>
                 </div>
-              </Form>
-            )}
-          </Formik>
-        </div>
-      </Spin>
-    );
-  }
+            </Spin>
+        );
+    }
 }
 
 const mapStateToProps = state => ({
-  isLoading: state.miscellaneousReducer.isLoading,
-  errorMessage: state.miscellaneousReducer.errorMessage
+    isLoading: state.miscellaneousReducer.isLoading,
+    errorMessage: state.miscellaneousReducer.errorMessage
 });
 
 const mapDispatchToProps = {
-  createMiscContent,
-  updateMiscContent,
-  addSpecialMessage
+    createMiscContent,
+    updateMiscContent,
+    addSpecialMessage
 };
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+    mapStateToProps,
+    mapDispatchToProps
 )(ZincCodeComponent);

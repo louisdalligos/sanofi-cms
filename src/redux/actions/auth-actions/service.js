@@ -1,27 +1,27 @@
 import axiosInstance from "../../../utils/axiosInstance";
 
 function signinRequest(body) {
-  return axiosInstance({
-    method: "post",
-    url: "/login",
-    data: body
-  });
+    return axiosInstance({
+        method: "post",
+        url: "/login",
+        data: body
+    });
 }
 
 function requestAccountService(body) {
-  return axiosInstance({
-    method: "post",
-    url: "/request-account",
-    data: body
-  });
+    return axiosInstance({
+        method: "post",
+        url: "/request-account",
+        data: body
+    });
 }
 
 function getAuthUserRequest(body) {
-  return axiosInstance({
-    method: "get",
-    url: "/profile",
-    data: body
-  });
+    return axiosInstance({
+        method: "get",
+        url: "/profile",
+        data: body
+    });
 }
 
 // function logoutRequest() {
@@ -33,10 +33,10 @@ function getAuthUserRequest(body) {
 // }
 
 const AuthServices = {
-  signinRequest,
-  requestAccountService,
-  //logoutRequest,
-  getAuthUserRequest
+    signinRequest,
+    requestAccountService,
+    //logoutRequest,
+    getAuthUserRequest
 };
 
 export default AuthServices;

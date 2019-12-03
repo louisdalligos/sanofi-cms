@@ -12,43 +12,45 @@ const pageTitle = "Update product";
 
 // Component
 const UpdateProductPage = ({
-  fetchCurrentProduct,
-  currentProduct,
-  history,
-  match,
-  ...props
+    fetchCurrentProduct,
+    currentProduct,
+    history,
+    match,
+    ...props
 }) => {
-  return (
-    <Fragment>
-      <div className="box-layout-custom">
-        <PageHeader title={pageTitle} />
-        <div className="page-breadcrumb">
-          <div>
-            <Breadcrumb>
-              <Breadcrumb.Item key="content">Content</Breadcrumb.Item>
-              <Breadcrumb.Item key="products">
-                <Link to="/products">Products</Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item key="products-create">
-                Update Product
-              </Breadcrumb.Item>
-            </Breadcrumb>
-          </div>
-        </div>
+    return (
+        <Fragment>
+            <div className="box-layout-custom">
+                <PageHeader title={pageTitle} />
+                <div className="page-breadcrumb">
+                    <div>
+                        <Breadcrumb>
+                            <Breadcrumb.Item key="content">
+                                Content
+                            </Breadcrumb.Item>
+                            <Breadcrumb.Item key="products">
+                                <Link to="/products">Products</Link>
+                            </Breadcrumb.Item>
+                            <Breadcrumb.Item key="products-create">
+                                Update Product
+                            </Breadcrumb.Item>
+                        </Breadcrumb>
+                    </div>
+                </div>
 
-        <UpdateProductForm history={history} match={match} />
-      </div>
-    </Fragment>
-  );
+                <UpdateProductForm history={history} match={match} />
+            </div>
+        </Fragment>
+    );
 };
 
 const mapStateToProps = state => {
-  return {
-    currentProduct: state.productManagementReducer.currentProduct
-  };
+    return {
+        currentProduct: state.productManagementReducer.currentProduct
+    };
 };
 
 export default connect(
-  mapStateToProps,
-  { fetchCurrentProduct }
+    mapStateToProps,
+    { fetchCurrentProduct }
 )(UpdateProductPage);

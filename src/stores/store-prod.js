@@ -9,9 +9,9 @@ middleware = [...middleware, thunk];
 
 // Initialize our REDUX store
 const store = createStore(
-  rootReducer,
-  initialState,
-  compose(applyMiddleware(...middleware))
+    rootReducer,
+    initialState,
+    compose(applyMiddleware(...middleware))
 );
 
 // console.log = function() {}; // remove clg

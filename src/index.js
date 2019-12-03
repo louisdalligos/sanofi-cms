@@ -10,6 +10,8 @@ import history from "./utils/history";
 import App from "./container/App";
 import "antd/dist/antd.min.css";
 
+import "./sass/app.scss";
+
 import {
   connectTheUser,
   getAuthUser

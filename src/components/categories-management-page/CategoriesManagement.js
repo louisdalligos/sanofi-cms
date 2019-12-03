@@ -6,18 +6,18 @@ import { PageHeader } from "antd";
 import Category from "./Category";
 
 const CategoriesManagement = props => {
-  const pageTitle = "Categories/Illnesses";
+    const pageTitle = "Categories/Illnesses";
 
-  return (
-    <>
-      <div className="box-layout-custom">
-        <PageHeader title={pageTitle} />
-        <DndProvider backend={HTML5Backend}>
-          <Category />
-        </DndProvider>
-      </div>
-    </>
-  );
+    return (
+        <>
+            <div className="box-layout-custom">
+                <PageHeader title={pageTitle} />
+                <DndProvider backend={HTML5Backend}>
+                    <Category />
+                </DndProvider>
+            </div>
+        </>
+    );
 };
 
 export default CategoriesManagement;
