@@ -1,0 +1,46 @@
+.dnd-wrapper {
+  min-height: 52px;
+  position: relative;
+}
+.dnd-table {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px;
+  .dnd-btn-wrapper {
+    display: flex;
+    justify-content: space-between;
+  }
+  div {
+    box-sizing: border-box;
+  }
+  .grid-left {
+    width: 78%;
+    padding-right: 10px;
+    @extend .truncate;
+  }
+  .grid-right {
+    width: 22%;
+  }
+}
+.not-bold {
+  font-weight: normal !important;
+}
+.dnd-wrapper {
+  max-width: 500px;
+  width: 100%;
+  border: 1px solid #d9d9d9;
+}
+.dnd-header {
+  max-width: 500px;
+  width: 100%;
+  font-weight: bold;
+  .grid-left,
+  .grid-right {
+    text-align: left;
+  }
+}
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

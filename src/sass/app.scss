@@ -1,6 +1,9 @@
 @import "./_variables.scss";
 @import "./_all.scss";
 @import "./_sitemap.scss";
+@import "dnd.scss";
+@import "_products.tab.scss";
+
 html {
   min-height: 100%;
 }
@@ -490,11 +493,32 @@ body {
   padding: 0 20px 40px;
 
   @media screen and (min-width: 1200px) {
-    width: 1100px;
+    //width: 1100px;
+    width: 1422px;
     margin: 30px auto;
   }
 
   .list-entry {
     margin-bottom: 30px;
+
+    .ant-spin {
+      text-align: center;
+      display: block !important;
+    }
+  }
+
+  .dashboard-card-item {
+    text-align: center;
+
+    h2 {
+      border: 1px solid #eeee;
+      padding: 34px;
+    }
+  }
+
+  .spacing-line {
+    background-color: #e8e8e8;
+    height: 1px;
+    margin: 40px 0;
   }
 }

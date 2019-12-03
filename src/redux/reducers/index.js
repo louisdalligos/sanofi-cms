@@ -17,27 +17,31 @@ import otherReferencesProductManagementReducers from "./other-references-product
 import prescriptionInfoProductManagementReducers from "./prescription-info-product-management.reducers";
 import newCategoriesReducers from "./new-categories.reducers";
 import newSubcategoriesReducers from "./new-subcategories.reducers";
+import clinicalTrialsProductManagementReducers from "./clinical-trials-product-management.reducers";
+
 //centralize
 import centralizeToastrReducers from "../../components/utility-components/CentralizeToastr/centralize-toastr.reducers";
 
 const rootReducer = combineReducers({
-    authReducer,
-    notificationReducer,
-    superadmin,
-    userMaintenanceReducer,
-    postManagementReducer,
-    productManagementReducer,
-    cmeReducer,
-    dashboardReducer,
-    miscellaneousReducer,
-    userDeletedReducer,
-    // doms
-    otherReferencesProductManagementReducers,
-    prescriptionInfoProductManagementReducers,
-    // centralize
-    centralizeToastrReducers,
-    newCategoriesReducers,
-    newSubcategoriesReducers
+  authReducer,
+  notificationReducer,
+  superadmin,
+  userMaintenanceReducer,
+  postManagementReducer,
+  productManagementReducer,
+  cmeReducer,
+  dashboardReducer,
+  miscellaneousReducer,
+  userDeletedReducer,
+  // Centralize Toaster
+  centralizeToastrReducers,
+  // (Sub)Categories
+  newCategoriesReducers,
+  newSubcategoriesReducers,
+  // ProductsManagementPage
+  prescriptionInfoProductManagementReducers,
+  otherReferencesProductManagementReducers,
+  clinicalTrialsProductManagementReducers
 });
 
 export default rootReducer;
