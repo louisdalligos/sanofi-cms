@@ -3,8 +3,6 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Formik, Field, Form, withFormik } from "formik";
 import { Button, Row, Col, message, Icon, Spin, Tooltip } from "antd";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
 import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
@@ -28,6 +26,7 @@ import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 import ImageUploader from "./ImageUploader";
 
 import { sampleZincFormat } from "../../../utils/constant";
+import TextEditorFormField from "../../smart-form/TextEditorFormField";
 
 // validation schema
 const schema = Yup.object().shape({
@@ -367,29 +366,11 @@ const UpdateArticleForm = ({
           </Col>
           <Col xs={24} md={16}>
             <h3>Article Body</h3>
-            {/* <Field name="body">
-              {({ field, form: { touched, errors }, meta }) => (
-                <div
-                  className={
-                    meta.touched && meta.error
-                      ? "has-feedback has-error ant-form-item-control"
-                      : "ant-form-item-control"
-                  }
-                >
-                  <ReactQuill
-                    theme="snow"
-                    placeholder="Write something..."
-                    modules={UpdateArticleForm.modules}
-                    formats={UpdateArticleForm.formats}
-                    value={props.values.body}
-                    onChange={field.onChange(field.name)}
-                  />
-                  {meta.touched && meta.error ? (
-                    <div className="ant-form-explain">{meta.error}</div>
-                  ) : null}
-                </div>
-              )}
-            </Field> */}
+            <Field
+              as={TextEditorFormField}
+              name="body"
+              values={props.values.body}
+            />
           </Col>
         </Row>
 
@@ -415,43 +396,6 @@ const UpdateArticleForm = ({
     </Spin>
   );
 };
-
-UpdateArticleForm.modules = {
-  toolbar: [
-    [{ header: "1" }, { header: "2" }, { font: [] }],
-    [{ size: [] }],
-    ["bold", "italic", "underline", "strike", "blockquote"],
-    [
-      { list: "ordered" },
-      { list: "bullet" },
-      { indent: "-1" },
-      { indent: "+1" }
-    ],
-    ["link", "image", "video"],
-    ["clean"]
-  ],
-  clipboard: {
-    // toggle to add extra line breaks when pasting HTML:
-    matchVisual: false
-  }
-};
-
-UpdateArticleForm.formats = [
-  "header",
-  "font",
-  "size",
-  "bold",
-  "italic",
-  "underline",
-  "strike",
-  "blockquote",
-  "list",
-  "bullet",
-  "indent",
-  "link",
-  "image",
-  "video"
-];
 
 const formikEnhancer = withFormik({
   mapPropsToValues: props => props.data,

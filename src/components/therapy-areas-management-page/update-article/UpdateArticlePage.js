@@ -48,7 +48,7 @@ const UpdateArticlePage = ({ match, auth, postManagement, ...props }) => {
       subcategory_id: data.category_id,
       specializations: spc,
       other_tags: tags,
-      body: data.event_body,
+      body: data.body,
       page_title: data.page_title,
       slug: data.slug,
       meta_description: data.meta_description,
