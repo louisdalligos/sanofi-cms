@@ -261,6 +261,8 @@ const TherapyAreasTable = ({
   function showArchiveConfirm(id, e) {
     e.stopPropagation();
 
+    console.log(id);
+
     confirm({
       title: "Are you sure you want to archive this article?",
       okText: "Yes",
@@ -268,8 +270,7 @@ const TherapyAreasTable = ({
       cancelText: "No",
       onOk() {
         const values = {
-          id: id.toString(),
-          status: "archive"
+          status: "archived"
         };
 
         changeArticleStatus(id, values);
@@ -290,8 +291,7 @@ const TherapyAreasTable = ({
       cancelText: "No",
       onOk() {
         const values = {
-          id: id.toString(),
-          status: "unarchive"
+          status: "unarchived"
         };
 
         changeArticleStatus(id, values);
