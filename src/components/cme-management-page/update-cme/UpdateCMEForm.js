@@ -497,11 +497,14 @@ const formikEnhancer = withFormik({
   validationSchema: schema,
   enableReinitialize: true,
   handleSubmit: (values, { props, setSubmitting, resetForm }) => {
+    const formatSpc =
+      values.tag_all === "0" ? "0" : values.specializations.join();
+
     const data = {
       page_title: values.page_title,
       category_id: values.category_id,
       other_tags: values.other_tags.join(),
-      specializations: values.specializations.join(),
+      specializations: formatSpc,
       event_name: values.event_name,
       event_description: values.event_description,
       zinc_code: `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`,

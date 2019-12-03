@@ -406,12 +406,16 @@ const formikEnhancer = withFormik({
 
     let formData = new FormData();
 
+    const formatSpc = values.tag_all === true ? "0" : values.specializations;
+
+    console.log(values.tag_all);
+    console.log(formatSpc);
+    debugger;
+
     formData.append("category_id", values.category_id);
     formData.append("subcategory_id", values.subcategory_id);
     formData.append("other_tags", values.other_tags);
-    values.specializations.length === 0
-      ? formData.append("specializations", null)
-      : formData.append("specializations", values.specializations);
+    formData.append("specializations", formatSpc);
     formData.append("headline", values.headline);
     formData.append("short_details", values.short_details);
     formData.append(

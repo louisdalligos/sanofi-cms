@@ -30,7 +30,8 @@ const UpdateCMEPage = ({ history, auth, match, postManagement, ...props }) => {
     zinc_code3: "",
     zinc_code: "",
     featured: "",
-    thumbnail: ""
+    thumbnail: "",
+    tag_all: ""
   });
 
   const getData = data => {

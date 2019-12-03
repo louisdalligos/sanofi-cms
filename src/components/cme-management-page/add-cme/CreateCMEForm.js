@@ -308,8 +308,8 @@ const formikEnhancer = withFormik({
     formData.append("category_id", values.category_id);
     formData.append("event_type", values.event_type);
     formData.append("other_tags", values.other_tags);
-    values.specializations.length === 0
-      ? formData.append("specializations", null)
+    values.tag_all === 0
+      ? formData.append("specializations", 0)
       : formData.append("specializations", values.specializations);
     formData.append("event_name", values.event_name);
     formData.append("event_description", values.event_description);
