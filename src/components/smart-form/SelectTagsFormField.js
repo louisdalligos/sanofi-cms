@@ -1,5 +1,5 @@
 import React from "react";
-import { useField, useFormikContext } from "formik";
+import { useField, useFormikContext, Field } from "formik";
 import { Select, Checkbox } from "antd";
 const { Option } = Select;
 
@@ -27,8 +27,10 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
       console.log(ids);
 
       setFieldValue(field.name, ids); // update our formik props
+      setFieldValue("tag_all", true);
     } else {
       setFieldValue(field.name, []);
+      setFieldValue("tag_all", false);
     }
   }
 
@@ -59,7 +61,6 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
         onChange={handleSelectChange}
         onBlur={handleSelectBlur}
         notFoundContent="No results found"
-        allowClear
         maxTagCount={5}
         maxTagTextLength={20}
       >
@@ -76,7 +77,9 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
         <div className="ant-form-explain">{meta.error}</div>
       ) : null}
 
-      <Checkbox onChange={onChange}>Select all specializations</Checkbox>
+      <Field as={Checkbox} name="tag_all" onChange={onChange}>
+        Select all specializations
+      </Field>
     </div>
   );
 };

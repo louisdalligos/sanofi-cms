@@ -15,10 +15,19 @@ import {
   fetchTotalEvents
 } from "../../redux/actions/dashboard-actions/dashboardActions";
 
+import {
+  fetchSpecializations,
+  fetchCategories,
+  fetchSubCategories
+} from "../../redux/actions/post-management-actions/postManagementActions";
+
 const pageTitle = "Dashboard";
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 const Dashboard = ({
+  fetchCategories,
+  fetchSpecializations,
+  fetchSubCategories,
   fetchTotalMonthlyNewDoctors,
   fetchTotalActiveDoctors,
   fetchTotalBlockedDoctors,
@@ -63,6 +72,9 @@ const Dashboard = ({
     fetchTotalProducts();
     fetchTotalEvents();
 
+    fetchSpecializations();
+    fetchCategories();
+    fetchSubCategories();
     console.log(props);
 
     //setRole(props.role);
@@ -320,6 +332,9 @@ export default connect(
     fetchTotalSubCategories,
     fetchTotalTherapyArticles,
     fetchTotalProducts,
-    fetchTotalEvents
+    fetchTotalEvents,
+    fetchSpecializations,
+    fetchCategories,
+    fetchSubCategories
   }
 )(Dashboard);

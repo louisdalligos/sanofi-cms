@@ -139,7 +139,7 @@ const CreateArticleForm = ({
     formData.set("category_id", values.category_id);
     formData.set("subcategory_id", values.subcategory_id);
     formData.set("other_tags", values.other_tags);
-    values.specializations === 0
+    values.tag_all === 0
       ? formData.set("specializations", 0)
       : formData.set("specializations", values.specializations);
     formData.set("headline", values.headline);

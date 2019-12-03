@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { Formik, Field, Form } from "formik";
+import { Formik, Field, Form, withFormik } from "formik";
 import { Button, Row, Col, message, Icon, Spin, Tooltip } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
-//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
 import {
   updateArticle,
-  fetchCategories,
-  fetchSubCategories,
-  fetchSpecializations,
   changeArticleStatus,
   fetchCurrentArticle
 } from "../../../redux/actions/post-management-actions/postManagementActions";
@@ -61,126 +58,74 @@ const schema = Yup.object().shape({
 
 const UpdateArticleForm = ({
   notifs,
-  postManagement,
-  fetchCategories,
-  fetchSubCategories,
-  fetchSpecializations,
   fetchCurrentArticle,
   updateArticle,
   currentArticle,
   changeArticleStatus,
-  history,
-  match,
   ...props
 }) => {
-  const [currentArticleId, setCurrentArticleId] = useState(match.params.id);
-  const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
-  const [specializations, setSpecializations] = useState([]);
-
-  const [featuredImageInfo, setfeaturedImageInfo] = useState("");
-  const [mastheadImageInfo, setmastheadImageInfo] = useState("");
-  const [thumbnailImageInfo, setthumbnailImageInfo] = useState("");
+  // article Id
+  const [currentArticleId, setCurrentArticleId] = useState(
+    props.match.params.id
+  );
 
   const [loading, setLoading] = useState(false);
-
-  const [statusOptions, setStatusOptions] = useState([]);
   const [isDisabled, setIsDisabled] = useState(true);
 
-  // form data state values
-  const [categoryId, setCategoryId] = useState("");
-  const [subCategoryId, setSubCategoryId] = useState("");
-  const [otherTags, setOtherTags] = useState([]);
-  const [selectedSpecializations, setSelectedSpecializations] = useState([]);
-  const [pageTitle, setPageTitle] = useState("");
-  const [headline, setHeadline] = useState("");
-  const [zincCode, setZincCode] = useState("");
-  const [shortDetails, setShortDetails] = useState("");
-  const [slug, setSlug] = useState("");
-  const [metaDescription, setMetaDescription] = useState("");
-  const [metaKeywords, setMetaKeywords] = useState("");
-  const [body, setBody] = useState("");
-  const [status, setStatus] = useState("");
-  const [zincode1, setZinCode1] = useState("");
-  const [zincode2, setZincCode2] = useState("");
-  const [zincode3, setZincCode3] = useState("");
-
-  const [masthead, setMasthead] = useState("");
-  const [featured, setFeatured] = useState("");
-  const [thumbnail, setThumbnail] = useState("");
+  // Fetch data state
+  const [specializationOptions, setSpecializationOptions] = useState([]);
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [subCategoryOptions, setSubCategoryOptions] = useState([]);
+  const [statusOptions, setStatusOptions] = useState([
+    { id: "unpublished", name: "unpublished" },
+    { id: "published", name: "published" },
+    { id: "archived", name: "archived" }
+  ]);
 
   useEffect(() => {
     setLoading(true);
     fetchCurrentArticle(currentArticleId);
-    fetchCategories();
-    fetchSubCategories();
-    fetchSpecializations();
 
-    setStatusOptions([
-      { id: "unpublished", name: "unpublished" },
-      { id: "published", name: "published" },
-      { id: "archived", name: "archived" }
-    ]);
+    setSpecializationOptions(
+      props.postManagement.specializations
+        ? props.postManagement.specializations
+        : []
+    );
+    setCategoryOptions(
+      props.postManagement.categories
+        ? props.postManagement.categories.results
+        : []
+    );
+    setSubCategoryOptions(
+      props.postManagement.subCategories
+        ? props.postManagement.subCategories.results
+        : []
+    );
 
     return () => {
-      //alert("Unmount update");
-      //setLoading(false);
+      console.log("unmount -------->");
     };
     //eslint-disable-next-line
   }, []);
 
-  const setComponentState = currentArticle => {
-    console.log(currentArticle);
-
-    const formatTag = currentArticle.other_tags
-      ? currentArticle.other_tags.toString().split(",")
-      : [];
-
-    const formatSpecial = currentArticle.specializations
-      ? currentArticle.specializations
-          .toString()
-          .split(",")
-          .map(item => {
-            return parseInt(item, 10);
-          })
-      : [];
-
-    setCategoryId(currentArticle.category_id);
-    setSubCategoryId(currentArticle.subcategory_id);
-
-    setOtherTags(formatTag);
-
-    setSelectedSpecializations(formatSpecial);
-    setPageTitle(currentArticle.page_title);
-    setHeadline(currentArticle.headline);
-    //setZincCode(currentArticle.zinc_code);
-    setShortDetails(currentArticle.short_details);
-    setSlug(currentArticle.slug);
-    setMetaDescription(currentArticle.meta_description);
-    setMetaKeywords(currentArticle.meta_keywords);
-    setBody(currentArticle.body);
-    setStatus(currentArticle.status);
-    setMasthead(currentArticle.masthead_image);
-    setFeatured(currentArticle.featured_image);
-    setThumbnail(currentArticle.thumbnail_image);
-
-    // work on our zinc code
-    const str = currentArticle.zinc_code.split("|");
-    setZinCode1(str[0].trim());
-    setZincCode2(str[1].trim());
-    setZincCode3(str[2].trim());
-  };
-
   useEffect(() => {
     if (currentArticle) {
-      setTimeout(() => {
-        setComponentState(currentArticle);
-      }, 1000);
+      props.getData(currentArticle); // pass our data to parent for it to set the initial values of formik
+
+      setLoading(false);
     }
+
+    return () => {
+      console.log("CME FORM unmount -------->");
+    };
+    //eslint-disable-next-line
   }, [currentArticle]);
 
   useEffect(() => {
     switch (notifs.id) {
+      case "FETCH_CURRENT_ARTICLE_SUCCESS":
+        setLoading(false);
+        break;
       case "CHANGE_ARTICLE_STATUS_SUCCESS":
         setLoading(false);
         message.success(
@@ -197,16 +142,7 @@ const UpdateArticleForm = ({
             : "There was an error on processing your request"
         );
         break;
-      case "FETCH_SPECIALIZATIONS_SUCCESS":
-        setSpecializations(postManagement.specializations);
-        setLoading(false);
-        break;
-      case "FETCH_SUBCATEGORIES_SUCCESS":
-        setSubCategories(postManagement.subCategories.results);
-        break;
-      case "FETCH_CATEGORIES_SUCCESS":
-        setCategories(postManagement.categories.results);
-        break;
+
       case "UPDATE_ARTICLE_SUCCESS":
         message.success(notifs.notifications.success);
         fetchCurrentArticle(currentArticle.id);
@@ -228,59 +164,6 @@ const UpdateArticleForm = ({
     //eslint-disable-next-line
   }, [notifs.id, notifs.notifications]);
 
-  // get the file
-  const getImage = (name, file) => {
-    console.log(file);
-    console.log(name);
-    if (name === "masthead") {
-      setmastheadImageInfo(file);
-    }
-    if (name === "featured") {
-      setfeaturedImageInfo(file);
-    }
-    if (name === "thumbnail") {
-      setthumbnailImageInfo(file);
-    }
-  };
-
-  const submitForm = (values, action) => {
-    clearNotifications(); // clear our notifs
-    action.setSubmitting(true);
-
-    let formData = new FormData();
-
-    formData.append("category_id", values.category_id);
-    formData.append("subcategory_id", values.subcategory_id);
-    formData.append("other_tags", values.other_tags);
-    values.specializations.length === 0
-      ? formData.append("specializations", null)
-      : formData.append("specializations", values.specializations);
-    formData.append("headline", values.headline);
-    formData.append("short_details", values.short_details);
-    formData.append(
-      "zinc_code",
-      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
-    );
-    formData.append("page_title", values.page_title);
-    formData.append("meta_description", values.meta_description);
-    formData.append("slug", values.slug.replace(/\s+/g, "-").toLowerCase());
-    formData.append("meta_keywords", values.meta_keywords);
-    formData.append("body", values.body);
-    formData.append("_method", "PUT");
-
-    // if theres an uploaded image include these field on our form data
-    if (mastheadImageInfo) {
-      formData.append("masthead", mastheadImageInfo);
-      formData.append("featured", featuredImageInfo);
-      formData.append("thumbnail", thumbnailImageInfo);
-    }
-
-    updateArticle(currentArticle.id, formData);
-    action.setSubmitting(false);
-
-    setComponentState(values);
-  };
-
   const saveStatus = val => {
     setLoading(true);
     const id = currentArticle.id;
@@ -297,7 +180,7 @@ const UpdateArticleForm = ({
           <Formik
             enableReinitialize={true}
             initialValues={{
-              status: status
+              status: props.values.status
             }}
           >
             {props => (
@@ -342,213 +225,193 @@ const UpdateArticleForm = ({
           </Formik>
         </Col>
       </Row>
-      <Formik
-        enableReinitialize={true}
-        initialValues={{
-          status: status,
-          category_id: categoryId,
-          subcategory_id: subCategoryId,
-          other_tags: otherTags,
-          specializations: selectedSpecializations,
-          headline: headline,
-          short_details: shortDetails,
-          //zinc_code: zincCode,
-          page_title: pageTitle,
-          meta_description: metaDescription,
-          slug: slug,
-          meta_keywords: metaKeywords ? metaKeywords : "",
-          body: body,
-          zinc_code1: zincode1,
-          zinc_code2: zincode2,
-          zinc_code3: zincode3,
-          featured: featured,
-          masthead: masthead,
-          thumbnail: thumbnail
-        }}
-        onSubmit={submitForm}
-        validationSchema={schema}
-        validateOnChange={false}
-        validateOnBlur={false}
-      >
-        {props => (
-          <Form className="therapy-article-form">
-            <Row gutter={24} className="form-section">
-              <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
-              <Col xs={24} md={8}>
-                <SelectFormField
-                  options={categories}
-                  label="Category"
-                  name="category_id"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                />
-                <SelectFormField
-                  options={subCategories}
-                  label="Sub Category"
-                  name="subcategory_id"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                />
-                <TagsSuggestionFormField
-                  placeholder={"Select a tag"}
-                  label="Other tags"
-                  name="other_tags"
-                  onChange={props.setFieldValue}
-                />
-              </Col>
-              <Col xs={24} md={7}>
-                <SelectTagsFormField
-                  options={specializations}
-                  label="Specializations"
-                  name="specializations"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                  placeholder="Please select a specialization"
-                />
-              </Col>
-              <Col xs={24} md={9}>
-                <TextFormField
-                  name="short_details"
-                  type="text"
-                  label="Short Details"
-                  requiredlabel="true"
-                  placeholder="Enter a short detail"
-                />
-                <TextFormField
-                  name="headline"
-                  type="text"
-                  label="Headline"
-                  requiredlabel="true"
-                  placeholder="Enter a headline"
-                />
-                <label
-                  style={{
-                    display: "block",
-                    margin: "15px 0"
-                  }}
-                >
-                  <span>Zinc Code </span>{" "}
-                  <Tooltip placement="top" title={sampleZincFormat}>
-                    <Icon type="info-circle" style={{ color: "#1890ff" }} />
-                  </Tooltip>
-                </label>
-                <ZincCodeFormField
-                  className="zinc-code-field1"
-                  name="zinc_code1"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="AAAA.AAA.11.11.11"
-                  size="small"
-                />
-                <ZincCodeFormField
-                  className="zinc-code-field2"
-                  name="zinc_code2"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="Version 1.1"
-                  size="small"
-                />
-                <ZincCodeFormField
-                  className="zinc-code-field3"
-                  name="zinc_code3"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="11 A** 1111"
-                  size="small"
-                />
-              </Col>
-            </Row>
 
-            <Row gutter={24} className="form-section">
-              <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
-              <Col xs={24} md={12}>
-                <TextFormField
-                  name="page_title"
-                  type="text"
-                  label="Page Title"
-                  requiredlabel="true"
-                  placeholder="Enter a page title"
-                />
-                <TextFormField
-                  name="meta_description"
-                  type="text"
-                  label="Meta Description"
-                  requiredlabel="true"
-                  placeholder="Enter a meta description"
-                />
-              </Col>
-
-              <Col xs={24} md={12}>
-                <TextFormField
-                  name="slug"
-                  type="text"
-                  label="Page Slug(Optional - system will generate if empty"
-                  placeholder="Enter a page slug"
-                />
-                <TextFormField
-                  name="meta_keywords"
-                  type="text"
-                  label="Meta Keywords(Optional)"
-                  placeholder="Enter meta keywords"
-                />
-              </Col>
-            </Row>
-
-            {/* 3nd row */}
-            <Row gutter={24} className="form-section last">
-              <Col xs={24} md={8}>
-                <h3>Feature Image</h3>
-                <ImageUploader getImage={getImage} />
-              </Col>
-              <Col xs={24} md={16}>
-                <h3>Article Body</h3>
-                <Field name="body">
-                  {({ field, form: { touched, errors }, meta }) => (
-                    <div
-                      className={
-                        meta.touched && meta.error
-                          ? "has-feedback has-error ant-form-item-control"
-                          : "ant-form-item-control"
-                      }
-                    >
-                      <ReactQuill
-                        theme="snow"
-                        placeholder="Write something..."
-                        modules={UpdateArticleForm.modules}
-                        formats={UpdateArticleForm.formats}
-                        value={field.value}
-                        onChange={field.onChange(field.name)}
-                      />
-                      {meta.touched && meta.error ? (
-                        <div className="ant-form-explain">{meta.error}</div>
-                      ) : null}
-                    </div>
-                  )}
-                </Field>
-              </Col>
-            </Row>
-
-            {/* <Row>
-                            <DisplayFormikState {...props} />
-                        </Row> */}
-
-            <div className="form-actions">
-              <Button style={{ marginRight: 10 }}>
-                <Link to="/therapy-areas">Cancel</Link>
-              </Button>
-              <Button htmlType="submit" type="primary">
-                Save
-              </Button>
-            </div>
-
-            <RouteLeavingGuard
-              when={props.dirty}
-              navigate={path => history.push(path)}
-              shouldBlockNavigation={location => (props.dirty ? true : false)}
+      <form className="therapy-article-form" onSubmit={props.handleSubmit}>
+        <Row gutter={24} className="form-section">
+          <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
+          <Col xs={24} md={8}>
+            <SelectFormField
+              options={categoryOptions}
+              label="Category"
+              name="category_id"
+              onChange={props.setFieldValue}
+              requiredlabel="true"
+              values={props.values.category_id}
             />
-          </Form>
-        )}
-      </Formik>
+            <SelectFormField
+              options={subCategoryOptions}
+              label="Sub Category"
+              name="subcategory_id"
+              onChange={props.setFieldValue}
+              requiredlabel="true"
+              values={props.values.subcategory_id}
+            />
+            <TagsSuggestionFormField
+              placeholder={"Select a tag"}
+              label="Other tags"
+              name="other_tags"
+              onChange={props.setFieldValue}
+              values={props.values.other_tags}
+            />
+          </Col>
+          <Col xs={24} md={7}>
+            <SelectTagsFormField
+              options={specializationOptions}
+              label="Specializations"
+              name="specializations"
+              onChange={props.setFieldValue}
+              requiredlabel="true"
+              placeholder="Please select a specialization"
+              values={props.values.specializations}
+            />
+          </Col>
+          <Col xs={24} md={9}>
+            <TextFormField
+              name="headline"
+              type="text"
+              label="Headline"
+              requiredlabel="true"
+              placeholder="Enter a headline"
+              values={props.values.headline}
+            />
+            <TextFormField
+              name="short_details"
+              type="text"
+              label="Short Details"
+              requiredlabel="true"
+              placeholder="Enter a short detail"
+              values={props.values.short_details}
+            />
+            <label
+              style={{
+                display: "block",
+                margin: "15px 0"
+              }}
+            >
+              <span>Zinc Code </span>{" "}
+              <Tooltip placement="top" title={sampleZincFormat}>
+                <Icon type="info-circle" style={{ color: "#1890ff" }} />
+              </Tooltip>
+            </label>
+            <ZincCodeFormField
+              className="zinc-code-field1"
+              name="zinc_code1"
+              type="text"
+              onChange={props.setFieldValue}
+              maskValidation="AAAA.AAA.11.11.11"
+              size="small"
+            />
+            <ZincCodeFormField
+              className="zinc-code-field2"
+              name="zinc_code2"
+              type="text"
+              onChange={props.setFieldValue}
+              maskValidation="Version 1.1"
+              size="small"
+            />
+            <ZincCodeFormField
+              className="zinc-code-field3"
+              name="zinc_code3"
+              type="text"
+              onChange={props.setFieldValue}
+              maskValidation="11 A** 1111"
+              size="small"
+            />
+          </Col>
+        </Row>
+
+        <Row gutter={24} className="form-section">
+          <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
+          <Col xs={24} md={12}>
+            <TextFormField
+              name="page_title"
+              type="text"
+              label="Page Title"
+              requiredlabel="true"
+              placeholder="Enter a page title"
+              values={props.values.page_title}
+            />
+            <TextFormField
+              name="meta_description"
+              type="text"
+              label="Meta Description"
+              requiredlabel="true"
+              placeholder="Enter a meta description"
+              values={props.values.meta_description}
+            />
+          </Col>
+
+          <Col xs={24} md={12}>
+            <TextFormField
+              name="slug"
+              type="text"
+              label="Page Slug(Optional - system will generate if empty"
+              placeholder="Enter a page slug"
+              values={props.values.slug}
+            />
+            <TextFormField
+              name="meta_keywords"
+              type="text"
+              label="Meta Keywords(Optional)"
+              placeholder="Enter meta keywords"
+              values={props.values.meta_keywords}
+            />
+          </Col>
+        </Row>
+
+        {/* 3nd row */}
+        <Row gutter={24} className="form-section last">
+          <Col xs={24} md={8}>
+            <h3>Feature Image</h3>
+            <ImageUploader />
+          </Col>
+          <Col xs={24} md={16}>
+            <h3>Article Body</h3>
+            {/* <Field name="body">
+              {({ field, form: { touched, errors }, meta }) => (
+                <div
+                  className={
+                    meta.touched && meta.error
+                      ? "has-feedback has-error ant-form-item-control"
+                      : "ant-form-item-control"
+                  }
+                >
+                  <ReactQuill
+                    theme="snow"
+                    placeholder="Write something..."
+                    modules={UpdateArticleForm.modules}
+                    formats={UpdateArticleForm.formats}
+                    value={props.values.body}
+                    onChange={field.onChange(field.name)}
+                  />
+                  {meta.touched && meta.error ? (
+                    <div className="ant-form-explain">{meta.error}</div>
+                  ) : null}
+                </div>
+              )}
+            </Field> */}
+          </Col>
+        </Row>
+
+        <Row>
+          <DisplayFormikState {...props.values} />
+        </Row>
+
+        <div className="form-actions">
+          <Button style={{ marginRight: 10 }}>
+            <Link to="/therapy-areas">Cancel</Link>
+          </Button>
+          <Button htmlType="submit" type="primary">
+            Save
+          </Button>
+        </div>
+
+        <RouteLeavingGuard
+          when={props.dirty}
+          navigate={path => props.history.push(path)}
+          shouldBlockNavigation={location => (props.dirty ? true : false)}
+        />
+      </form>
     </Spin>
   );
 };
@@ -590,22 +453,27 @@ UpdateArticleForm.formats = [
   "video"
 ];
 
+const formikEnhancer = withFormik({
+  mapPropsToValues: props => props.data,
+  validationSchema: schema,
+  enableReinitialize: true,
+  handleSubmit: (values, { props, setSubmitting, resetForm }) => {
+    console.log(values);
+  },
+  displayName: "UpdateArticleForm"
+})(UpdateArticleForm);
+
 const mapStateToProps = state => {
   return {
-    postManagement: state.postManagementReducer,
     notifs: state.notificationReducer,
-    currentArticle: state.postManagementReducer.currentArticle
+    currentArticle: state.postManagementReducer.currentArticle,
+    postManagement: state.postManagementReducer
   };
 };
 
-export default connect(
+const UpdateArticleFormWrapper = connect(
   mapStateToProps,
-  {
-    updateArticle,
-    fetchSpecializations,
-    fetchCategories,
-    fetchSubCategories,
-    fetchCurrentArticle,
-    changeArticleStatus
-  }
-)(UpdateArticleForm);
+  { updateArticle, fetchCurrentArticle, changeArticleStatus }
+)(formikEnhancer);
+
+export default UpdateArticleFormWrapper;

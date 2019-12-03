@@ -162,6 +162,7 @@ const TherapyAreasTable = ({
 
   useEffect(() => {
     fetch(); // fetch initial
+
     //eslint-disable-next-line
   }, []);
 
