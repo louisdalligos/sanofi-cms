@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Formik, Field, Form, useFormikContext } from "formik";
-import { Button, Row, Col, message, Icon, Tooltip } from "antd";
+import { Button, Row, Col, message, Icon, Tooltip, Checkbox } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
-//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
@@ -139,8 +139,8 @@ const CreateArticleForm = ({
     formData.set("category_id", values.category_id);
     formData.set("subcategory_id", values.subcategory_id);
     formData.set("other_tags", values.other_tags);
-    values.specializations.length === 0
-      ? formData.set("specializations", null)
+    values.specializations === 0
+      ? formData.set("specializations", 0)
       : formData.set("specializations", values.specializations);
     formData.set("headline", values.headline);
     formData.set("short_details", values.short_details);
@@ -335,9 +335,9 @@ const CreateArticleForm = ({
               </Col>
             </Row>
 
-            {/* <Row>
-                            <DisplayFormikState {...props} />
-                        </Row> */}
+            <Row>
+              <DisplayFormikState {...props} />
+            </Row>
 
             <div className="form-actions">
               <Button style={{ marginRight: 10 }}>
