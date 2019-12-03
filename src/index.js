@@ -3,8 +3,8 @@ import ReactDOM from "react-dom";
 import { Router } from "react-router-dom";
 import { Provider } from "react-redux";
 import axiosInstance from "./utils/axiosInstance";
-//import store from "./stores/store-dev";
-import store from "./stores/store-prod";
+import store from "./stores/store-dev";
+//import store from "./stores/store-prod";
 import history from "./utils/history";
 
 import App from "./container/App";

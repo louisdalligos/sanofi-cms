@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { Select, Button, Icon } from "antd";
 import { connect } from "react-redux";
-const { Option } = Select;
 
 import {
   fecthClinicalTrialsArticles,
@@ -9,6 +8,8 @@ import {
   addItemClinicalTrialsArticle,
   deleteClinicalTrialsDndItem
 } from "../../../../redux/actions/product-management-actions/clinical-trials-productmanagement.actions";
+
+const { Option } = Select;
 
 class ClinicalTrialsComponent extends Component {
   constructor(props) {
