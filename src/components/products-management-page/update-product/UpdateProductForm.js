@@ -16,7 +16,7 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
-import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
@@ -637,9 +637,9 @@ const UpdateProductForm = ({
                   </Col>
                 </Row>
 
-                <Row>
+                {/* <Row>
                   <DisplayFormikState {...props} />
-                </Row>
+                </Row> */}
 
                 <div className="form-actions">
                   <Button style={{ marginRight: 10 }}>

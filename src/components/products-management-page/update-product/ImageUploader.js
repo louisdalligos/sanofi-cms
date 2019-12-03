@@ -132,7 +132,7 @@ const ImageUploader = ({ auth, data, ...props }) => {
           }
         );
       });
-      message.success("Successfully deleted file");
+      message.success("Product file successfully deleted!");
       setUploadedFileList([]);
       setImageFormFieldStatus("image_gallery", []);
 
