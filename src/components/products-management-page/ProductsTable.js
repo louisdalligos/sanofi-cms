@@ -157,7 +157,7 @@ const ProductsTable = ({
         <Fragment>
           {record.status === "archived" ? (
             <TableAction
-              title="Unarchive the article?"
+              title="Unarchive the product?"
               buttonType="primary"
               iconType="undo"
               recordId={record.id}
@@ -165,7 +165,7 @@ const ProductsTable = ({
             />
           ) : (
             <TableAction
-              title="Archive the article?"
+              title="Archive the product?"
               iconType="delete"
               recordId={record.id}
               handleTableAction={showArchiveConfirm}

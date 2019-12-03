@@ -143,7 +143,7 @@ const CMETable = ({ notifs, clearNotifications, changeEventStatus, auth }) => {
         <Fragment>
           {record.status === "archived" ? (
             <TableAction
-              title="Unarchive the article?"
+              title="Unarchive the event?"
               buttonType="primary"
               iconType="undo"
               recordId={record.id}
@@ -151,7 +151,7 @@ const CMETable = ({ notifs, clearNotifications, changeEventStatus, auth }) => {
             />
           ) : (
             <TableAction
-              title="Archive the article?"
+              title="Archive the event?"
               iconType="delete"
               recordId={record.id}
               handleTableAction={showArchiveConfirm}
