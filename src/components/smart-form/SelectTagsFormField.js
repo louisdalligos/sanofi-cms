@@ -34,10 +34,6 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
     }
   }
 
-  React.useEffect(() => {
-    console.log(options, "CURRENT OPTIONS");
-  }, [options]);
-
   return (
     <div
       className={
