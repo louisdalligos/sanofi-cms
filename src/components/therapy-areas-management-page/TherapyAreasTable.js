@@ -73,7 +73,7 @@ const TherapyAreasTable = ({
       width: 50,
       render: (text, record) => (
         <Tooltip placement="top" title="Edit article">
-          <Button type="link" onClick={e => handleSelectArticle(record.id, e)}>
+          <Button type="link">
             <Link to={`/therapy-areas/${record.id}`}>
               <Icon type="form" />
             </Link>
@@ -95,10 +95,7 @@ const TherapyAreasTable = ({
             className="table-list-thumbnail-image"
           />
           <div>
-            <Button
-              type="link"
-              onClick={e => handleSelectArticle(record.id, e)}
-            >
+            <Button type="link">
               <Link to={`/therapy-areas/${record.id}`} title={text}>
                 <Typography.Text ellipsis={true} style={COLUMN_ITEM_LINK}>
                   {text}
@@ -300,12 +297,6 @@ const TherapyAreasTable = ({
         console.log("Cancel");
       }
     });
-  }
-
-  function handleSelectArticle(id, e) {
-    e.stopPropagation();
-    console.log(id);
-    //fetchCurrentAdmin(id);
   }
 
   function itemRender(current, type, originalElement) {
