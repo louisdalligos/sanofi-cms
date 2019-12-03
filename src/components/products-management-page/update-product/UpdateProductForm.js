@@ -16,7 +16,7 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
-//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
@@ -41,9 +41,6 @@ import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 
 // Other components
 import ImageUploader from "./ImageUploader";
-import FileUploader from "./FileUploader";
-import ClinicalTrialsForm from "./clinical-trial-form/ClinicalTrialsForm";
-import ResourcesForm from "./resources-form/ResourcesForm";
 
 import OtherReferencesComponent from "../tabs/OtherReferences/OtherReferencesComponent";
 import PrescriptionInfoComponent from "../tabs/PrescriptionInfo/PrescriptionInfoComponent";
@@ -305,16 +302,6 @@ const UpdateProductForm = ({
     //eslint-disable-next-line
   }, [notifs.id, notifs.notifications]);
 
-  // get the file
-  const getImage = (name, file) => {
-    console.log(file);
-    console.log(name);
-
-    if (name === "image_gallery") {
-      setImageGalleryFiles([...imageGalleryFiles, file]);
-    }
-  };
-
   // Submit form action
   const submitForm = (values, action) => {
     clearNotifications(); // clear our notifs
@@ -361,20 +348,11 @@ const UpdateProductForm = ({
 
     formData.append("_method", "PUT");
 
-    // const formatTags = currentProduct.other_tags
-    //     ? currentProduct.other_tags.split(",")
-    //     : [];
-    // const formatSelectedSpecialization = currentProduct.specializations
-    //     ? currentProduct.specializations.split(",").map(item => {
-    //           return parseInt(item, 10);
-    //       })
-    //     : [];
-
     //if theres an uploaded image include these field on our form data
     if (values.image_gallery) {
-      for (let i = 0; i < imageGalleryFiles.length; i++) {
-        if (imageGalleryFiles[i] instanceof Blob)
-          formData.append("image_gallery[]", imageGalleryFiles[i]);
+      for (let i = 0; i < values.image_gallery.length; i++) {
+        if (values.image_gallery[i] instanceof Blob)
+          formData.append("image_gallery[]", values.image_gallery[i]);
       }
     }
 
@@ -629,7 +607,7 @@ const UpdateProductForm = ({
                 <Row gutter={24} className="form-section last">
                   <Col xs={24} md={8}>
                     <h3>Gallery Images</h3>
-                    <ImageUploader getImage={getImage} data={defaultList} />
+                    <ImageUploader data={defaultList} />
                   </Col>
                   <Col xs={24} md={16}>
                     <h3>Product Description</h3>
@@ -659,9 +637,9 @@ const UpdateProductForm = ({
                   </Col>
                 </Row>
 
-                {/* <Row>
-                                    <DisplayFormikState {...props} />
-                                </Row> */}
+                <Row>
+                  <DisplayFormikState {...props} />
+                </Row>
 
                 <div className="form-actions">
                   <Button style={{ marginRight: 10 }}>
