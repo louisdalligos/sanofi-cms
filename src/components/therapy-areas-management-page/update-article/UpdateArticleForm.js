@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Formik, Field, Form, withFormik } from "formik";
 import { Button, Row, Col, message, Icon, Spin, Tooltip } from "antd";
 import * as Yup from "yup";
-import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
@@ -150,7 +150,7 @@ const UpdateArticleForm = ({
       case "UPDATE_ARTICLE_FAILED":
         message.error(
           notifs.notifications
-            ? notifs.notifications
+            ? notifs.notifications.message
             : "There was an error on processing your request"
         );
         setLoading(false);
@@ -374,9 +374,9 @@ const UpdateArticleForm = ({
           </Col>
         </Row>
 
-        <Row>
+        {/* <Row>
           <DisplayFormikState {...props.values} />
-        </Row>
+        </Row> */}
 
         <div className="form-actions">
           <Button style={{ marginRight: 10 }}>
@@ -403,6 +403,36 @@ const formikEnhancer = withFormik({
   enableReinitialize: true,
   handleSubmit: (values, { props, setSubmitting, resetForm }) => {
     console.log(values);
+
+    let formData = new FormData();
+
+    formData.append("category_id", values.category_id);
+    formData.append("subcategory_id", values.subcategory_id);
+    formData.append("other_tags", values.other_tags);
+    values.specializations.length === 0
+      ? formData.append("specializations", null)
+      : formData.append("specializations", values.specializations);
+    formData.append("headline", values.headline);
+    formData.append("short_details", values.short_details);
+    formData.append(
+      "zinc_code",
+      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
+    );
+    formData.append("page_title", values.page_title);
+    formData.append("meta_description", values.meta_description);
+    formData.append("slug", values.slug);
+    formData.append("meta_keywords", values.meta_keywords);
+    formData.append("body", values.body);
+    formData.append("_method", "PUT");
+
+    //if theres an uploaded image include these field on our form data
+    if (values.masthead) {
+      formData.append("masthead", values.masthead);
+      formData.append("featured", values.featured);
+      formData.append("thumbnail", values.thumbnail);
+    }
+
+    props.updateArticle(props.currentArticle.id, formData);
   },
   displayName: "UpdateArticleForm"
 })(UpdateArticleForm);
