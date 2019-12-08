@@ -19,7 +19,10 @@ import { API } from "../../utils/api";
 
 import { noImage } from "../../utils/constant";
 
-import { changeEventStatus } from "../../redux/actions/cme-actions/cmeActions";
+import {
+  changeEventStatus,
+  featureEvent
+} from "../../redux/actions/cme-actions/cmeActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 // Table components
@@ -32,16 +35,25 @@ import { COLUMN_ITEM_LINK } from "../../utils/config";
 
 const { confirm } = Modal;
 
-const CMETable = ({ notifs, clearNotifications, changeEventStatus, auth }) => {
+const CMETable = ({
+  notifs,
+  clearNotifications,
+  changeEventStatus,
+  featureEvent,
+  auth
+}) => {
   const columns = [
     {
       title: "Featured",
       dataIndex: "new",
       rowKey: "id",
-      width: 70,
+      width: 80,
       render: (text, record) => (
         <Tooltip placement="top" title="Tag as featured?">
-          <Switch className="switch-new-trigger" />
+          <Switch
+            className="switch-new-trigger"
+            defaultChecked={record.featured_at === "Yes" ? true : false}
+          />
         </Tooltip>
       )
     },
@@ -173,26 +185,7 @@ const CMETable = ({ notifs, clearNotifications, changeEventStatus, auth }) => {
     }
   ];
 
-  const [data, setData] = useState([
-    {
-      id: 1,
-      event_name: "Event One",
-      event_type: "upcoming",
-      status: "unpublished",
-      short_description: "Lorem ipsum",
-      zinc_code: "AAAA.AAA.12.06.16 | Version 0.6 | 06 DEC 2016",
-      date_created: new Date()
-    },
-    {
-      id: 2,
-      event_name: "Event Two",
-      event_type: "past",
-      status: "unpublished",
-      short_description: "Lorem ipsum",
-      zinc_code: "FFXFE.DFE.12.06.16 | Version 1.6 | 12 DEC 1998",
-      date_created: new Date()
-    }
-  ]);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(null);
@@ -427,6 +420,7 @@ export default connect(
   mapStateToProps,
   {
     clearNotifications,
-    changeEventStatus
+    changeEventStatus,
+    featureEvent
   }
 )(CMETable);

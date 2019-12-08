@@ -7,12 +7,11 @@ const TextEditorFormField = ({ className, values, ...props }) => {
   const [field, meta] = useField(props);
 
   const handleSelectChange = value => {
-    console.log(value);
     props.onChange(field.name, value);
   };
 
   const handleSelectBlur = value => {
-    console.log(value);
+    //console.log(value);
   };
 
   return (

@@ -41,7 +41,8 @@ import { sampleZincFormat } from "../../../utils/constant";
 // redux action
 import {
   fetchCurrentEvent,
-  changeEventStatus
+  changeEventStatus,
+  featureEvent
 } from "../../../redux/actions/cme-actions/cmeActions";
 import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
 
@@ -87,6 +88,7 @@ const UpdateCMEForm = ({
   currentEvent,
   changeEventStatus,
   fetchCurrentEvent,
+  featureEvent,
   notifs,
   ...props
 }) => {
@@ -108,7 +110,7 @@ const UpdateCMEForm = ({
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [thumbnailImageInfo, setthumbnailImageInfo] = useState("");
   const [featuredImageInfo, setfeaturedImageInfo] = useState("");
-  const [isEventFeatured, setIsEventFeatured] = useState(true);
+  const [isEventFeatured, setIsEventFeatured] = useState(null);
   const [statusOptions, setStatusOptions] = useState([
     { id: "unpublished", name: "unpublished" },
     { id: "published", name: "published" },
@@ -149,6 +151,14 @@ const UpdateCMEForm = ({
         currentEvent.specializations === "0" ? shapeData : currentEvent
       ); // pass our data to parent for it to set the initial values of formik
       setLoading(false);
+
+      if (currentEvent.event_type === 1) {
+        console.log("Past selected");
+      }
+      setIsEventFeatured(currentEvent.featured_at === 1 ? true : false);
+
+      console.log(isEventFeatured);
+      debugger;
     }
 
     return () => {
@@ -160,6 +170,14 @@ const UpdateCMEForm = ({
   // Notifications listener
   useEffect(() => {
     switch (notifs.id) {
+      case "FEATURE_EVENT_FAILED":
+        setIsEventFeatured(false);
+        message.error(
+          notifs.notifications
+            ? notifs.notifications
+            : "There was an error on processing your request"
+        );
+        break;
       case "FETCH_CURRENT_EVENT_FAILED":
         setLoading(false);
         message.error(
@@ -211,7 +229,11 @@ const UpdateCMEForm = ({
 
   // handle set to featured switch
   function handleSwitchChange(checked) {
-    console.log(checked);
+    if (checked) {
+      featureEvent(currentEventId, JSON.stringify({ is_featured: 1 }));
+    } else {
+      featureEvent(currentEventId, JSON.stringify({ is_featured: 0 }));
+    }
   }
 
   return (
@@ -270,14 +292,14 @@ const UpdateCMEForm = ({
           <Tooltip
             placement="top"
             title={
-              isEventFeatured && isEventFeatured === "Yes"
+              isEventFeatured
                 ? "Remove from featured event"
                 : "Feature the event?"
             }
           >
             <Switch
               className="switch-new-trigger"
-              defaultChecked={isEventFeatured && isEventFeatured === "Yes"}
+              defaultChecked={isEventFeatured}
               onChange={handleSwitchChange}
             />
           </Tooltip>
@@ -308,7 +330,7 @@ const UpdateCMEForm = ({
                   requiredlabel="true"
                   options={eventTypes}
                   placeholder={"Select an event type"}
-                  value={props.values.event_type === "0" ? "Upcoming" : "Past"}
+                  value={props.values.event_type === 0 ? "Upcoming" : "Past"}
                 />
                 <Field
                   as={DatePickerFormField}
@@ -585,7 +607,8 @@ const mapDispatchToProps = dispatch => {
   return bindActionCreators(
     {
       fetchCurrentEvent: fetchCurrentEvent,
-      changeEventStatus: changeEventStatus
+      changeEventStatus: changeEventStatus,
+      featureEvent: featureEvent
     },
     dispatch
   );
