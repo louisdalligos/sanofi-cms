@@ -275,6 +275,7 @@ const CMETable = ({
       case "FEATURE_EVENT_SUCCESS":
       case "FEATURE_EVENT_FAILED":
         setLoading(false);
+        break;
       case "CHANGE_EVENT_STATUS_SUCCESS":
         message.success(
           notifs.notifications

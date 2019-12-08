@@ -1,15 +1,29 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import { PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import UpdateCMEFormWrapper from "./UpdateCMEForm";
-import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
+
+import {
+  fetchCategories,
+  fetchSpecializations
+} from "../../../redux/actions/post-management-actions/postManagementActions";
 
 const pageTitle = "Update CME";
 
 // Component
-const UpdateCMEPage = ({ history, auth, match, postManagement, ...props }) => {
+const UpdateCMEPage = ({
+  history,
+  auth,
+  match,
+  postManagement,
+  fetchCategories,
+  fetchSpecializations,
+  notifs,
+  ...props
+}) => {
   const [data, setData] = useState({
     id: "",
     category_id: "",
@@ -73,6 +87,29 @@ const UpdateCMEPage = ({ history, auth, match, postManagement, ...props }) => {
     setData(formatData); // set our formated obj to formik values
   };
 
+  const [specializations, setSpecializations] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchSpecializations();
+    //eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    switch (notifs.id) {
+      case "FETCH_SPECIALIZATIONS_SUCCESS":
+        setSpecializations(postManagement.specializations);
+        break;
+      case "FETCH_CATEGORIES_SUCCESS":
+        setCategories(postManagement.categories.results);
+        break;
+      default:
+        return;
+    }
+    //eslint-disable-next-line
+  }, [notifs.id, notifs.notifications]);
+
   return (
     <Fragment>
       <div className="box-layout-custom">
@@ -92,7 +129,8 @@ const UpdateCMEPage = ({ history, auth, match, postManagement, ...props }) => {
         <UpdateCMEFormWrapper
           history={history}
           auth={auth}
-          postManagement={postManagement}
+          categories={categories}
+          specializations={specializations}
           data={data}
           getData={getData}
           match={match}
@@ -107,11 +145,21 @@ const mapStateToProps = state => {
     auth: state.authReducer,
     postManagement: state.postManagementReducer,
     notifs: state.notificationReducer,
-    currentEvent: state.cmeReducer.currentProduct
+    currentEvent: state.cmeReducer.currentEvent
   };
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators(
+    {
+      fetchCategories: fetchCategories,
+      fetchSpecializations: fetchSpecializations
+    },
+    dispatch
+  );
 };
 
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(UpdateCMEPage);

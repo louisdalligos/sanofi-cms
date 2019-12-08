@@ -44,7 +44,6 @@ import {
   changeEventStatus,
   featureEvent
 } from "../../../redux/actions/cme-actions/cmeActions";
-import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
 
 // validation schema
 const schema = Yup.object().shape({
@@ -58,7 +57,7 @@ const schema = Yup.object().shape({
   event_date: Yup.string().required("This field is required"),
   event_type: Yup.string().required("This field is required"),
   event_location: Yup.string().required("This field is required"),
-  //specializations: Yup.string().required("This field is required"),
+  specializations: Yup.string().required("This field is required"),
   other_tags: Yup.string().required("This field is required"),
   page_title: Yup.string()
     .required("This field is required")
@@ -105,9 +104,6 @@ const UpdateCMEForm = ({
   const [loading, setLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
 
-  // Fetch data state
-  const [specializationOptions, setSpecializationOptions] = useState([]);
-  const [categoryOptions, setCategoryOptions] = useState([]);
   const [thumbnailImageInfo, setthumbnailImageInfo] = useState("");
   const [featuredImageInfo, setfeaturedImageInfo] = useState("");
   const [isEventFeatured, setIsEventFeatured] = useState(null);
@@ -121,17 +117,6 @@ const UpdateCMEForm = ({
     setLoading(true);
     fetchCurrentEvent(currentEventId);
 
-    setSpecializationOptions(
-      props.postManagement.specializations
-        ? props.postManagement.specializations
-        : []
-    );
-    setCategoryOptions(
-      props.postManagement.categories
-        ? props.postManagement.categories.results
-        : []
-    );
-
     return () => {
       console.log("CME FORM unmount -------->");
     };
@@ -142,7 +127,7 @@ const UpdateCMEForm = ({
     if (currentEvent) {
       const shapeData = {
         ...currentEvent,
-        specializations: props.postManagement.specializations.map(item => {
+        specializations: props.specializations.map(item => {
           return item.id;
         }),
         tag_all: true
@@ -151,7 +136,7 @@ const UpdateCMEForm = ({
         currentEvent.specializations === "0" ? shapeData : currentEvent
       ); // pass our data to parent for it to set the initial values of formik
 
-      setIsEventFeatured(currentEvent.featured_at === 1 ? true : false);
+      console.log(isEventFeatured);
       setLoading(false);
     }
 
@@ -305,7 +290,7 @@ const UpdateCMEForm = ({
                   values={props.values.category_id}
                   label="Category"
                   requiredlabel="true"
-                  options={categoryOptions}
+                  options={props.categories}
                   placeholder={"Select a category"}
                 />
                 <Field
@@ -350,7 +335,7 @@ const UpdateCMEForm = ({
                   values={props.values.specializations}
                   label="Specializations"
                   requiredlabel="true"
-                  options={specializationOptions}
+                  options={props.specializations}
                   placeholder="Please select a specialization"
                   allSelected={props.values.tag_all}
                   onEditMode={true}
