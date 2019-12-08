@@ -106,7 +106,6 @@ const UpdateCMEForm = ({
 
   const [thumbnailImageInfo, setthumbnailImageInfo] = useState("");
   const [featuredImageInfo, setfeaturedImageInfo] = useState("");
-  const [isEventFeatured, setIsEventFeatured] = useState(null);
   const [statusOptions, setStatusOptions] = useState([
     { id: "unpublished", name: "unpublished" },
     { id: "published", name: "published" },
@@ -136,7 +135,6 @@ const UpdateCMEForm = ({
         currentEvent.specializations === "0" ? shapeData : currentEvent
       ); // pass our data to parent for it to set the initial values of formik
 
-      console.log(isEventFeatured);
       setLoading(false);
     }
 
@@ -259,7 +257,7 @@ const UpdateCMEForm = ({
             )}
           </Formik>
         </Col>
-        <Col xs={24} md={12}>
+        {/* <Col xs={24} md={12}>
           <h3 style={{ float: "left", marginRight: 10 }}>Featured</h3>
           <Tooltip
             placement="top"
@@ -275,7 +273,7 @@ const UpdateCMEForm = ({
               onChange={handleSwitchChange}
             />
           </Tooltip>
-        </Col>
+        </Col> */}
       </Row>
       <Tabs onChange={callback} type="card" style={{ marginTop: 30 }}>
         <TabPane tab="Main Product Info" key="1">
@@ -302,7 +300,6 @@ const UpdateCMEForm = ({
                   requiredlabel="true"
                   options={eventTypes}
                   placeholder={"Select an event type"}
-                  value={props.values.event_type === 0 ? "Upcoming" : "Past"}
                 />
                 <Field
                   as={DatePickerFormField}
@@ -485,7 +482,17 @@ const UpdateCMEForm = ({
             />
           </form>
         </TabPane>
-        <TabPane tab="Event Highlights" key="4" disabled={props.isEditMode}>
+
+        <TabPane
+          tab="Event Highlights"
+          key="4"
+          disabled={
+            props.values.event_type === "Upcoming" ||
+            props.values.event_type === 0
+              ? true
+              : false
+          }
+        >
           <Row>
             <Col>
               <h3>Event Hightlights</h3>

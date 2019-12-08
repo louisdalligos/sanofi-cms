@@ -54,6 +54,10 @@ const UpdateCMEPage = ({
     const momentDate = moment(data.event_date).format("YYYY/MM/DD");
     const allStatus = data.tag_all ? true : false;
 
+    const type = data.event_type === "0" ? "Upcoming" : "Past";
+
+    console.log(type);
+
     let formatData = {
       id: data.id,
       status: data.status,
@@ -61,7 +65,7 @@ const UpdateCMEPage = ({
       event_name: data.event_name,
       event_description: data.event_description,
       event_date: momentDate,
-      event_type: data.event_type,
+      event_type: type,
       event_location: data.event_location,
       specializations:
         typeof data.specializations === "string"
