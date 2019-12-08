@@ -5,7 +5,7 @@ import moment from "moment";
 
 const dateFormat = "YYYY/MM/DD";
 
-const DatePickerFormField = ({ label, ...props }) => {
+const DatePickerFormField = ({ label, disabledDate, disabled, ...props }) => {
   const { values } = useFormikContext();
 
   const [field, meta] = useField(props);
@@ -43,6 +43,8 @@ const DatePickerFormField = ({ label, ...props }) => {
         onChange={handleChange}
         format={dateFormat}
         value={date !== "" ? moment(`${date}`) : ""}
+        disabledDate={disabledDate}
+        disabled={disabled}
       />
 
       {meta.touched && meta.error ? (

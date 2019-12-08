@@ -1,14 +1,28 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import { PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
-import CreateCMEForm from "./CreateCMEForm";
+import CreateCMEFormWrapper from "./CreateCMEForm";
+
+import {
+  fetchCategories,
+  fetchSpecializations
+} from "../../../redux/actions/post-management-actions/postManagementActions";
 
 const pageTitle = "Create a new CME";
 
 // Component
-const CreateCMEPage = ({ auth, postManagement, match, ...props }) => {
+const CreateCMEPage = ({
+  auth,
+  postManagement,
+  match,
+  fetchCategories,
+  fetchSpecializations,
+  notifs,
+  ...props
+}) => {
   const [data, setData] = useState({
     category_id: "",
     event_name: "",
@@ -32,6 +46,29 @@ const CreateCMEPage = ({ auth, postManagement, match, ...props }) => {
     tag_all: ""
   });
 
+  const [specializations, setSpecializations] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchSpecializations();
+    //eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    switch (notifs.id) {
+      case "FETCH_SPECIALIZATIONS_SUCCESS":
+        setSpecializations(postManagement.specializations);
+        break;
+      case "FETCH_CATEGORIES_SUCCESS":
+        setCategories(postManagement.categories.results);
+        break;
+      default:
+        return;
+    }
+    //eslint-disable-next-line
+  }, [notifs.id, notifs.notifications]);
+
   return (
     <Fragment>
       <div className="box-layout-custom">
@@ -48,11 +85,13 @@ const CreateCMEPage = ({ auth, postManagement, match, ...props }) => {
           </div>
         </div>
 
-        <CreateCMEForm
+        <CreateCMEFormWrapper
           history={props.history}
           auth={auth}
           postManagement={postManagement}
           data={data}
+          categories={categories}
+          specializations={specializations}
         />
       </div>
     </Fragment>
@@ -67,7 +106,17 @@ const mapStateToProps = state => {
   };
 };
 
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators(
+    {
+      fetchCategories: fetchCategories,
+      fetchSpecializations: fetchSpecializations
+    },
+    dispatch
+  );
+};
+
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(CreateCMEPage);
