@@ -20,7 +20,7 @@ import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 import axios from "axios";
 import { API } from "../../../utils/api";
-import qs from "qs";
+import moment from "moment";
 
 // Form elements
 import TextFormField from "../../smart-form/TextFormField";
@@ -30,6 +30,7 @@ import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
 import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 import DatePickerFormField from "../../smart-form/DatePickerFormField";
 import TextEditorFormField from "../../smart-form/TextEditorFormField";
+import EventTypeField from "../../smart-form/EventTypeField";
 
 // Other components
 import ImageUploader from "./ImageUploader";
@@ -99,6 +100,8 @@ const UpdateCMEForm = ({
     { id: 0, name: "Upcoming" },
     { id: 1, name: "Past" }
   ]);
+
+  const [currentEventSelection, setCurrentEventSelection] = useState(null);
 
   // loading state
   const [loading, setLoading] = useState(false);
@@ -203,8 +206,24 @@ const UpdateCMEForm = ({
     changeEventStatus(id, values); // redux action
   };
 
-  // handle set to featured switch
-  function handleSwitchChange() {}
+  function disabledDate(current) {
+    return current && current < moment().endOf("day");
+  }
+
+  function disabledFutureDate(current) {
+    // Can not select days before today and today
+    return current && current > moment().endOf("day");
+  }
+
+  // Handle event type change
+  const handleEventChange = e => {
+    const { setFieldValue } = props;
+
+    console.log(e);
+    setFieldValue("event_type", e);
+    setCurrentEventSelection(e);
+    setFieldValue("event_date", "");
+  };
 
   return (
     <Spin spinning={loading}>
@@ -292,9 +311,9 @@ const UpdateCMEForm = ({
                   placeholder={"Select a category"}
                 />
                 <Field
-                  as={SelectFormField}
+                  as={EventTypeField}
                   name="event_type"
-                  onChange={props.setFieldValue}
+                  onChange={handleEventChange}
                   values={props.values.event_type}
                   label="Event Type"
                   requiredlabel="true"
@@ -309,6 +328,12 @@ const UpdateCMEForm = ({
                   onChange={props.setFieldValue}
                   requiredlabel="true"
                   dateValue={props.values.event_date}
+                  disabled={currentEventSelection !== null ? false : true}
+                  disabledDate={
+                    currentEventSelection === 0
+                      ? disabledDate
+                      : disabledFutureDate
+                  }
                 />
 
                 <TextFormField
@@ -561,14 +586,16 @@ const formikEnhancer = withFormik({
       .catch(err => {
         setSubmitting(false);
 
-        if (err.response.data.length > 0) {
-          console.log(err.response.data);
-        } else {
-          message.error(
-            err.response.data.error
-              ? err.response.data.error
-              : err.response.data.message
-          );
+        const errorMsg = err.response.data;
+
+        if (errorMsg.errors) {
+          errorMsg.errors.forEach(element => {
+            message.error(element);
+          });
+        }
+
+        if (errorMsg.error) {
+          message.error(errorMsg.error);
         }
       });
   },

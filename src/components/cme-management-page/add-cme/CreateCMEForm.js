@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { withFormik, Field } from "formik";
 import { Button, Row, Col, Tooltip, Icon, message, Tabs } from "antd";
 import * as Yup from "yup";
-import { DisplayFormikState } from "../../../utils/formikPropDisplay";
+//import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 //import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 import axios from "axios";
@@ -97,6 +97,7 @@ const CreateCMEForm = ({
     return current && current > moment().endOf("day");
   }
 
+  // Handle event type change
   const handleEventChange = e => {
     const { setFieldValue } = props;
 
@@ -287,9 +288,9 @@ const CreateCMEForm = ({
         </Col>
       </Row>
 
-      <Row>
+      {/* <Row>
         <DisplayFormikState {...props.values} />
-      </Row>
+      </Row> */}
 
       <div className="form-actions">
         <Button style={{ marginRight: 10 }}>
