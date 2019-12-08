@@ -36,7 +36,8 @@ const initialState = {
   currentEvent: null,
   currentVideoSelected: null,
   currentHeadingSelected: null,
-  editVideoMode: false
+  editVideoMode: false,
+  toggleFeaturedProgress: null
 };
 
 const cmeReducer = (state = initialState, action) => {
@@ -49,7 +50,6 @@ const cmeReducer = (state = initialState, action) => {
     case DELETE_EVENT_HEADING_VIDEO_REQUEST:
     case DELETE_EVENT_HEADING_REQUEST:
     case UPDATE_EVENT_HEADING_VIDEO_REQUEST:
-    case FEATURE_EVENT_REQUEST:
       return {
         ...state,
         requestInProgress: true
@@ -69,8 +69,6 @@ const cmeReducer = (state = initialState, action) => {
     case DELETE_EVENT_HEADING_FAILED:
     case UPDATE_EVENT_HEADING_VIDEO_SUCCESS:
     case UPDATE_EVENT_HEADING_VIDEO_FAILED:
-    case FEATURE_EVENT_SUCCESS:
-    case FEATURE_EVENT_FAILED:
       return {
         ...state,
         requestInProgress: false
@@ -102,6 +100,17 @@ const cmeReducer = (state = initialState, action) => {
       return {
         ...state,
         currentHeadingSelected: action.payload
+      };
+    case FEATURE_EVENT_REQUEST:
+      return {
+        ...state,
+        toggleFeaturedProgress: true
+      };
+    case FEATURE_EVENT_SUCCESS:
+    case FEATURE_EVENT_FAILED:
+      return {
+        ...state,
+        toggleFeaturedProgress: false
       };
     default:
       return state;

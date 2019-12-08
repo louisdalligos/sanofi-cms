@@ -150,15 +150,9 @@ const UpdateCMEForm = ({
       props.getData(
         currentEvent.specializations === "0" ? shapeData : currentEvent
       ); // pass our data to parent for it to set the initial values of formik
-      setLoading(false);
 
-      if (currentEvent.event_type === 1) {
-        console.log("Past selected");
-      }
       setIsEventFeatured(currentEvent.featured_at === 1 ? true : false);
-
-      console.log(isEventFeatured);
-      debugger;
+      setLoading(false);
     }
 
     return () => {
@@ -171,7 +165,6 @@ const UpdateCMEForm = ({
   useEffect(() => {
     switch (notifs.id) {
       case "FEATURE_EVENT_FAILED":
-        setIsEventFeatured(false);
         message.error(
           notifs.notifications
             ? notifs.notifications
@@ -228,13 +221,7 @@ const UpdateCMEForm = ({
   };
 
   // handle set to featured switch
-  function handleSwitchChange(checked) {
-    if (checked) {
-      featureEvent(currentEventId, JSON.stringify({ is_featured: 1 }));
-    } else {
-      featureEvent(currentEventId, JSON.stringify({ is_featured: 0 }));
-    }
-  }
+  function handleSwitchChange() {}
 
   return (
     <Spin spinning={loading}>

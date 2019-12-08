@@ -40,7 +40,8 @@ const CMETable = ({
   clearNotifications,
   changeEventStatus,
   featureEvent,
-  auth
+  auth,
+  cmeReducer
 }) => {
   const columns = [
     {
@@ -49,12 +50,23 @@ const CMETable = ({
       rowKey: "id",
       width: 80,
       render: (text, record) => (
-        <Tooltip placement="top" title="Tag as featured?">
-          <Switch
-            className="switch-new-trigger"
-            defaultChecked={record.featured_at === "Yes" ? true : false}
-          />
-        </Tooltip>
+        <Fragment>
+          {record.status === "published" ? (
+            <Tooltip placement="top" title="Tag as featured?">
+              <Switch
+                className="switch-new-trigger"
+                defaultChecked={record.featured_at === "Yes" ? true : false}
+                onClick={() =>
+                  handleToggleFeatured(record.id, record.featured_at)
+                }
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip placement="right" title="Publish the event to feature it">
+              <Switch className="switch-new-trigger" disabled />
+            </Tooltip>
+          )}
+        </Fragment>
       )
     },
     {
@@ -260,6 +272,9 @@ const CMETable = ({
 
   useEffect(() => {
     switch (notifs.id) {
+      case "FEATURE_EVENT_SUCCESS":
+      case "FEATURE_EVENT_FAILED":
+        setLoading(false);
       case "CHANGE_EVENT_STATUS_SUCCESS":
         message.success(
           notifs.notifications
@@ -363,6 +378,18 @@ const CMETable = ({
     return pageSize;
   };
 
+  function handleToggleFeatured(id, isFeatured) {
+    console.log("ID", id);
+    console.log("Is it featured", isFeatured);
+    setLoading(true);
+
+    if (isFeatured === "Yes") {
+      featureEvent(id, JSON.stringify({ id: id, is_featured: 0 }));
+    } else {
+      featureEvent(id, JSON.stringify({ id: id, is_featured: 1 }));
+    }
+  }
+
   return (
     <Fragment>
       {/* breadcrumbs */}
@@ -412,7 +439,8 @@ const CMETable = ({
 const mapStateToProps = state => {
   return {
     auth: state.authReducer,
-    notifs: state.notificationReducer
+    notifs: state.notificationReducer,
+    cmeReducer: state.cmeReducer
   };
 };
 
