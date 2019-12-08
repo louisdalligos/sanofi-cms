@@ -48,7 +48,7 @@ function fetchCurrentProductArticlesByCategoryIdRequest(id) {
 
 function newProductRequest(id, body) {
   return axiosInstance({
-    method: "post",
+    method: "put",
     url: `/products/update/new/${id}`,
     data: body
   });

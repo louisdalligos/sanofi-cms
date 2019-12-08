@@ -262,6 +262,13 @@ const ProductsTable = ({
   useEffect(() => {
     switch (notifs.id) {
       case "NEW_PRODUCT_SUCCESS":
+        message.success(
+          notifs.notifications
+            ? notifs.notifications.success
+            : "Product successfully set as new!"
+        );
+        setLoading(false);
+        break;
       case "NEW_PRODUCT_FAILED":
         setLoading(false);
         break;
@@ -287,7 +294,7 @@ const ProductsTable = ({
         return;
     }
     //eslint-disable-next-line
-  }, [notifs.id]);
+  }, [notifs.id, notifs.notifications]);
 
   // table actions
   function showArchiveConfirm(id, e) {
