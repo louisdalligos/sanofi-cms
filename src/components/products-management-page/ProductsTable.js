@@ -19,7 +19,10 @@ import { API } from "../../utils/api";
 
 import { noImage } from "../../utils/constant";
 
-import { changeProductStatus } from "../../redux/actions/product-management-actions/productManagementActions";
+import {
+  changeProductStatus,
+  newProduct
+} from "../../redux/actions/product-management-actions/productManagementActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
 
 // Table components
@@ -36,6 +39,7 @@ const ProductsTable = ({
   notifs,
   clearNotifications,
   changeProductStatus,
+  newProduct,
   auth
 }) => {
   const columns = [
@@ -45,20 +49,24 @@ const ProductsTable = ({
       rowKey: "id",
       width: 70,
       render: (text, record) => (
-        <Tooltip
-          placement="top"
-          title={
-            record.is_new && record.is_new === "Yes"
-              ? "Untag as new product"
-              : "Tag as new product?"
-          }
-        >
-          <Switch
-            className="switch-new-trigger"
-            onChange={handleSwitchChange}
-            defaultChecked={record.is_new && record.is_new === "Yes"}
-          />
-        </Tooltip>
+        <Fragment>
+          {record.status === "published" ? (
+            <Tooltip placement="top" title="Set new product?">
+              <Switch
+                className="switch-new-trigger"
+                defaultChecked={record.is_new === "Yes" ? true : false}
+                onClick={() => handleToggleNew(record.id, record.isNew)}
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip
+              placement="right"
+              title="Publish the product to set as new"
+            >
+              <Switch className="switch-new-trigger" disabled />
+            </Tooltip>
+          )}
+        </Fragment>
       )
     },
     {
@@ -253,6 +261,10 @@ const ProductsTable = ({
 
   useEffect(() => {
     switch (notifs.id) {
+      case "NEW_PRODUCT_SUCCESS":
+      case "NEW_PRODUCT_FAILED":
+        setLoading(false);
+        break;
       case "CHANGE_PRODUCT_STATUS_SUCCESS":
         message.success(
           notifs.notifications
@@ -357,8 +369,16 @@ const ProductsTable = ({
   };
 
   // handle set to featured switch
-  function handleSwitchChange(checked) {
-    console.log(checked);
+  function handleToggleNew(id, isFeatured) {
+    console.log("ID", id);
+    console.log("Is it featured", isFeatured);
+    setLoading(true);
+
+    if (isFeatured === "Yes") {
+      newProduct(id, JSON.stringify({ id: id, is_new: 0 }));
+    } else {
+      newProduct(id, JSON.stringify({ id: id, is_new: 1 }));
+    }
   }
 
   return (
@@ -418,6 +438,7 @@ export default connect(
   mapStateToProps,
   {
     clearNotifications,
-    changeProductStatus
+    changeProductStatus,
+    newProduct
   }
 )(ProductsTable);
