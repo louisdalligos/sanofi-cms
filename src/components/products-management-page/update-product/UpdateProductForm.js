@@ -91,8 +91,6 @@ const UpdateProductForm = ({
   const [isDisabled, setIsDisabled] = useState(true);
 
   // Fetch data state
-  const [specializationOptions, setSpecializationOptions] = useState([]);
-  const [categoryOptions, setCategoryOptions] = useState([]);
   const [statusOptions, setStatusOptions] = useState([
     { id: "unpublished", name: "unpublished" },
     { id: "published", name: "published" },
@@ -105,17 +103,6 @@ const UpdateProductForm = ({
     setLoading(true);
     fetchCurrentProduct(currentProductId);
 
-    setSpecializationOptions(
-      props.postManagement.specializations
-        ? props.postManagement.specializations
-        : []
-    );
-    setCategoryOptions(
-      props.postManagement.categories
-        ? props.postManagement.categories.results
-        : []
-    );
-
     return () => {
       console.log("unmount -------->");
     };
@@ -126,7 +113,7 @@ const UpdateProductForm = ({
     if (currentProduct) {
       const shapeData = {
         ...currentProduct,
-        specializations: props.postManagement.specializations.map(item => {
+        specializations: props.specializations.map(item => {
           return item.id;
         }),
         tag_all: true
@@ -187,6 +174,8 @@ const UpdateProductForm = ({
         );
         setLoading(false);
         break;
+      default:
+        return;
     }
 
     setIsDisabled(true);
@@ -266,7 +255,7 @@ const UpdateProductForm = ({
               <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
               <Col xs={24} md={8}>
                 <SelectFormField
-                  options={categoryOptions}
+                  options={props.categories}
                   label="Category"
                   name="category_id"
                   onChange={props.setFieldValue}
@@ -281,7 +270,7 @@ const UpdateProductForm = ({
               </Col>
               <Col xs={24} md={7}>
                 <SelectTagsFormField
-                  options={specializationOptions}
+                  options={props.specializations}
                   label="Specializations"
                   name="specializations"
                   onChange={props.setFieldValue}

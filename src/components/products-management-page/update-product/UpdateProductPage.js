@@ -1,14 +1,28 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import { PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
 import UpdateProductFormWrapper from "./UpdateProductForm";
 
+import {
+  fetchCategories,
+  fetchSpecializations
+} from "../../../redux/actions/post-management-actions/postManagementActions";
+
 const pageTitle = "Update product";
 
 // Component
-const UpdateProductPage = ({ match, auth, postManagement, ...props }) => {
+const UpdateProductPage = ({
+  match,
+  auth,
+  postManagement,
+  fetchCategories,
+  fetchSpecializations,
+  notifs,
+  ...props
+}) => {
   const [data, setData] = useState({
     status: "",
     category_id: "",
@@ -67,6 +81,29 @@ const UpdateProductPage = ({ match, auth, postManagement, ...props }) => {
     setData(formatData); // set our formated obj to formik values
   };
 
+  const [specializations, setSpecializations] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchSpecializations();
+    //eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    switch (notifs.id) {
+      case "FETCH_SPECIALIZATIONS_SUCCESS":
+        setSpecializations(postManagement.specializations);
+        break;
+      case "FETCH_CATEGORIES_SUCCESS":
+        setCategories(postManagement.categories.results);
+        break;
+      default:
+        return;
+    }
+    //eslint-disable-next-line
+  }, [notifs.id, notifs.notifications]);
+
   return (
     <Fragment>
       <div className="box-layout-custom">
@@ -87,6 +124,8 @@ const UpdateProductPage = ({ match, auth, postManagement, ...props }) => {
 
         <UpdateProductFormWrapper
           auth={auth}
+          categories={categories}
+          specializations={specializations}
           history={props.history}
           match={match}
           data={data}
@@ -106,7 +145,17 @@ const mapStateToProps = state => {
   };
 };
 
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators(
+    {
+      fetchCategories: fetchCategories,
+      fetchSpecializations: fetchSpecializations
+    },
+    dispatch
+  );
+};
+
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(UpdateProductPage);
