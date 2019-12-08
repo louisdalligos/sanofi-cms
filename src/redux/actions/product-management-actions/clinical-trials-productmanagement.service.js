@@ -22,10 +22,19 @@ function deleteClinicalTrialsDndItem(clinicalTrialId) {
   });
 }
 
+function saveSortedClinicalTrials(payload) {
+  return axiosInstance({
+    method: "PUT",
+    url: `/products/clinical-trial/sort`,
+    data: payload
+  });
+}
+
 const ClinicalTrialsServices = {
   fecthClinicalTrialsArticles,
   addItemClinicalTrialsArticle,
-  deleteClinicalTrialsDndItem
+  deleteClinicalTrialsDndItem,
+  saveSortedClinicalTrials
 };
 
 export default ClinicalTrialsServices;

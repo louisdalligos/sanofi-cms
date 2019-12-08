@@ -126,51 +126,49 @@ const App = ({ auth, ...props }) => {
               exact
               path="/cpd-management"
               component={CPDManagement}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             <PrivateRoute
               exact
               path="/therapy-areas"
               component={TherapyAreasManagement}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             <PrivateRoute
               exact
               path="/therapy-areas/create"
               component={CreateArticlePage}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             <PrivateRoute
               exact
               path="/therapy-areas/:id"
               component={UpdateArticlePage}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             {/* <PrivateRoute
                             exact
                             path="/categories"
-                            // component={CategoriesManagement}
                             component={CategoriesManagementContainer}
                             roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
                         />
                         <PrivateRoute
                             exact
                             path="/sub-categories"
-                            // component={SubCategoriesManagement}
                             component={SubCategoriesManagementContainer}
-                            roles={[Role.SuperAdmin, Role.Admin]}
+                            roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
                         /> */}
             <PrivateRoute
               exact
               path="/other-tags"
               component={OtherTags}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             <PrivateRoute
               exact
               path="/cme"
               component={CMEManagement}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             <PrivateRoute
               exact
@@ -182,37 +180,37 @@ const App = ({ auth, ...props }) => {
               exact
               path="/cme/:id"
               component={UpdateCMEPage}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             <PrivateRoute
               exact
               path="/doctor-specialization"
               component={DoctorSpecialization}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={([Role.SuperAdmin, Role.Admin], Role.Editor)}
             />
             <PrivateRoute
               exact
               path="/academy"
               component={Academy}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             <PrivateRoute
               exact
               path="/products"
               component={ProductsManagement}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             <PrivateRoute
               exact
               path="/products/create"
               component={CreateProductPage}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             <PrivateRoute
               exact
               path="/products/:id"
               component={UpdateProductPage}
-              roles={[Role.SuperAdmin, Role.Admin]}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
 
             <PrivateRoute

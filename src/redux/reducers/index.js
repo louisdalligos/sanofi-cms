@@ -18,7 +18,7 @@ import prescriptionInfoProductManagementReducers from "./prescription-info-produ
 import newCategoriesReducers from "./new-categories.reducers";
 import newSubcategoriesReducers from "./new-subcategories.reducers";
 import clinicalTrialsProductManagementReducers from "./clinical-trials-product-management.reducers";
-
+import centralizeFunctionalityReducers from "./centralize-functionality.reducers";
 //centralize
 import centralizeToastrReducers from "../../components/utility-components/CentralizeToastr/centralize-toastr.reducers";
 
@@ -41,7 +41,9 @@ const rootReducer = combineReducers({
   // ProductsManagementPage
   prescriptionInfoProductManagementReducers,
   otherReferencesProductManagementReducers,
-  clinicalTrialsProductManagementReducers
+  clinicalTrialsProductManagementReducers,
+  // for dirty
+  centralizeFunctionalityReducers
 });
 
 export default rootReducer;

@@ -3,7 +3,14 @@ import { useField, useFormikContext, Field } from "formik";
 import { Select, Checkbox } from "antd";
 const { Option } = Select;
 
-const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
+const SelectTagsFormField = ({
+  label,
+  placeholder,
+  options,
+  allSelected,
+  onEditMode,
+  ...props
+}) => {
   const [field, meta] = useField(props);
   const { setFieldValue, values } = useFormikContext();
 
@@ -73,9 +80,20 @@ const SelectTagsFormField = ({ label, placeholder, options, ...props }) => {
         <div className="ant-form-explain">{meta.error}</div>
       ) : null}
 
-      <Field as={Checkbox} name="tag_all" onChange={onChange}>
-        Select all specializations
-      </Field>
+      {onEditMode ? (
+        <Field
+          as={Checkbox}
+          name="tag_all"
+          onChange={onChange}
+          checked={allSelected}
+        >
+          Select all specializations
+        </Field>
+      ) : (
+        <Field as={Checkbox} name="tag_all" onChange={onChange}>
+          Select all specializations
+        </Field>
+      )}
     </div>
   );
 };

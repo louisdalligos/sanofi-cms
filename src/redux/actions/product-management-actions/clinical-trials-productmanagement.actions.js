@@ -1,7 +1,8 @@
 import {
   CLINICAL_TRIALS_ARTICLES_FETCH,
   CLINICAL_TRIALS_ARTICLES_SET,
-  CLINICAL_TRIALS_DND_SET
+  CLINICAL_TRIALS_DND_SET,
+  CLINICAL_TRIALS_LOADERS
 } from "./clinical-trials-productmanagement.types";
 import { CENTRALIZE_TOASTR_SET } from "../../../components/utility-components/CentralizeToastr/centralize-toastr.types";
 import ClinicalTrialsServices from "./clinical-trials-productmanagement.service";
@@ -9,6 +10,10 @@ import OtherReferencesProductManagementService from "./other-references-productm
 
 export function deleteClinicalTrialsDndItem(productId, clinicalTrialId) {
   return async dispatch => {
+    dispatch({
+      type: CLINICAL_TRIALS_LOADERS
+    });
+
     try {
       const res = await ClinicalTrialsServices.deleteClinicalTrialsDndItem(
         clinicalTrialId
@@ -24,6 +29,38 @@ export function deleteClinicalTrialsDndItem(productId, clinicalTrialId) {
       dispatch({
         type: CENTRALIZE_TOASTR_SET,
         payload: error
+      });
+      dispatch({
+        type: CLINICAL_TRIALS_LOADERS
+      });
+    }
+  };
+}
+
+export function saveSortedClinicalTrials(productId, payload) {
+  return async dispatch => {
+    dispatch({
+      type: CLINICAL_TRIALS_LOADERS
+    });
+
+    try {
+      const res = await ClinicalTrialsServices.saveSortedClinicalTrials(
+        payload
+      );
+
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: res
+      });
+
+      this.fecthClinicalTrialsArticles(productId);
+    } catch (error) {
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: error
+      });
+      dispatch({
+        type: CLINICAL_TRIALS_LOADERS
       });
     }
   };
@@ -62,19 +99,24 @@ export function fecthClinicalTrialsArticles(productId) {
         }
       });
       const dndList = otherReferencesData.clinical_trials || [];
+      //
+      dndList.sort((a, b) => {
+        return a.sort - b.sort;
+      });
+      //
       dispatch({
         type: CLINICAL_TRIALS_DND_SET,
         payload: {
           dndList
         }
       });
-      // autoSelectFirstIndex
-      // this.setClinicalTrialsArticle(withinSelectTag[0].id.toString());
-      //
     } catch (error) {
       dispatch({
         type: CENTRALIZE_TOASTR_SET,
         payload: error
+      });
+      dispatch({
+        type: CLINICAL_TRIALS_LOADERS
       });
     }
   };
@@ -82,6 +124,10 @@ export function fecthClinicalTrialsArticles(productId) {
 
 export function addItemClinicalTrialsArticle(payload, productId) {
   return async dispatch => {
+    dispatch({
+      type: CLINICAL_TRIALS_LOADERS
+    });
+
     try {
       const res = await ClinicalTrialsServices.addItemClinicalTrialsArticle(
         payload,
@@ -91,12 +137,15 @@ export function addItemClinicalTrialsArticle(payload, productId) {
         type: CENTRALIZE_TOASTR_SET,
         payload: res
       });
+
       this.fecthClinicalTrialsArticles(productId);
-      //
     } catch (error) {
       dispatch({
         type: CENTRALIZE_TOASTR_SET,
         payload: error
+      });
+      dispatch({
+        type: CLINICAL_TRIALS_LOADERS
       });
     }
   };

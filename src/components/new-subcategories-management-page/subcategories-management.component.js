@@ -124,7 +124,9 @@ class SubCategoriesManagementComponent extends Component {
   }
 
   render() {
-    const { categories, loader } = this.props;
+    const { loader } = this.props;
+    const { categories } = this.state;
+
     const renderItems = categories.map((category, idx) => (
       <div key={idx} data-id={category.sort} className="dnd-table">
         <div className="grid-left">
@@ -158,7 +160,12 @@ class SubCategoriesManagementComponent extends Component {
                 )}
               </div>
             ) : (
-              <span>{category.name}</span>
+              <div className="dnd-content-wrapper">
+                <span className="dnd-icon" style={{ color: "#aaa" }}>
+                  <Icon type="drag" />
+                </span>
+                <p className="dnd-content">{category.name}</p>
+              </div>
             )}
           </div>
         </div>
@@ -259,9 +266,15 @@ class SubCategoriesManagementComponent extends Component {
                     }
                   });
                 });
+
                 for (let i = 0; i < newArr.length; i++) {
                   newArr[i].new_position = i;
                 }
+
+                this.setState({
+                  categories: newArr
+                });
+
                 this.triggerSaveSortedCategories(newArr);
               }}
             >

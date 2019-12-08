@@ -18,8 +18,8 @@ const UpdateCMEPage = ({ history, auth, match, postManagement, ...props }) => {
     event_date: "",
     event_type: "",
     event_location: "",
-    specializations: "",
-    other_tags: "",
+    specializations: [],
+    other_tags: [],
     event_body: "",
     page_title: "",
     slug: "",
@@ -36,10 +36,9 @@ const UpdateCMEPage = ({ history, auth, match, postManagement, ...props }) => {
 
   const getData = data => {
     const str = data.zinc_code.split("|"); // split our zinc code
-    const spc = data.specializations.split(",").map(item => {
-      return parseInt(item, 10);
-    });
     const tags = data.other_tags.split(",");
+    const momentDate = moment(data.event_date).format("YYYY/MM/DD");
+    const allStatus = data.tag_all ? true : false;
 
     let formatData = {
       id: data.id,
@@ -47,10 +46,15 @@ const UpdateCMEPage = ({ history, auth, match, postManagement, ...props }) => {
       category_id: data.category_id,
       event_name: data.event_name,
       event_description: data.event_description,
-      event_date: moment(data.event_date).format("M/D/Y"),
+      event_date: momentDate,
       event_type: data.event_type,
       event_location: data.event_location,
-      specializations: spc,
+      specializations:
+        typeof data.specializations === "string"
+          ? data.specializations.split(",").map(item => {
+              return parseInt(item, 10);
+            })
+          : data.specializations,
       other_tags: tags,
       event_body: data.event_body,
       page_title: data.page_title,
@@ -63,7 +67,7 @@ const UpdateCMEPage = ({ history, auth, match, postManagement, ...props }) => {
       zinc_code3: str[2].trim(),
       featured: data.featured_image,
       thumbnail: data.thumbnail_image,
-      tag_all: ""
+      tag_all: allStatus
     };
 
     setData(formatData); // set our formated obj to formik values

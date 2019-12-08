@@ -20,7 +20,8 @@ const prescriptionInfoProductManagementReducers = (
 
       return {
         ...state,
-        files: prescription_info || []
+        files: prescription_info || [],
+        loader: false
       };
 
     case PRESCRIPTION_LOADERS:

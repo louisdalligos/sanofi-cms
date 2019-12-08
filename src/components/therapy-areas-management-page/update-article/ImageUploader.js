@@ -50,19 +50,6 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
     }
   }, [values.masthead]);
 
-  // // Set our file currently uploaded
-  // useEffect(() => {
-  //     console.log(uploadedFileList);
-  //     // temp data
-  //     setUploadedFileList([
-  //         {
-  //             uid: "-1",
-  //             name: "uploaded-file.png"
-  //         }
-  //     ]);
-  //     //eslint-disable-next-line
-  // }, []);
-
   // Make sure we only pass 1 file on generate
   useEffect(() => {
     if (uploadedFileList.length > 1) {
@@ -109,6 +96,9 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
     setImageFormFieldStatus("masthead", "");
     setImageFormFieldStatus("featured", "");
     setImageFormFieldStatus("thumbnail", "");
+    setMastHeadImage("");
+    setFeaturedmage("");
+    setThumbnailImage("");
     setIsSpinning(false);
   };
 
@@ -147,24 +137,38 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
           uri => {
             console.log(uri);
             setMastHeadImage(uri);
-            setImageFormFieldStatus("masthead", uri); // set form value status
+          },
+          "base64"
+        );
+
+        // Generate masthead image
+        Resizer.imageFileResizer(
+          file,
+          1000,
+          600,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            console.log(uri);
+            setMastHeadImage(uri);
           },
           "base64"
         );
 
         // Generate masthead image - blob
-        // Resizer.imageFileResizer(
-        //   file,
-        //   1000,
-        //   600,
-        //   "JPEG",
-        //   100,
-        //   0,
-        //   uri => {
-        //     setImageFormFieldStatus("masthead", uri); // set form value status
-        //   },
-        //   "blob"
-        // );
+        Resizer.imageFileResizer(
+          file,
+          1000,
+          600,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            setImageFormFieldStatus("masthead", uri); // set form value status
+          },
+          "blob"
+        );
 
         // Generate featured image
         Resizer.imageFileResizer(
@@ -176,24 +180,23 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
           0,
           uri => {
             setFeaturedmage(uri);
-            setImageFormFieldStatus("featured", uri); // set form value status
           },
           "base64"
         );
 
-        // // Generate featured image - blob
-        // Resizer.imageFileResizer(
-        //   file,
-        //   300,
-        //   300,
-        //   "JPEG",
-        //   100,
-        //   0,
-        //   uri => {
-        //     setImageFormFieldStatus("featured", uri); // set form value status
-        //   },
-        //   "blob"
-        // );
+        // Generate featured image - blob
+        Resizer.imageFileResizer(
+          file,
+          300,
+          300,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            setImageFormFieldStatus("featured", uri); // set form value status
+          },
+          "blob"
+        );
 
         // Generate thumbnail image
         Resizer.imageFileResizer(
@@ -210,19 +213,19 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
           "base64"
         );
 
-        // Generate thumbnail image - blob
-        // Resizer.imageFileResizer(
-        //   file,
-        //   300,
-        //   280,
-        //   "JPEG",
-        //   100,
-        //   0,
-        //   uri => {
-        //     setImageFormFieldStatus("thumbnail", uri); // set form value status
-        //   },
-        //   "blob"
-        // );
+        //Generate thumbnail image - blob
+        Resizer.imageFileResizer(
+          file,
+          300,
+          280,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            setImageFormFieldStatus("thumbnail", uri); // set form value status
+          },
+          "blob"
+        );
 
         setUploading(false);
         message.success("upload successfully.");
@@ -288,35 +291,11 @@ const ImageUploader = ({ auth, getImage, ...props }) => {
           {values.masthead ? (
             <div>
               <h4>Masthead</h4>
-              <img
-                alt=""
-                style={{ width: "300px" }}
-                src={
-                  values.masthead && values.masthead !== ""
-                    ? values.masthead
-                    : mastHeadImage
-                }
-              />
+              <img alt="" style={{ width: "300px" }} src={featuredImage} />
               <h4>Featured</h4>
-              <img
-                alt=""
-                style={{ width: "200px" }}
-                src={
-                  values.featured && values.featured !== ""
-                    ? values.featured
-                    : featuredImage
-                }
-              />
+              <img alt="" style={{ width: "200px" }} src={featuredImage} />
               <h4>Thumbnail</h4>
-              <img
-                alt=""
-                style={{ width: "180px" }}
-                src={
-                  values.thumbnail && values.thumbnail !== ""
-                    ? values.featured
-                    : thumbnailImage
-                }
-              />
+              <img alt="" style={{ width: "180px" }} src={thumbnailImage} />
             </div>
           ) : (
             <Spin indicator={antIcon} spinning={isSpinning} />

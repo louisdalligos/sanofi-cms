@@ -39,7 +39,7 @@ const ImageUploader = ({ auth, ...props }) => {
   useEffect(() => {
     if (values.featured) {
       setShowThumbnails(true);
-      setFeaturedmage(values.thumbnail);
+      setFeaturedmage(values.featured);
       setThumbnailImage(values.thumbnail);
       setIsDisabled(false);
     } else {
@@ -91,6 +91,8 @@ const ImageUploader = ({ auth, ...props }) => {
     console.log("clear", uploadedFileList);
     setImageFormFieldStatus("featured", "");
     setImageFormFieldStatus("thumbnail", "");
+    setFeaturedmage("");
+    setThumbnailImage("");
     setIsSpinning(false);
   };
 
@@ -129,7 +131,50 @@ const ImageUploader = ({ auth, ...props }) => {
           uri => {
             console.log(uri);
             setFeaturedmage(uri);
+          },
+          "base64"
+        );
+
+        // Generate masthead image
+        Resizer.imageFileResizer(
+          file,
+          1000,
+          600,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            console.log(uri);
+            setFeaturedmage(uri);
+          },
+          "base64"
+        );
+
+        // Generate the blob
+        Resizer.imageFileResizer(
+          file,
+          1000,
+          600,
+          "JPEG",
+          100,
+          0,
+          uri => {
             setImageFormFieldStatus("featured", uri);
+          },
+          "blob"
+        );
+
+        // Generate thumbnail image
+        Resizer.imageFileResizer(
+          file,
+          300,
+          280,
+          "JPEG",
+          100,
+          0,
+          uri => {
+            console.log(uri);
+            setThumbnailImage(uri);
           },
           "base64"
         );
@@ -144,10 +189,9 @@ const ImageUploader = ({ auth, ...props }) => {
           0,
           uri => {
             console.log(uri);
-            setThumbnailImage(uri);
             setImageFormFieldStatus("thumbnail", uri);
           },
-          "base64"
+          "blob"
         );
 
         setUploading(false);
@@ -214,7 +258,7 @@ const ImageUploader = ({ auth, ...props }) => {
           {values.featured ? (
             <div>
               <h4>Featured</h4>
-              <img alt="" style={{ width: "300px" }} src={featuredImage} />
+              <img alt="" style={{ width: "300px" }} src={thumbnailImage} />
               <h4>Thumbnail</h4>
               <img alt="" style={{ width: "180px" }} src={thumbnailImage} />
             </div>

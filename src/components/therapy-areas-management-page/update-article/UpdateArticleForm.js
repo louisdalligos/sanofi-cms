@@ -50,9 +50,21 @@ const schema = Yup.object().shape({
     .max(150, "Meta description is too long")
     .required("This field is required"),
   body: Yup.string().required("This field is required"),
-  zinc_code1: Yup.string().required("Required field"),
-  zinc_code2: Yup.string().required("Required field"),
-  zinc_code3: Yup.string().required("Required field")
+  zinc_code1: Yup.string()
+    .required("Required field")
+    .matches(
+      /[A-Z]{4}.[A-Z]{3}.[0-9]{2}.[0-9]{2}.[0-9]{4}/,
+      "Please complete the code"
+    ),
+  zinc_code2: Yup.string()
+    .required("Required field")
+    .matches(/[Version][ ][0-9]{1}.[0-9]{1}/, "Please complete version"),
+  zinc_code3: Yup.string()
+    .required("Required field")
+    .matches(
+      /[0-9]{2}[ ][A-Z]{1}[a-z]{1}[a-z]{1}[ ][0-9]{4}/,
+      "Please complete the date"
+    )
 });
 
 const UpdateArticleForm = ({
@@ -109,8 +121,17 @@ const UpdateArticleForm = ({
 
   useEffect(() => {
     if (currentArticle) {
-      props.getData(currentArticle); // pass our data to parent for it to set the initial values of formik
+      const shapeData = {
+        ...currentArticle,
+        specializations: props.postManagement.specializations.map(item => {
+          return item.id;
+        }),
+        tag_all: true
+      };
 
+      props.getData(
+        currentArticle.specializations === "0" ? shapeData : currentArticle
+      ); // pass our data to parent for it to set the initial values of formik
       setLoading(false);
     }
 
@@ -262,6 +283,8 @@ const UpdateArticleForm = ({
               requiredlabel="true"
               placeholder="Please select a specialization"
               values={props.values.specializations}
+              allSelected={props.values.tag_all}
+              onEditMode={true}
             />
           </Col>
           <Col xs={24} md={9}>
@@ -297,7 +320,7 @@ const UpdateArticleForm = ({
               name="zinc_code1"
               type="text"
               onChange={props.setFieldValue}
-              maskValidation="AAAA.AAA.11.11.11"
+              maskValidation="AAAA.AAA.11.11.1111"
               size="small"
             />
             <ZincCodeFormField
@@ -361,7 +384,9 @@ const UpdateArticleForm = ({
         {/* 3nd row */}
         <Row gutter={24} className="form-section last">
           <Col xs={24} md={8}>
-            <h3>Feature Image</h3>
+            <h3 className="ant-form-item-required">
+              Feature Image <small>(required)</small>
+            </h3>
             <ImageUploader />
           </Col>
           <Col xs={24} md={16}>
@@ -375,8 +400,8 @@ const UpdateArticleForm = ({
         </Row>
 
         {/* <Row>
-          <DisplayFormikState {...props.values} />
-        </Row> */}
+                    <DisplayFormikState {...props.values} />
+                </Row> */}
 
         <div className="form-actions">
           <Button style={{ marginRight: 10 }}>
@@ -402,20 +427,15 @@ const formikEnhancer = withFormik({
   validationSchema: schema,
   enableReinitialize: true,
   handleSubmit: (values, { props, setSubmitting, resetForm }) => {
-    console.log(values);
-
     let formData = new FormData();
-
-    const formatSpc = values.tag_all === true ? "0" : values.specializations;
-
-    console.log(values.tag_all);
-    console.log(formatSpc);
-    debugger;
 
     formData.append("category_id", values.category_id);
     formData.append("subcategory_id", values.subcategory_id);
     formData.append("other_tags", values.other_tags);
-    formData.append("specializations", formatSpc);
+    formData.append(
+      "specializations",
+      values.tag_all ? 0 : values.specializations
+    );
     formData.append("headline", values.headline);
     formData.append("short_details", values.short_details);
     formData.append(
@@ -430,7 +450,7 @@ const formikEnhancer = withFormik({
     formData.append("_method", "PUT");
 
     //if theres an uploaded image include these field on our form data
-    if (values.masthead) {
+    if (values.masthead instanceof Blob) {
       formData.append("masthead", values.masthead);
       formData.append("featured", values.featured);
       formData.append("thumbnail", values.thumbnail);

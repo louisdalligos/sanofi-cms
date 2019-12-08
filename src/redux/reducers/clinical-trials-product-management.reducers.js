@@ -1,7 +1,8 @@
 import {
   CLINICAL_TRIALS_ARTICLES_FETCH,
   CLINICAL_TRIALS_ARTICLES_SET,
-  CLINICAL_TRIALS_DND_SET
+  CLINICAL_TRIALS_DND_SET,
+  CLINICAL_TRIALS_LOADERS
 } from "../actions/product-management-actions/clinical-trials-productmanagement.types";
 
 let initialState = {
@@ -20,7 +21,14 @@ const clinicalTrialsProductManagementReducers = (
     case CLINICAL_TRIALS_ARTICLES_FETCH:
       return {
         ...state,
+        loader: false,
         articles: action.payload.withinSelectTag || []
+      };
+
+    case CLINICAL_TRIALS_LOADERS:
+      return {
+        ...state,
+        loader: !state.loader
       };
 
     case CLINICAL_TRIALS_DND_SET:

@@ -7,7 +7,6 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import * as Yup from "yup";
 //import { DisplayFormikState } from "../../../utils/formikPropDisplay";
-import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
 import {
@@ -24,6 +23,7 @@ import SelectFormField from "../../smart-form/SelectFormField";
 import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
 import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
+import TextEditorFormField from "../../smart-form/TextEditorFormField";
 
 // Other components
 import ImageUploader from "./ImageUploader";
@@ -55,9 +55,21 @@ const schema = Yup.object().shape({
     .max(150, "Meta description is too long")
     .required("This field is required"),
   body: Yup.string().required("This field is required"),
-  zinc_code1: Yup.string().required("Required field"),
-  zinc_code2: Yup.string().required("Required field"),
-  zinc_code3: Yup.string().required("Required field")
+  zinc_code1: Yup.string()
+    .required("Required field")
+    .matches(
+      /[A-Z]{4}.[A-Z]{3}.[0-9]{2}.[0-9]{2}.[0-9]{4}/,
+      "Please complete the code"
+    ),
+  zinc_code2: Yup.string()
+    .required("Required field")
+    .matches(/[Version][ ][0-9]{1}.[0-9]{1}/, "Please complete version"),
+  zinc_code3: Yup.string()
+    .required("Required field")
+    .matches(
+      /[0-9]{2}[ ][A-Z]{1}[a-z]{1}[a-z]{1}[ ][0-9]{4}/,
+      "Please complete the date"
+    )
 });
 
 const CreateArticleForm = ({
@@ -139,7 +151,7 @@ const CreateArticleForm = ({
     formData.set("category_id", values.category_id);
     formData.set("subcategory_id", values.subcategory_id);
     formData.set("other_tags", values.other_tags);
-    values.tag_all === 0
+    values.tag_all === true
       ? formData.set("specializations", 0)
       : formData.set("specializations", values.specializations);
     formData.set("headline", values.headline);
@@ -233,7 +245,7 @@ const CreateArticleForm = ({
                     margin: "15px 0"
                   }}
                 >
-                  <span>Zinc Code </span>{" "}
+                  <span className="ant-form-item-required">Zinc Code </span>
                   <Tooltip placement="top" title={sampleZincFormat}>
                     <Icon type="info-circle" style={{ color: "#1890ff" }} />
                   </Tooltip>
@@ -243,7 +255,7 @@ const CreateArticleForm = ({
                   name="zinc_code1"
                   type="text"
                   onChange={props.setFieldValue}
-                  maskValidation="AAAA.AAA.11.11.11"
+                  maskValidation="AAAA.AAA.11.11.1111"
                   size="small"
                 />
                 <ZincCodeFormField
@@ -303,41 +315,25 @@ const CreateArticleForm = ({
             {/* 3nd row */}
             <Row gutter={24} className="form-section last">
               <Col xs={24} md={8}>
-                <h3>Feature Image</h3>
-                <ImageUploader getImage={getImage} />
-                {/* <ThumbnailGenerator getImages={getImages} /> */}
+                <h3 className="ant-form-item-required">
+                  Feature Image <small>(required)</small>
+                </h3>
+                <ImageUploader getImage={getImage} name="featured_image" />
               </Col>
               <Col xs={24} md={16}>
                 <h3 className="ant-form-item-required">Article Body</h3>
-                <Field name="body">
-                  {({ field, form: { touched, errors }, meta }) => (
-                    <div
-                      className={
-                        meta.touched && meta.error
-                          ? "has-feedback has-error ant-form-item-control"
-                          : "ant-form-item-control"
-                      }
-                    >
-                      <ReactQuill
-                        theme="snow"
-                        placeholder="Write something..."
-                        modules={CreateArticleForm.modules}
-                        formats={CreateArticleForm.formats}
-                        value={field.value}
-                        onChange={field.onChange(field.name)}
-                      />
-                      {meta.touched && meta.error ? (
-                        <div className="ant-form-explain">{meta.error}</div>
-                      ) : null}
-                    </div>
-                  )}
-                </Field>
+                <Field
+                  as={TextEditorFormField}
+                  name="body"
+                  values={props.values.body}
+                  onChange={props.setFieldValue}
+                />
               </Col>
             </Row>
 
             {/* <Row>
-              <DisplayFormikState {...props} />
-            </Row> */}
+                            <DisplayFormikState {...props} />
+                        </Row> */}
 
             <div className="form-actions">
               <Button style={{ marginRight: 10 }}>
@@ -347,55 +343,12 @@ const CreateArticleForm = ({
                 Save
               </Button>
             </div>
-
-            <RouteLeavingGuard
-              when={props.dirty}
-              navigate={path => history.push(path)}
-              shouldBlockNavigation={location => (props.dirty ? true : false)}
-            />
           </Form>
         )}
       </Formik>
     </>
   );
 };
-
-CreateArticleForm.modules = {
-  toolbar: [
-    [{ header: "1" }, { header: "2" }, { font: [] }],
-    [{ size: [] }],
-    ["bold", "italic", "underline", "strike", "blockquote"],
-    [
-      { list: "ordered" },
-      { list: "bullet" },
-      { indent: "-1" },
-      { indent: "+1" }
-    ],
-    ["link", "image", "video"],
-    ["clean"]
-  ],
-  clipboard: {
-    // toggle to add extra line breaks when pasting HTML:
-    matchVisual: false
-  }
-};
-
-CreateArticleForm.formats = [
-  "header",
-  "font",
-  "size",
-  "bold",
-  "italic",
-  "underline",
-  "strike",
-  "blockquote",
-  "list",
-  "bullet",
-  "indent",
-  "link",
-  "image",
-  "video"
-];
 
 const mapStateToProps = state => {
   return {

@@ -20,6 +20,7 @@ import {
 } from "antd";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
+import { setProductDirty } from "../../../../redux/actions/centralize-functionality-actions/centralize-functionality.actions";
 
 // import CentralizeToastr from "../../../utility-components/CentralizeToastr/CentralizeToastr";
 
@@ -36,14 +37,18 @@ const VideoSchema = Yup.object().shape({
   video_title: Yup.string()
     .required("This field is required.")
     .max(150, "Video title is too long."),
-  video_link: Yup.string().required("This field is required.")
+  video_link: Yup.string()
+    .required("This field is required.")
+    .max(150, "Video title is too long.")
 });
 
 const LinkSchema = Yup.object().shape({
   link_title: Yup.string()
     .required("This field is required.")
     .max(150, "Link title is too long."),
-  link_url: Yup.string().required("This field is required.")
+  link_url: Yup.string()
+    .required("This field is required.")
+    .max(150, "Video title is too long.")
 });
 
 class OtherReferencesComponent extends Component {
@@ -61,7 +66,8 @@ class OtherReferencesComponent extends Component {
       local_filename: "",
       MANUAL_CHECK_NO_FILE: false,
       MANUAL_CHECK_NO_FILENAME: false,
-      isMoreThan25Mb: false
+      isMoreThan25Mb: false,
+      isTooLong: false
     };
     this.runtime = {
       action: "save"
@@ -86,12 +92,19 @@ class OtherReferencesComponent extends Component {
       {
         title: "Title",
         dataIndex: "title",
-        rowKey: "id"
+        rowKey: "id",
+        width: 300,
+        render: text => {
+          return (
+            <div className="custom-document-name-title-wrapper">{text}</div>
+          );
+        }
       },
       {
         title: "Attachment",
         dataIndex: "section",
         rowKey: "id",
+        width: 768,
         render: (text, { type, filename, path, video_link, link }, index) => {
           let caption = "default";
           switch (type) {
@@ -106,12 +119,13 @@ class OtherReferencesComponent extends Component {
               caption = link;
               break;
           }
-          return <span>{caption}</span>;
+          return <div className="custom-attachment-wrapper">{caption}</div>;
         }
       },
       {
         title: "Action",
         rowKey: "id",
+        width: 100,
         render: (text, row, index) => {
           return (
             <Button
@@ -163,6 +177,7 @@ class OtherReferencesComponent extends Component {
     resetForm({});
     // this runtime to differ loader actions
     this.runtime.action = "save";
+    this.props.setProductDirty({ dirty: true });
   }
 
   handleLinkEntrySubmit(values, { resetForm }) {
@@ -179,6 +194,7 @@ class OtherReferencesComponent extends Component {
     resetForm({});
     // this runtime to differ loader actions
     this.runtime.action = "save";
+    this.props.setProductDirty({ dirty: true });
   }
 
   handleFileEntrySubmit() {
@@ -192,6 +208,7 @@ class OtherReferencesComponent extends Component {
           !this.state.MANUAL_CHECK_NO_FILE &&
           !this.state.MANUAL_CHECK_NO_FILENAME &&
           !this.state.isMoreThan25Mb &&
+          !this.state.isTooLong &&
           (this.state.local_fileList.length !== 0 ||
             this.state.local_filename.length !== 0)
         ) {
@@ -209,6 +226,7 @@ class OtherReferencesComponent extends Component {
       }
     );
     this.runtime.action = "save";
+    this.props.setProductDirty({ dirty: true });
   }
   resets() {
     this.setState({
@@ -271,12 +289,18 @@ class OtherReferencesComponent extends Component {
                         <CustomTextField
                           name="video_link"
                           label={"Video Link"}
-                          setFieldValue={setFieldValue}
+                          setFieldValue={(name, value) => {
+                            setFieldValue(name, value);
+                            this.props.setProductDirty({ dirty: true });
+                          }}
                         />
                         <CustomField
                           name="video_title"
                           label={"Video Title"}
-                          setFieldValue={setFieldValue}
+                          setFieldValue={(name, value) => {
+                            setFieldValue(name, value);
+                            this.props.setProductDirty({ dirty: true });
+                          }}
                         />
                         <div className="generic-btn-wrapper">
                           <Button
@@ -381,12 +405,20 @@ class OtherReferencesComponent extends Component {
                           this.setState({
                             MANUAL_CHECK_NO_FILENAME: true
                           });
+                          this.props.setProductDirty({
+                            dirty: true
+                          });
                         }
                       }}
                       onChange={evt => {
                         this.setState({
                           local_filename: evt.target.value,
-                          MANUAL_CHECK_NO_FILENAME: false
+                          MANUAL_CHECK_NO_FILENAME: false,
+                          isTooLong: false
+                        });
+                        // SetDirty
+                        this.props.setProductDirty({
+                          dirty: true
                         });
                       }}
                     />
@@ -397,6 +429,12 @@ class OtherReferencesComponent extends Component {
                       </div>
                     )}
 
+                    {this.state.isTooLong && (
+                      <div className="font-red ant-form-explain">
+                        {"Document Name is too long."}
+                      </div>
+                    )}
+
                     <div className="generic-btn-wrapper">
                       <Button
                         loading={
@@ -404,7 +442,15 @@ class OtherReferencesComponent extends Component {
                         }
                         htmlType="submit"
                         type="primary"
-                        onClick={this.handleFileEntrySubmit}
+                        onClick={() => {
+                          if (this.state.local_filename.length >= 150) {
+                            this.setState({
+                              isTooLong: true
+                            });
+                          } else {
+                            this.handleFileEntrySubmit();
+                          }
+                        }}
                       >
                         Save File Details
                       </Button>
@@ -414,6 +460,7 @@ class OtherReferencesComponent extends Component {
                           this.setState({
                             local_fileList: [],
                             local_filename: "",
+                            isTooLong: false,
                             MANUAL_CHECK_NO_FILE: false,
                             MANUAL_CHECK_NO_FILENAME: false
                           });
@@ -448,12 +495,18 @@ class OtherReferencesComponent extends Component {
                         <CustomField
                           name="link_url"
                           label={"Link"}
-                          setFieldValue={setFieldValue}
+                          setFieldValue={(name, value) => {
+                            setFieldValue(name, value);
+                            this.props.setProductDirty({ dirty: true });
+                          }}
                         />
                         <CustomField
                           name="link_title"
                           label={"Link Title"}
-                          setFieldValue={setFieldValue}
+                          setFieldValue={(name, value) => {
+                            setFieldValue(name, value);
+                            this.props.setProductDirty({ dirty: true });
+                          }}
                         />
                         <div className="generic-btn-wrapper">
                           <Button
@@ -487,13 +540,17 @@ class OtherReferencesComponent extends Component {
         {/* Listing with Action */}
 
         <Fragment>
+          {/* <div style={{ overflowX: "auto" }}> */}
           <Table
+            // tableLayout={"fixed"}
             loading={this.props.loader}
             dataSource={this.props.files}
             columns={this.columns}
             size="small"
             locale={{ emptyText: "No data found" }}
+            scroll={{ x: 1200 }}
           />
+          {/* </div> */}
         </Fragment>
       </div>
     );
@@ -566,7 +623,8 @@ const mapDispatchToProps = {
   fetchOtherReferences,
   saveOtherReferences,
   deleteOtherReferences,
-  saveFilePostOtherReferences
+  saveFilePostOtherReferences,
+  setProductDirty
 };
 
 export default connect(

@@ -13,11 +13,10 @@ const UpdateArticlePage = ({ match, auth, postManagement, ...props }) => {
     status: "",
     category_id: "",
     subcategory_id: "",
-    other_tags: "",
-    specializations: "",
+    other_tags: [],
+    specializations: [],
     headline: "",
     short_details: "",
-    //zinc_code: zincCode,
     page_title: "",
     meta_description: "",
     slug: "",
@@ -34,10 +33,9 @@ const UpdateArticlePage = ({ match, auth, postManagement, ...props }) => {
 
   const getData = data => {
     const str = data.zinc_code.split("|"); // split our zinc code
-    const spc = data.specializations.split(",").map(item => {
-      return parseInt(item, 10);
-    });
+
     const tags = data.other_tags.split(",");
+    const allStatus = data.tag_all ? true : false;
 
     let formatData = {
       id: data.id,
@@ -45,8 +43,13 @@ const UpdateArticlePage = ({ match, auth, postManagement, ...props }) => {
       headline: data.headline,
       short_details: data.short_details,
       category_id: data.category_id,
-      subcategory_id: data.category_id,
-      specializations: spc,
+      subcategory_id: data.subcategory_id,
+      specializations:
+        typeof data.specializations === "string"
+          ? data.specializations.split(",").map(item => {
+              return parseInt(item, 10);
+            })
+          : data.specializations,
       other_tags: tags,
       body: data.body,
       page_title: data.page_title,
@@ -59,7 +62,8 @@ const UpdateArticlePage = ({ match, auth, postManagement, ...props }) => {
       zinc_code3: str[2].trim(),
       masthead: data.masthead_image,
       featured: data.featured_image,
-      thumbnail: data.thumbnail_image
+      thumbnail: data.thumbnail_image,
+      tag_all: allStatus
     };
 
     setData(formatData); // set our formated obj to formik values

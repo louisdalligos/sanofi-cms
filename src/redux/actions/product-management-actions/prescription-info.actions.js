@@ -38,11 +38,7 @@ export function savePrescriptionInfo(id, payload) {
         id,
         payload
       );
-
-      dispatch({
-        type: PRESCRIPTION_LOADERS
-      });
-
+      //
       dispatch({
         type: CENTRALIZE_TOASTR_SET,
         payload: res
@@ -75,11 +71,7 @@ export function deleletPrescriptionInfo(productId, prescriptionId) {
       const res = await PrescriptionInfoServices.deleletPrescriptionInfo(
         prescriptionId
       );
-
-      dispatch({
-        type: PRESCRIPTION_LOADERS
-      });
-
+      //
       dispatch({
         type: CENTRALIZE_TOASTR_SET,
         payload: res
@@ -116,11 +108,7 @@ export function saveEditedDocumentInPrescriptionInfo(
         prescriptionId,
         filename
       );
-
-      dispatch({
-        type: PRESCRIPTION_LOADERS
-      });
-
+      //
       dispatch({
         type: CENTRALIZE_TOASTR_SET,
         payload: res

@@ -3,12 +3,12 @@ import { connect } from "react-redux";
 import { PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
 
-import CreateCMEFormWrapper from "./CreateCMEForm";
+import CreateCMEForm from "./CreateCMEForm";
 
 const pageTitle = "Create a new CME";
 
 // Component
-const CreateCMEPage = ({ history, auth, postManagement, match, ...props }) => {
+const CreateCMEPage = ({ auth, postManagement, match, ...props }) => {
   const [data, setData] = useState({
     category_id: "",
     event_name: "",
@@ -48,8 +48,8 @@ const CreateCMEPage = ({ history, auth, postManagement, match, ...props }) => {
           </div>
         </div>
 
-        <CreateCMEFormWrapper
-          history={history}
+        <CreateCMEForm
+          history={props.history}
           auth={auth}
           postManagement={postManagement}
           data={data}

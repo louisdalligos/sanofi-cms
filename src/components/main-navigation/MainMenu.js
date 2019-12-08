@@ -29,8 +29,7 @@ const MainMenu = ({ user, ...props }) => {
           <Link to="/">Dashboard</Link>
         </Menu.Item>
 
-        {(user && user.role === "superadmin") ||
-        (user && user.role === "admin") ? (
+        {user && user.role !== "editor" ? (
           <SubMenu title={<span className="submenu-title-wrapper">Users</span>}>
             <Menu.Item key="doctors">
               <Link to="/doctors">Doctors</Link>
@@ -53,33 +52,23 @@ const MainMenu = ({ user, ...props }) => {
           </SubMenu>
         ) : null}
         <SubMenu title={<span className="submenu-title-wrapper">Content</span>}>
-          {user && user.role !== "editor" ? (
-            <Menu.Item key="general-settings">General Settings</Menu.Item>
-          ) : null}
+          <Menu.Item key="general-settings">General Settings</Menu.Item>
 
-          {user && user.role !== "editor" ? (
-            <Menu.Item key="doctor-specialization" className="third-level-menu">
-              <Link to="/doctor-specialization">Doctor Specialization</Link>
-            </Menu.Item>
-          ) : null}
+          <Menu.Item key="doctor-specialization" className="third-level-menu">
+            <Link to="/doctor-specialization">Doctor Specialization</Link>
+          </Menu.Item>
 
-          {user && user.role !== "editor" ? (
-            <Menu.Item key="categories" className="third-level-menu">
-              <Link to="/categories">Categories/Illnesses</Link>
-            </Menu.Item>
-          ) : null}
+          <Menu.Item key="categories" className="third-level-menu">
+            <Link to="/categories">Categories/Illnesses</Link>
+          </Menu.Item>
 
-          {user && user.role !== "editor" ? (
-            <Menu.Item key="subcategories" className="third-level-menu">
-              <Link to="/sub-categories">Subcategories/Sections</Link>
-            </Menu.Item>
-          ) : null}
+          <Menu.Item key="subcategories" className="third-level-menu">
+            <Link to="/sub-categories">Subcategories/Sections</Link>
+          </Menu.Item>
 
-          {user && user.role !== "editor" ? (
-            <Menu.Item key="other-tags" className="third-level-menu">
-              <Link to="/other-tags">Other Tags</Link>
-            </Menu.Item>
-          ) : null}
+          <Menu.Item key="other-tags" className="third-level-menu">
+            <Link to="/other-tags">Other Tags</Link>
+          </Menu.Item>
 
           <Menu.Item key="therapy-areas">
             <Link to="/therapy-areas">Therapy Areas</Link>
@@ -88,11 +77,9 @@ const MainMenu = ({ user, ...props }) => {
           <Menu.Item key="cme">
             <Link to="/cme">CME</Link>
           </Menu.Item>
-          {user && user.role !== "editor" ? (
-            <Menu.Item key="academy">
-              <Link to="/academy">Academy</Link>
-            </Menu.Item>
-          ) : null}
+          <Menu.Item key="academy">
+            <Link to="/academy">Academy</Link>
+          </Menu.Item>
 
           <Menu.Item key="products">
             <Link to="/products">Products</Link>

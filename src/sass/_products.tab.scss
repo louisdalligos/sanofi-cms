@@ -2,4 +2,19 @@
   button {
     margin-left: 15px;
   }
+  display: flex;
+}
+.custom-document-name-title-wrapper {
+  max-width: 300px;
+  width: 100%;
+  word-wrap: break-word;
+}
+.custom-attachment-wrapper {
+  max-width: 768px;
+  width: 100%;
+  word-wrap: break-word;
+
+  // white-space: nowrap;
+  // overflow: hidden;
+  // text-overflow: ellipsis;
 }

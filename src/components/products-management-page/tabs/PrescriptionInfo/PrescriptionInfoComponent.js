@@ -7,6 +7,8 @@ import {
   saveEditedDocumentInPrescriptionInfo
 } from "../../../../redux/actions/product-management-actions/prescription-info.actions";
 
+import { setProductDirty } from "../../../../redux/actions/centralize-functionality-actions/centralize-functionality.actions";
+
 import { Button, Icon, Input, Upload, Row, Col, Table, Spin } from "antd";
 
 // TODO: preloader
@@ -20,23 +22,37 @@ class PrescriptionInfoComponent extends Component {
       editCursor: -1,
       editFilename: "",
 
+      isTooLong: false,
+
       MANUAL_CHECK_NO_FILE: false,
       MANUAL_CHECK_NO_FILENAME: false
     };
+    this.runtime = {
+      action: "save"
+    };
+
     this.columns = [
       {
         title: "Attachment",
         dataIndex: "filename",
-        rowKey: "id"
+        rowKey: "id",
+        width: 300,
+        render: text => {
+          return (
+            <div className="custom-document-name-title-wrapper">{text}</div>
+          );
+        }
       },
       {
         title: "Document Name",
         dataIndex: "title",
         rowKey: "id",
+        width: 768,
         render: (text, { title, id }) => {
           const curTitle = title;
+          let renderHTML = <span>Loading...</span>;
           if (this.state.editCursor === id) {
-            return (
+            renderHTML = (
               <Input
                 value={this.state.editFilename}
                 onChange={evt => {
@@ -48,14 +64,16 @@ class PrescriptionInfoComponent extends Component {
               />
             );
           } else {
-            return curTitle;
+            renderHTML = <span>{curTitle}</span>;
           }
+          return <div className="custom-attachment-wrapper"> {renderHTML}</div>;
         }
       },
       {
         title: "View",
         dataIndex: "product_id",
         rowKey: "id",
+        width: 100,
         render: (text, { path }, index) => (
           <a href={path} target="_blank">
             View
@@ -66,6 +84,7 @@ class PrescriptionInfoComponent extends Component {
         title: "Actions",
         dataIndex: "section",
         rowKey: "id",
+        width: 150,
         render: (text, { path, title, id, product_id }, index) => (
           <div className="generic-btn-wrapper" style={{ margin: "0" }}>
             <Fragment>
@@ -74,10 +93,17 @@ class PrescriptionInfoComponent extends Component {
                 <Button
                   type="primary"
                   onClick={() => {
-                    this.setState({
-                      editCursor: id,
-                      editFilename: title
-                    });
+                    this.setState(
+                      {
+                        editCursor: id,
+                        editFilename: title
+                      },
+                      () => {
+                        this.props.setProductDirty({
+                          dirty: true
+                        });
+                      }
+                    );
                   }}
                 >
                   <Icon type={"edit"} />
@@ -86,6 +112,7 @@ class PrescriptionInfoComponent extends Component {
                 <Button
                   type="primary"
                   onClick={() => {
+                    this.runtime.action = "save_edit";
                     this.handleSaveEditedDocument();
                   }}
                 >
@@ -99,6 +126,7 @@ class PrescriptionInfoComponent extends Component {
               <Button
                 type="danger"
                 onClick={() => {
+                  this.runtime.action = "delete";
                   this.props.deleletPrescriptionInfo(this.props.id, id);
                 }}
               >
@@ -129,6 +157,7 @@ class PrescriptionInfoComponent extends Component {
 
   componentDidMount() {
     this.props.fetchPrescriptionInfo(this.props.id);
+    this.runtime.action = "save";
   }
 
   handleSubmitPrescriptionInfo() {
@@ -141,6 +170,12 @@ class PrescriptionInfoComponent extends Component {
       this.setState({
         MANUAL_CHECK_NO_FILE: true
       });
+    }
+    if (this.state.local_filename.length >= 150) {
+      this.setState({
+        isTooLong: true
+      });
+      return;
     }
 
     if (this.state.local_filename.length && this.state.local_fileList.length) {
@@ -156,6 +191,9 @@ class PrescriptionInfoComponent extends Component {
 
       this.resets();
     }
+
+    this.runtime.action = "save";
+    this.props.setProductDirty({ dirty: true });
   }
 
   resets() {
@@ -165,7 +203,8 @@ class PrescriptionInfoComponent extends Component {
       local_fileList: [],
       local_filename: "",
       MANUAL_CHECK_NO_FILENAME: false,
-      MANUAL_CHECK_NO_FILE: false
+      MANUAL_CHECK_NO_FILE: false,
+      isTooLong: false
     });
   }
 
@@ -201,10 +240,17 @@ class PrescriptionInfoComponent extends Component {
                     fileList={this.state.local_fileList}
                     beforeUpload={(file, fileList) => {
                       const newList = [file];
-                      this.setState({
-                        local_fileList: newList,
-                        MANUAL_CHECK_NO_FILE: false
-                      });
+                      this.setState(
+                        {
+                          local_fileList: newList,
+                          MANUAL_CHECK_NO_FILE: false
+                        },
+                        () => {
+                          this.props.setProductDirty({
+                            dirty: true
+                          });
+                        }
+                      );
                     }}
                     onRemove={removedFile => {
                       const excluded = this.state.local_fileList.filter(
@@ -239,7 +285,7 @@ class PrescriptionInfoComponent extends Component {
                 <div
                   className={
                     "ant-form-item-control " +
-                    (this.state.MANUAL_CHECK_NO_FILENAME === true
+                    (this.state.MANUAL_CHECK_NO_FILENAME || this.state.isTooLong
                       ? "has-error"
                       : "")
                   }
@@ -252,14 +298,27 @@ class PrescriptionInfoComponent extends Component {
                         this.setState({
                           MANUAL_CHECK_NO_FILENAME: true
                         });
+                        //
+                        this.props.setProductDirty({
+                          dirty: true
+                        });
                       }
                     }}
                     onChange={evt => {
                       const value = evt.target.value;
-                      this.setState({
-                        local_filename: value,
-                        MANUAL_CHECK_NO_FILENAME: false
-                      });
+                      this.setState(
+                        {
+                          local_filename: value,
+                          MANUAL_CHECK_NO_FILENAME: false,
+                          isTooLong: false
+                        },
+                        () => {
+                          //
+                          this.props.setProductDirty({
+                            dirty: true
+                          });
+                        }
+                      );
                     }}
                   />
 
@@ -269,12 +328,22 @@ class PrescriptionInfoComponent extends Component {
                       {"This field is required."}
                     </div>
                   )}
+
+                  {this.state.isTooLong && (
+                    <div className="ant-form-explain">
+                      {"Document Name is too long."}
+                    </div>
+                  )}
                 </div>
               </div>
               <br />
               <div className="generic-btn-wrapper">
                 <Button
-                  loading={false}
+                  loading={(() => {
+                    const isOnlySave = this.runtime.action === "save" && loader;
+                    console.log("isOnlySave", isOnlySave);
+                    return isOnlySave;
+                  })()}
                   type="primary"
                   onClick={this.handleSubmitPrescriptionInfo}
                 >
@@ -288,7 +357,8 @@ class PrescriptionInfoComponent extends Component {
                       local_fileList: [],
                       local_filename: "",
                       MANUAL_CHECK_NO_FILE: false,
-                      MANUAL_CHECK_NO_FILENAME: false
+                      MANUAL_CHECK_NO_FILENAME: false,
+                      isTooLong: false
                     });
                   }}
                 >
@@ -304,16 +374,19 @@ class PrescriptionInfoComponent extends Component {
         <br />
         <br />
         <br />
+
         <Fragment>
-          {/* <Spin> */}
+          {/* <div style={{ overflowX: "auto" }}> */}
           <Table
+            // tableLayout={"fixed"}
             loading={loader}
             dataSource={this.props.files}
             columns={this.columns}
             size="small"
             locale={{ emptyText: "No data found" }}
+            scroll={{ x: 1200 }}
           />
-          {/* </Spin> */}
+          {/* </div> */}
         </Fragment>
       </div>
     );
@@ -329,7 +402,8 @@ const mapDispatchToProps = {
   fetchPrescriptionInfo,
   savePrescriptionInfo,
   deleletPrescriptionInfo,
-  saveEditedDocumentInPrescriptionInfo
+  saveEditedDocumentInPrescriptionInfo,
+  setProductDirty
 };
 
 export default connect(

@@ -64,9 +64,21 @@ const schema = Yup.object().shape({
     .max(60, "Page title is too long"),
   meta_description: Yup.string().required("This field is required"),
   event_body: Yup.string().required("This field is required"),
-  zinc_code1: Yup.string().required("Required field"),
-  zinc_code2: Yup.string().required("Required field"),
-  zinc_code3: Yup.string().required("Required field")
+  zinc_code1: Yup.string()
+    .required("Required field")
+    .matches(
+      /[A-Z]{4}.[A-Z]{3}.[0-9]{2}.[0-9]{2}.[0-9]{4}/,
+      "Please complete the code"
+    ),
+  zinc_code2: Yup.string()
+    .required("Required field")
+    .matches(/[Version][ ][0-9]{1}.[0-9]{1}/, "Please complete version"),
+  zinc_code3: Yup.string()
+    .required("Required field")
+    .matches(
+      /[0-9]{2}[ ][A-Z]{1}[a-z]{1}[a-z]{1}[ ][0-9]{4}/,
+      "Please complete the date"
+    )
 });
 
 const { TabPane } = Tabs;
@@ -126,8 +138,16 @@ const UpdateCMEForm = ({
 
   useEffect(() => {
     if (currentEvent) {
-      props.getData(currentEvent); // pass our data to parent for it to set the initial values of formik
-
+      const shapeData = {
+        ...currentEvent,
+        specializations: props.postManagement.specializations.map(item => {
+          return item.id;
+        }),
+        tag_all: true
+      };
+      props.getData(
+        currentEvent.specializations === "0" ? shapeData : currentEvent
+      ); // pass our data to parent for it to set the initial values of formik
       setLoading(false);
     }
 
@@ -174,16 +194,6 @@ const UpdateCMEForm = ({
   // Tabs callback on change
   const callback = key => {
     console.log(key);
-  };
-
-  // get/send image to uploader componennt
-  const getImage = (name, file) => {
-    if (name === "featured") {
-      setfeaturedImageInfo(file);
-    }
-    if (name === "thumbnail") {
-      setthumbnailImageInfo(file);
-    }
   };
 
   // Save action changing of status
@@ -290,15 +300,6 @@ const UpdateCMEForm = ({
                   placeholder={"Select a category"}
                 />
                 <Field
-                  as={DatePickerFormField}
-                  placeholder={"Select a date"}
-                  label="Event Date"
-                  name="event_date"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                  values={props.values.event_date}
-                />
-                <Field
                   as={SelectFormField}
                   name="event_type"
                   onChange={props.setFieldValue}
@@ -307,9 +308,16 @@ const UpdateCMEForm = ({
                   requiredlabel="true"
                   options={eventTypes}
                   placeholder={"Select an event type"}
-                  defaultValue={
-                    props.values.event_type === 0 ? "Upcoming" : "Past"
-                  }
+                  value={props.values.event_type === "0" ? "Upcoming" : "Past"}
+                />
+                <Field
+                  as={DatePickerFormField}
+                  placeholder={"Select a date"}
+                  label="Event Date"
+                  name="event_date"
+                  onChange={props.setFieldValue}
+                  requiredlabel="true"
+                  dateValue={props.values.event_date}
                 />
 
                 <TextFormField
@@ -335,6 +343,8 @@ const UpdateCMEForm = ({
                   requiredlabel="true"
                   options={specializationOptions}
                   placeholder="Please select a specialization"
+                  allSelected={props.values.tag_all}
+                  onEditMode={true}
                 />
                 <Field
                   as={TagsSuggestionFormField}
@@ -382,7 +392,7 @@ const UpdateCMEForm = ({
                   name="zinc_code1"
                   type="text"
                   onChange={props.setFieldValue}
-                  maskValidation="AAAA.AAA.11.11.11"
+                  maskValidation="AAAA.AAA.11.11.1111"
                   size="small"
                 />
                 <ZincCodeFormField
@@ -446,7 +456,9 @@ const UpdateCMEForm = ({
             {/* 3nd row */}
             <Row gutter={24} className="form-section last">
               <Col xs={24} md={8}>
-                <h3>Feature Image</h3>
+                <h3 className="ant-form-item-required">
+                  Feature Image <small>(required)</small>
+                </h3>
                 <ImageUploader />
               </Col>
               <Col xs={24} md={16}>
@@ -497,37 +509,44 @@ const formikEnhancer = withFormik({
   validationSchema: schema,
   enableReinitialize: true,
   handleSubmit: (values, { props, setSubmitting, resetForm }) => {
-    const formatSpc =
-      values.tag_all === "0" ? "0" : values.specializations.join();
+    let formData = new FormData();
 
-    const data = {
-      page_title: values.page_title,
-      category_id: values.category_id,
-      other_tags: values.other_tags.join(),
-      specializations: formatSpc,
-      event_name: values.event_name,
-      event_description: values.event_description,
-      zinc_code: `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`,
-      event_date: values.event_date,
-      meta_description: values.meta_description,
-      slug: values.slug,
-      meta_keywords: values.meta_keywords,
-      event_body: values.event_body,
-      event_location: values.event_location,
-      event_type: values.event_type,
-      featured: values.featured,
-      thumbnail: values.thumbnail
-    };
+    //let eventType = values.event_type === "Upcoming" ? 0 : 1; // format our type
 
-    console.log(qs.stringify(values), "<<======FORMAT");
+    formData.append("event_name", values.event_name);
+    formData.append("event_type", values.event_type);
+    formData.append("event_date", values.event_date);
+    formData.append("event_description", values.event_description);
+    formData.append("category_id", values.category_id);
+    formData.append("other_tags", values.other_tags.join());
+    formData.append(
+      "specializations",
+      values.tag_all ? 0 : values.specializations
+    );
+    formData.append(
+      "zinc_code",
+      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
+    );
+    formData.append("page_title", values.page_title);
+    formData.append("meta_description", values.meta_description);
+    formData.append("slug", values.slug);
+    formData.append("meta_keywords", values.meta_keywords);
+    formData.append("event_body", values.event_body);
+    formData.append("_method", "PUT");
+
+    //if theres an uploaded image include these field on our form data
+    if (values.featured instanceof Blob) {
+      formData.append("featured", values.featured);
+      formData.append("thumbnail", values.thumbnail);
+    }
     axios({
       url: `${API}/cme/update/${values.id}`,
-      method: "put",
+      method: "post",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/form",
         Authorization: `Bearer ${props.auth.access_token}`
       },
-      data: qs.stringify(data)
+      data: formData
     })
       .then(res => {
         setSubmitting(false);
@@ -535,7 +554,8 @@ const formikEnhancer = withFormik({
           res.data.success ? res.data.success : "Updated event successfully"
         );
         resetForm();
-        props.history.push("/cme"); // redirect to table
+        fetchCurrentEvent(props.currentEventId);
+        //props.history.push("/cme"); // redirect to table
       })
       .catch(err => {
         setSubmitting(false);
