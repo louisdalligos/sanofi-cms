@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import { Link } from "react-router-dom";
 import { withFormik, Field } from "formik";
 import { Button, Row, Col, Tooltip, Icon, message, Tabs } from "antd";
@@ -23,6 +24,8 @@ import EventTypeField from "../../smart-form/EventTypeField";
 
 // Other components
 import ImageUploader from "./ImageUploader";
+
+import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
 
 // utils
 import { sampleZincFormat } from "../../../utils/constant";
@@ -69,6 +72,7 @@ const CreateCMEForm = ({
   notifs,
   categories,
   specializations,
+  clearNotifications,
   ...props
 }) => {
   // Event types
@@ -78,25 +82,6 @@ const CreateCMEForm = ({
   ]);
 
   const [currentEventSelection, setCurrentEventSelection] = useState(null);
-
-  useEffect(() => {
-    switch (notifs.id) {
-      case "CREATE_EVENT_SUCCESS":
-        message.success(notifs.notifications.success);
-        history.push("/cme");
-        break;
-      case "CREATE_EVENT_FAILED":
-        message.error(
-          notifs.notifications
-            ? notifs.notifications
-            : "There was an error on processing your request"
-        );
-        break;
-      default:
-        return;
-    }
-    //eslint-disable-next-line
-  }, [notifs.id, notifs.notifications]);
 
   // Tabs callback on change
   const callback = key => {
@@ -157,7 +142,7 @@ const CreateCMEForm = ({
             }
           />
 
-          {props.values.event_type === 0 ? (
+          {/* enable this if location required is removed {props.values.event_type === 0 ? (
             <TextFormField
               name="event_location"
               type="text"
@@ -165,7 +150,14 @@ const CreateCMEForm = ({
               requiredlabel="true"
               placeholder="Enter an event location"
             />
-          ) : null}
+          ) : null} */}
+          <TextFormField
+            name="event_location"
+            type="text"
+            label="Event Location"
+            requiredlabel="true"
+            placeholder="Enter an event location"
+          />
         </Col>
         <Col xs={24} md={7}>
           <Field
@@ -316,6 +308,7 @@ const formikEnhancer = withFormik({
   validationSchema: schema,
   enableReinitialize: true,
   handleSubmit: (values, { props, setSubmitting, resetForm }) => {
+    clearNotifications();
     let formData = new FormData();
 
     formData.append("event_name", values.event_name);
@@ -365,11 +358,17 @@ const formikEnhancer = withFormik({
       })
       .catch(err => {
         setSubmitting(false);
-        message.error(
-          err.response.data.error
-            ? err.response.data.error
-            : "There was an error on processing your request"
-        );
+        const errorMsg = err.response.data;
+
+        if (errorMsg.errors) {
+          errorMsg.errors.forEach(element => {
+            message.error(element);
+          });
+        }
+
+        if (errorMsg.error) {
+          message.error(errorMsg.error);
+        }
       });
   },
   displayName: "CreateCMEForm"
@@ -382,9 +381,18 @@ const mapStateToProps = state => {
   };
 };
 
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators(
+    {
+      clearNotifications: clearNotifications
+    },
+    dispatch
+  );
+};
+
 const CreateCMEFormWrapper = connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(formikEnhancer);
 
 export default CreateCMEFormWrapper;
