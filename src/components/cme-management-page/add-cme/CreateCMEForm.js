@@ -61,8 +61,6 @@ const schema = Yup.object().shape({
     )
 });
 
-const { TabPane } = Tabs;
-
 const CreateCMEForm = ({ data, history, notifs, ...props }) => {
   // Event types
   const [eventTypes, setEventTypes] = useState([
@@ -200,14 +198,6 @@ const CreateCMEForm = ({ data, history, notifs, ...props }) => {
                 placeholder={"Select a category"}
               />
               <Field
-                as={DatePickerFormField}
-                placeholder={"Select a date"}
-                label="Event Date"
-                name="event_date"
-                onChange={props.setFieldValue}
-                requiredlabel="true"
-              />
-              <Field
                 as={SelectFormField}
                 name="event_type"
                 onChange={props.setFieldValue}
@@ -215,6 +205,14 @@ const CreateCMEForm = ({ data, history, notifs, ...props }) => {
                 requiredlabel="true"
                 options={eventTypes}
                 placeholder={"Select an event type"}
+              />
+              <Field
+                as={DatePickerFormField}
+                placeholder={"Select a date"}
+                label="Event Date"
+                name="event_date"
+                onChange={props.setFieldValue}
+                requiredlabel="true"
               />
 
               <TextFormField

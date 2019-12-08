@@ -9,7 +9,8 @@ import {
   Tooltip,
   Pagination,
   Tag,
-  Switch
+  Switch,
+  Typography
 } from "antd";
 import { Link } from "react-router-dom";
 
@@ -26,6 +27,9 @@ import WrappedCMETableFilter from "./CMETableFilter";
 import PageBreadcrumb from "./PageBreadcrumb";
 import { TableAction } from "../smart-table/TableAction";
 
+// Import our table config settings
+import { COLUMN_ITEM_LINK } from "../../utils/config";
+
 const { confirm } = Modal;
 
 const CMETable = ({ notifs, clearNotifications, changeEventStatus, auth }) => {
@@ -34,6 +38,7 @@ const CMETable = ({ notifs, clearNotifications, changeEventStatus, auth }) => {
       title: "Featured",
       dataIndex: "new",
       rowKey: "id",
+      width: 70,
       render: (text, record) => (
         <Tooltip placement="top" title="Tag as featured?">
           <Switch className="switch-new-trigger" />
@@ -45,7 +50,7 @@ const CMETable = ({ notifs, clearNotifications, changeEventStatus, auth }) => {
       dataIndex: "status",
       rowKey: "id",
       sorter: true,
-      width: 90,
+      width: 95,
       render: (text, record) => (
         <Fragment>
           <Tag
@@ -87,6 +92,7 @@ const CMETable = ({ notifs, clearNotifications, changeEventStatus, auth }) => {
       dataIndex: "event_name",
       rowKey: "id",
       sorter: true,
+      width: 400,
       render: (text, record) => (
         <div className="table-title-featured-wrap">
           {/* <img src={record.thumbnail_image} alt="" width="70" /> */}
@@ -97,7 +103,12 @@ const CMETable = ({ notifs, clearNotifications, changeEventStatus, auth }) => {
           />
           <div>
             <Button type="link">
-              <Link to={`/cme/${record.id}`}>{text}</Link>
+              <Link to={`/cme/${record.id}`}>
+                {" "}
+                <Typography.Text ellipsis={true} style={COLUMN_ITEM_LINK}>
+                  {text}
+                </Typography.Text>
+              </Link>
             </Button>
             <small>{record.short_description}</small>
           </div>

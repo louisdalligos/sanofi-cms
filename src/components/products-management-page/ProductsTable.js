@@ -43,7 +43,7 @@ const ProductsTable = ({
       title: "New",
       dataIndex: "new",
       rowKey: "id",
-      width: 60,
+      width: 70,
       render: (text, record) => (
         <Tooltip
           placement="top"
