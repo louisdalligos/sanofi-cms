@@ -21,9 +21,10 @@ const CreateProductPage = ({ history, ...props }) => {
     meta_keywords: "",
     body: "",
     image_gallery: [],
-    zinc_code1: "",
-    zinc_code2: "",
-    zinc_code3: "",
+    zinc_code: "",
+    // zinc_code1: "",
+    // zinc_code2: "",
+    // zinc_code3: "",
     tag_all: ""
   });
 

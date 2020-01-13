@@ -1,10 +1,10 @@
 import axiosInstance from "../../../utils/axiosInstance";
+import { appUrl } from "../../../utils/api";
 
 function fetchSpecializationsRequest(body) {
   return axiosInstance({
     method: "get",
-    //baseURL: "/api/v1/specializations",
-    baseURL: "https://sanofi-qa.nuworks.ph:8443/api/v1/specializations",
+    baseURL: `${appUrl}/api/v1/specializations`,
     data: body
   });
 }
@@ -72,6 +72,30 @@ function changeArticleStatusRequest(id, body) {
   });
 }
 
+function checkImageRequest(body) {
+  return axiosInstance({
+    method: "post",
+    url: "/gallery/check-image",
+    data: body
+  });
+}
+
+function searchTagsRequest(query) {
+  return axiosInstance({
+    method: "post",
+    url: `/tags/search/${query}`,
+    data: query
+  });
+}
+
+function fetchTagsRequest(body) {
+  return axiosInstance({
+    method: "get",
+    url: "/tags",
+    data: body
+  });
+}
+
 const PostManagementServices = {
   fetchSpecializationsRequest,
   fetchCategoriesRequest,
@@ -81,7 +105,10 @@ const PostManagementServices = {
   createArticleRequest,
   updateArticleRequest,
   fetchCurrentArticleRequest,
-  changeArticleStatusRequest
+  changeArticleStatusRequest,
+  checkImageRequest,
+  searchTagsRequest,
+  fetchTagsRequest
 };
 
 export default PostManagementServices;

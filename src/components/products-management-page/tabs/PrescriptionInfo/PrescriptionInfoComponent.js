@@ -21,14 +21,24 @@ class PrescriptionInfoComponent extends Component {
       local_filename: "",
       editCursor: -1,
       editFilename: "",
-
+      editFilenameTooLong: false,
       isTooLong: false,
-
+      MANUAL_CHECK_INVALID_FILE: false,
       MANUAL_CHECK_NO_FILE: false,
-      MANUAL_CHECK_NO_FILENAME: false
+      MANUAL_CHECK_NO_FILENAME: false,
+      docNameCtr: 0,
+      docNameListingCtr: 0,
+
+      tabKeyPrev: null,
+      // new implem use 1 message placeholder
+      filenameErrorMessage: null,
+      fileErrorMessage: null,
+
+      filenameListingErrorMessage: null
     };
     this.runtime = {
-      action: "save"
+      action: "save",
+      charLimit: 100
     };
 
     this.columns = [
@@ -52,16 +62,38 @@ class PrescriptionInfoComponent extends Component {
           const curTitle = title;
           let renderHTML = <span>Loading...</span>;
           if (this.state.editCursor === id) {
+            // xxxxxx
             renderHTML = (
-              <Input
-                value={this.state.editFilename}
-                onChange={evt => {
-                  const value = evt.target.value;
-                  this.setState({
-                    editFilename: value
-                  });
-                }}
-              />
+              <Fragment>
+                <div
+                  className={
+                    "ant-form-item-control " +
+                    (this.state.filenameListingErrorMessage ? "has-error" : "")
+                  }
+                >
+                  <Input
+                    value={this.state.editFilename}
+                    onChange={evt => {
+                      const value = evt.target.value;
+                      if (value.length <= this.runtime.charLimit) {
+                        this.setState({
+                          editFilename: value,
+                          docNameListingCtr: value.length,
+                          filenameListingErrorMessage: null
+                        });
+                      }
+                    }}
+                  />
+
+                  <div className="character-counter">{`${this.state.docNameListingCtr} of remaining ${this.runtime.charLimit} allowed`}</div>
+
+                  {this.state.filenameListingErrorMessage && (
+                    <div className="ant-form-explain">
+                      {this.state.filenameListingErrorMessage}
+                    </div>
+                  )}
+                </div>
+              </Fragment>
             );
           } else {
             renderHTML = <span>{curTitle}</span>;
@@ -84,7 +116,7 @@ class PrescriptionInfoComponent extends Component {
         title: "Actions",
         dataIndex: "section",
         rowKey: "id",
-        width: 150,
+        width: 200,
         render: (text, { path, title, id, product_id }, index) => (
           <div className="generic-btn-wrapper" style={{ margin: "0" }}>
             <Fragment>
@@ -93,17 +125,12 @@ class PrescriptionInfoComponent extends Component {
                 <Button
                   type="primary"
                   onClick={() => {
-                    this.setState(
-                      {
-                        editCursor: id,
-                        editFilename: title
-                      },
-                      () => {
-                        this.props.setProductDirty({
-                          dirty: true
-                        });
-                      }
-                    );
+                    this.setState({
+                      editCursor: id,
+                      editFilename: title,
+                      filenameListingErrorMessage: null,
+                      docNameListingCtr: title.length
+                    });
                   }}
                 >
                   <Icon type={"edit"} />
@@ -116,7 +143,7 @@ class PrescriptionInfoComponent extends Component {
                     this.handleSaveEditedDocument();
                   }}
                 >
-                  <Icon type={"save"} />
+                  <Icon type={"check"} />
                 </Button>
               )}
             </Fragment>
@@ -137,21 +164,65 @@ class PrescriptionInfoComponent extends Component {
         )
       }
     ];
+    // handlers
     this.handleSaveEditedDocument = this.handleSaveEditedDocument.bind(this);
     this.handleSubmitPrescriptionInfo = this.handleSubmitPrescriptionInfo.bind(
       this
     );
+    this.docNameListingOnBlurChange = this.docNameListingOnBlurChange.bind(
+      this
+    );
+    this.docNameListingOnChange = this.docNameListingOnChange.bind(this);
+    this.resets = this.resets.bind(this);
+
+    this.addDirtyClassesToFileName = this.addDirtyClassesToFileName.bind(this);
+    this.addDirtyClassesToFile = this.addDirtyClassesToFile.bind(this);
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.tabKey !== state.tabKeyPrev) {
+      if (props.tabKey.toString().indexOf("prescribing") !== -1) {
+        // resets
+        state.editCursor = -1;
+        state.editFilename = "";
+        state.local_fileList = [];
+        state.local_filename = "";
+        state.editFilenameTooLong = false;
+        state.MANUAL_CHECK_NO_FILENAME = false;
+        state.MANUAL_CHECK_NO_FILE = false;
+        state.MANUAL_CHECK_INVALID_FILE = false;
+        state.isTooLong = false;
+        // new implem
+        state.fileErrorMessage = null;
+        state.filenameErrorMessage = null;
+        state.filenameListingErrorMessage = null;
+        state.docNameCtr = 0;
+        state.docNameListingCtr = 0;
+      }
+      return {
+        tabKeyPrev: props.tabKey
+      };
+    }
+    return null;
   }
 
   handleSaveEditedDocument() {
-    if (!this.state.editFilename.length) return;
-
+    const offset = 50;
+    if (this.state.editFilename.length === 0) {
+      this.setState({
+        filenameListingErrorMessage: "This field is required."
+      });
+      return;
+    }
+    if (this.state.editFilename.length >= this.runtime.charLimit + offset) {
+      // not applied
+      return;
+    }
     this.props.saveEditedDocumentInPrescriptionInfo(
       this.props.id,
       this.state.editCursor,
       this.state.editFilename
     );
-
     this.resets();
   }
 
@@ -161,22 +232,14 @@ class PrescriptionInfoComponent extends Component {
   }
 
   handleSubmitPrescriptionInfo() {
-    if (this.state.local_filename.length === 0) {
-      this.setState({
-        MANUAL_CHECK_NO_FILENAME: true
-      });
-    }
+    // validation
     if (this.state.local_fileList.length === 0) {
-      this.setState({
-        MANUAL_CHECK_NO_FILE: true
-      });
-    }
-    if (this.state.local_filename.length >= 150) {
-      this.setState({
-        isTooLong: true
-      });
-      return;
-    }
+      this.setState({ fileErrorMessage: "This field is required." });
+    } else this.setState({ fileErrorMessage: null });
+
+    if (this.state.local_filename.length === 0)
+      this.setState({ filenameErrorMessage: "This field is required." });
+    else this.setState({ filenameErrorMessage: null });
 
     if (this.state.local_filename.length && this.state.local_fileList.length) {
       let formData = new FormData();
@@ -202,13 +265,83 @@ class PrescriptionInfoComponent extends Component {
       editFilename: "",
       local_fileList: [],
       local_filename: "",
+      editFilenameTooLong: false,
       MANUAL_CHECK_NO_FILENAME: false,
       MANUAL_CHECK_NO_FILE: false,
-      isTooLong: false
+      MANUAL_CHECK_INVALID_FILE: false,
+      isTooLong: false,
+      // new implem
+      filenameErrorMessage: null,
+      fileErrorMessage: null,
+      filenameListingErrorMessage: null,
+      docNameCtr: 0,
+      docNameListingCtr: 0
     });
   }
 
+  docNameListingOnBlurChange() {
+    if (this.state.local_filename.length === 0) {
+      this.setState({ filenameErrorMessage: "This field is Required" });
+    }
+  }
+
+  docNameListingOnChange(evt) {
+    const value = evt.target.value;
+    if (value.length <= this.runtime.charLimit) {
+      this.setState({
+        local_filename: value,
+        docNameCtr: value.length,
+        filenameErrorMessage: null
+      });
+    }
+  }
+
+  addDirtyClassesToFile() {
+    let classes = "ant-form-item-control ";
+    classes = classes.concat(this.state.fileErrorMessage ? "has-error" : "");
+    return classes;
+  }
+  addDirtyClassesToFileName() {
+    let classes = "ant-form-item-control ";
+    classes = classes.concat(
+      this.state.filenameErrorMessage ? "has-error" : ""
+    );
+    return classes;
+  }
+
   render() {
+    const manageDisableActions = () => {
+      return this.props.files.length === 3;
+    };
+
+    const manageBeforeUpload = (file, fileList) => {
+      const newList = [file];
+      if (newList[0].type.indexOf("pdf") !== -1) {
+        this.setState({
+          local_fileList: newList,
+          MANUAL_CHECK_NO_FILE: false,
+          MANUAL_CHECK_INVALID_FILE: false,
+          fileErrorMessage: null
+        });
+      } else {
+        this.setState({
+          local_fileList: [],
+          MANUAL_CHECK_INVALID_FILE: true,
+          fileErrorMessage: "Invalid attachment, only pdf format is allowed"
+        });
+      }
+    };
+
+    const manageOnRemoveFile = removedFile => {
+      const excluded = this.state.local_fileList.filter(
+        file => file.uid !== removedFile.uid
+      );
+      this.setState({
+        local_fileList: excluded,
+        MANUAL_CHECK_NO_FILE: false
+      });
+    };
+
     const { loader } = this.props;
     return (
       <div>
@@ -226,53 +359,23 @@ class PrescriptionInfoComponent extends Component {
               </div>
 
               <div>
-                <div
-                  className={
-                    "ant-form-item-control " +
-                    (this.state.MANUAL_CHECK_NO_FILE === true
-                      ? "has-error"
-                      : "")
-                  }
-                >
+                <div className={this.addDirtyClassesToFile()}>
                   <Upload
                     customRequest={() => {}}
                     accept="application/pdf"
                     fileList={this.state.local_fileList}
-                    beforeUpload={(file, fileList) => {
-                      const newList = [file];
-                      this.setState(
-                        {
-                          local_fileList: newList,
-                          MANUAL_CHECK_NO_FILE: false
-                        },
-                        () => {
-                          this.props.setProductDirty({
-                            dirty: true
-                          });
-                        }
-                      );
-                    }}
-                    onRemove={removedFile => {
-                      const excluded = this.state.local_fileList.filter(
-                        file => file.uid !== removedFile.uid
-                      );
-                      this.setState({
-                        local_fileList: excluded,
-                        MANUAL_CHECK_NO_FILE: false
-                      });
-                    }}
+                    beforeUpload={manageBeforeUpload}
+                    onRemove={manageOnRemoveFile}
                   >
-                    <Button>
+                    <Button disabled={manageDisableActions()}>
                       <Icon type="upload" />
-                      SelectFile
+                      <span>Select File</span>
                     </Button>
                   </Upload>
 
-                  {/* Errors */}
-
-                  {this.state.MANUAL_CHECK_NO_FILE && (
+                  {this.state.fileErrorMessage && (
                     <div className="ant-form-explain">
-                      {"This field is required."}
+                      <p>{this.state.fileErrorMessage}</p>
                     </div>
                   )}
                 </div>
@@ -282,56 +385,20 @@ class PrescriptionInfoComponent extends Component {
 
               <div>
                 <div className="ant-form-item-required">Document Name</div>
-                <div
-                  className={
-                    "ant-form-item-control " +
-                    (this.state.MANUAL_CHECK_NO_FILENAME || this.state.isTooLong
-                      ? "has-error"
-                      : "")
-                  }
-                >
+                <div className={this.addDirtyClassesToFileName()}>
                   <Input
                     name="document_name"
                     value={this.state.local_filename}
-                    onBlur={() => {
-                      if (this.state.local_filename.length === 0) {
-                        this.setState({
-                          MANUAL_CHECK_NO_FILENAME: true
-                        });
-                        //
-                        this.props.setProductDirty({
-                          dirty: true
-                        });
-                      }
-                    }}
-                    onChange={evt => {
-                      const value = evt.target.value;
-                      this.setState(
-                        {
-                          local_filename: value,
-                          MANUAL_CHECK_NO_FILENAME: false,
-                          isTooLong: false
-                        },
-                        () => {
-                          //
-                          this.props.setProductDirty({
-                            dirty: true
-                          });
-                        }
-                      );
-                    }}
+                    disabled={manageDisableActions()}
+                    onBlur={this.docNameListingOnBlurChange}
+                    onChange={this.docNameListingOnChange}
                   />
 
-                  {/* Errors */}
-                  {this.state.MANUAL_CHECK_NO_FILENAME && (
-                    <div className="ant-form-explain">
-                      {"This field is required."}
-                    </div>
-                  )}
+                  <div className="character-counter">{`${this.state.docNameCtr} of remaining ${this.runtime.charLimit} allowed`}</div>
 
-                  {this.state.isTooLong && (
+                  {this.state.filenameErrorMessage && (
                     <div className="ant-form-explain">
-                      {"Document Name is too long."}
+                      <p>{this.state.filenameErrorMessage}</p>
                     </div>
                   )}
                 </div>
@@ -339,29 +406,16 @@ class PrescriptionInfoComponent extends Component {
               <br />
               <div className="generic-btn-wrapper">
                 <Button
+                  disabled={manageDisableActions()}
                   loading={(() => {
-                    const isOnlySave = this.runtime.action === "save" && loader;
-                    console.log("isOnlySave", isOnlySave);
-                    return isOnlySave;
+                    return this.runtime.action === "save" && loader;
                   })()}
                   type="primary"
                   onClick={this.handleSubmitPrescriptionInfo}
                 >
                   Save File Details
                 </Button>
-                <Button
-                  loading={false}
-                  type="default"
-                  onClick={() => {
-                    this.setState({
-                      local_fileList: [],
-                      local_filename: "",
-                      MANUAL_CHECK_NO_FILE: false,
-                      MANUAL_CHECK_NO_FILENAME: false,
-                      isTooLong: false
-                    });
-                  }}
-                >
+                <Button loading={false} type="default" onClick={this.resets}>
                   Cancel
                 </Button>
               </div>

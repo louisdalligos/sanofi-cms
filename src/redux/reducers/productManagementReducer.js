@@ -16,7 +16,11 @@ import {
   FETCH_CURRENT_PRODUCT_ARTICLES_BY_CATEGORY_FAILED,
   NEW_PRODUCT_REQUEST,
   NEW_PRODUCT_SUCCESS,
-  NEW_PRODUCT_FAILED
+  NEW_PRODUCT_FAILED,
+  SET_STATUS_CHANGE_FORM_DISABLE,
+  CHANGE_PRODUCT_STATUS_REQUEST,
+  CHANGE_PRODUCT_STATUS_SUCCESS,
+  CHANGE_PRODUCT_STATUS_FAILED
 } from "../actions/product-management-actions/types";
 
 const initialState = {
@@ -27,7 +31,12 @@ const initialState = {
   currentProduct: null,
   specializations: null,
   articlesByCategory: null,
-  toggleNewProgress: null
+  toggleNewProgress: null,
+  isFormDirty: null,
+  // TODO: Refactor
+  productImages: [],
+  serverSideLoader: false,
+  statusChangeFormDisable: true
 };
 
 export default (state = initialState, action) => {
@@ -37,6 +46,7 @@ export default (state = initialState, action) => {
     case FETCH_CURRENT_PRODUCT_REQUEST:
     case UPDATE_PRODUCT_REQUEST:
     case FETCH_CURRENT_PRODUCT_ARTICLES_BY_CATEGORY_REQUEST:
+    case CHANGE_PRODUCT_STATUS_REQUEST:
       return {
         ...state,
         requestInProgress: true
@@ -73,6 +83,40 @@ export default (state = initialState, action) => {
       return {
         ...state,
         toggleNewProgress: false
+      };
+    // TODO: Refactor
+    case "ADD_PRODUCT_IMAGES":
+      return {
+        ...state,
+        productImages: action.payload.productImages
+      };
+    case "SERVER_SIDE_LOADER":
+      return {
+        ...state,
+        serverSideLoader: action.payload.loader
+      };
+    case UPDATE_PRODUCT_SUCCESS:
+      return {
+        ...state,
+        requestInProgress: false,
+        isFormDirty: false
+      };
+    case CHANGE_PRODUCT_STATUS_SUCCESS:
+      return {
+        ...state,
+        requestInProgress: false,
+        statusChangeFormDisable: true
+      };
+    case CHANGE_PRODUCT_STATUS_FAILED:
+      return {
+        ...state,
+        requestInProgress: false,
+        statusChangeFormDisable: false
+      };
+    case SET_STATUS_CHANGE_FORM_DISABLE:
+      return {
+        ...state,
+        statusChangeFormDisable: action.payload
       };
     default:
       return state;

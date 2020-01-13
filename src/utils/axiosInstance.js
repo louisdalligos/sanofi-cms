@@ -1,79 +1,68 @@
 import axios from "axios";
-import store from "../stores/store-prod";
-import { logout } from "../redux/actions/auth-actions/authActions";
+// import store from "../stores/store-prod";
+import { connectTheUser } from "../redux/actions/auth-actions/authActions";
 import { API } from "./api";
+import store from "../stores/store-dev";
 import history from "../utils/history";
-
-const cors = true;
-const token = sessionStorage.getItem("access_token");
+// import LocalStorageService from './LocalStorageService';
+// #TOKEN FIXED ON (12:54AM)
 
 const axiosInstance = axios.create({
-    baseURL: API,
-    headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-    }
-});
-
-// cors
-axiosInstance.interceptors.request.use(function(config) {
-    if (cors) {
-        if (
-            config.method === "OPTION" ||
-            typeof config.headers["X-CSRF-TOKEN"] === "undefined"
-        ) {
-            delete config.headers["X-CSRF-TOKEN"];
-            delete config.headers["X-Requested-With"];
-            delete config.headers.common["X-CSRF-TOKEN"];
-            delete config.headers.common["X-Requested-With"];
-        }
-    }
-    return config;
+  baseURL: API,
+  headers: {
+    Accept: "application/json",
+    ContentType: "application/json"
+  }
 });
 
 axiosInstance.interceptors.request.use(
-    function(config) {
-        // Do something before request is sent
-        return config;
-    },
-    function(error) {
-        // Do something with request error
-        return Promise.reject(error);
+  config => {
+    const token = sessionStorage.getItem("access_token");
+    if (token) {
+      config.headers["Authorization"] = "Bearer " + token;
     }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
 );
 
-// Add a response interceptor
 axiosInstance.interceptors.response.use(
-    function(response) {
-        // Do something with response data
-        return response;
-    },
-    function(error) {
-        switch (error.response.status) {
-            case 401:
-                // unauthorized -> token is invalid or expired
-                // User must reconnect!
-                store.dispatch(logout());
-                history.push("/login");
-                break;
-            // case 200:
-            //     message.success("Success");
-            // case 422:
-            //     message.error("There was an error in processing your request");
-            //     break;
-            // case 405:
-            //     message.error("There was an error in processing your request");
-            // case 500:
-            //     store.dispatch(logout());
-            //     history.push("/login");
+  response => {
+    return response;
+  },
+  error => {
+    const request = error.config;
 
-            default:
-                break;
-        }
-        // Do something with response error
-        return Promise.reject(error);
+    if (
+      error.response.status === 401 &&
+      !request._oldTokenRefresh &&
+      request.url !== `${API}/login`
+    ) {
+      request._oldTokenRefresh = true;
+      const refreshToken = error.response.headers["access-token"];
+      sessionStorage.setItem("access_token", refreshToken);
+      const token = sessionStorage.getItem("access_token", refreshToken);
+      // reconfigure Tokens
+      axiosInstance.defaults.headers.common["Authorization"] =
+        "Bearer " + token;
+      // update store
+      store.dispatch(connectTheUser(token));
+      return axiosInstance(request);
     }
+
+    /* Working in Progress(testing)
+    } else if( error.response.status === 429 && !request._restTooManyAttempts ){
+        request._restTooManyAttempts = true;
+        let delay = setTimeout(() => {
+            clearTimeout(delay);
+            return axiosInstance(request);
+        }, 1500);
+    }*/
+
+    return Promise.reject(error);
+  }
 );
 
 export default axiosInstance;

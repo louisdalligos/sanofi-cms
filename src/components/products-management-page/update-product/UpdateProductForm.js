@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Formik, Field, Form, withFormik } from "formik";
@@ -12,7 +12,11 @@ import {
   fetchCurrentProduct,
   updateProduct,
   changeProductStatus,
-  fetchCurrentProductArticlesByCategoryId
+  fetchCurrentProductArticlesByCategoryId,
+  addProductImages,
+  removeProductImageById,
+  setServerSideLoader,
+  setStatusChangeFormDisable
 } from "../../../redux/actions/product-management-actions/productManagementActions";
 import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
 
@@ -21,11 +25,10 @@ import TextFormField from "../../smart-form/TextFormField";
 import SelectFormField from "../../smart-form/SelectFormField";
 import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
-import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 import TextEditorFormField from "../../smart-form/TextEditorFormField";
 
 // Other components
-import ImageUploader from "./ImageUploader";
+// import ImageUploader from "./ImageUploader";
 
 import OtherReferencesComponent from "../tabs/OtherReferences/OtherReferencesComponent";
 import PrescriptionInfoComponent from "../tabs/PrescriptionInfo/PrescriptionInfoComponent";
@@ -33,42 +36,30 @@ import ClinicalTrialsComponent from "../tabs/ClinicalTrials/ClinicalTrialsCompon
 
 import { sampleZincFormat } from "../../../utils/constant";
 
+// TODO: Refactor
+import { Upload } from "antd";
+import TextAreaFormField from "../../smart-form/TextAreaFormField";
+
 // validation schema
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
   specializations: Yup.string().required("This field is required"),
   short_description: Yup.string()
-    .min(1, "Short description is too short")
-    .max(150, "Short description is too long")
+    .max(1000, "Maximum of 1000 characters allowed only")
     .required("This field is required"),
   product_name: Yup.string()
-    .min(1, "Product name is too short")
-    .max(60, "Product name is too long")
+    .max(100, "Maximum of 100 characters allowed only")
     .required("This field is required"),
-  //zinc_code: Yup.string().required("This field is required"),
+  zinc_code: Yup.string()
+    .required("This field is required")
+    .max(150, "Maximum of 150 characters allowed only"),
   page_title: Yup.string()
-    .min(1, "Page title is too short")
-    .max(60, "Page title is too long")
+    .max(60, "Maximum of 60 characters allowed only")
     .required("This field is required"),
   meta_description: Yup.string()
-    .max(150, "Meta description is too long")
+    .max(150, "Maximum of 150 characters allowed only")
     .required("This field is required"),
-  body: Yup.string().required("This field is required"),
-  zinc_code1: Yup.string()
-    .required("Required field")
-    .matches(
-      /[A-Z]{4}.[A-Z]{3}.[0-9]{2}.[0-9]{2}.[0-9]{4}/,
-      "Please complete the code"
-    ),
-  zinc_code2: Yup.string()
-    .required("Required field")
-    .matches(/[Version][ ][0-9]{1}.[0-9]{1}/, "Please complete version"),
-  zinc_code3: Yup.string()
-    .required("Required field")
-    .matches(
-      /[0-9]{2}[ ][A-Z]{1}[a-z]{1}[a-z]{1}[ ][0-9]{4}/,
-      "Please complete the date"
-    )
+  body: Yup.string().required("This field is required")
 });
 
 const { TabPane } = Tabs;
@@ -80,6 +71,14 @@ const UpdateProductForm = ({
   currentProduct,
   changeProductStatus,
   auth,
+  addProductImages,
+  removeProductImageById,
+  setServerSideLoader,
+  history,
+  isFormDirty,
+  loading,
+  statusChangeFormDisable,
+  setStatusChangeFormDisable,
   ...props
 }) => {
   // product Id
@@ -87,20 +86,21 @@ const UpdateProductForm = ({
     props.match.params.id
   );
 
-  const [loading, setLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(true);
-
   // Fetch data state
   const [statusOptions, setStatusOptions] = useState([
-    { id: "unpublished", name: "unpublished" },
-    { id: "published", name: "published" },
-    { id: "archived", name: "archived" }
+    { id: "unpublished", name: "Unpublished" },
+    { id: "published", name: "Published" },
+    { id: "archived", name: "Archived" }
   ]);
 
   const [defaultList, setDefaultList] = useState([]); // image list shape per antd docu
+  // TODO: tabControls
+  const [curTabKey, setCurTabKey] = useState(1);
+  // TODO: Upload images
+  const [productImages, setProductImages] = useState([]);
+  const [imageError, setImageError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
     fetchCurrentProduct(currentProductId);
 
     return () => {
@@ -120,19 +120,31 @@ const UpdateProductForm = ({
       };
 
       props.getData(
-        currentProduct.specializations === "0" ? shapeData : currentProduct
-      ); // pass our data to parent for it to set the initial values of formik
+        +currentProduct.specializations === 0 ? shapeData : currentProduct
+      );
 
-      if (currentProduct.product_images) {
-        const modifiedData = currentProduct.product_images.map(item => {
-          item.uid = item.id;
-          item.status = "done";
-          item.name = item.filename;
-          return item;
-        });
-        setDefaultList(modifiedData);
+      try {
+        if (
+          currentProduct.product_images &&
+          currentProduct.product_images.length
+        ) {
+          const formatted = currentProduct.product_images.map(image => {
+            if (!(image instanceof Blob)) {
+              image.uid = image.id;
+              image.name = image.filename;
+            }
+            return image;
+          });
+          // set state
+          setProductImages(formatted);
+          // set props
+          addProductImages({
+            productImages: formatted
+          });
+        }
+      } catch (error) {
+        throw Error("Blob not supported in your device.");
       }
-      setLoading(false);
     }
 
     return () => {
@@ -143,27 +155,10 @@ const UpdateProductForm = ({
 
   useEffect(() => {
     switch (notifs.id) {
-      case "CHANGE_PRODUCT_STATUS_SUCCESS":
-        setLoading(false);
-        setIsDisabled(true);
-        message.success(
-          notifs.notifications
-            ? notifs.notifications.success
-            : "Product successfully publised"
-        );
-        break;
-      case "CHANGE_PRODUCT_STATUS_FAILED":
-        setLoading(false);
-        message.error(
-          notifs.notifications
-            ? notifs.notifications.error
-            : "There was an error on processing your request"
-        );
-        break;
       case "UPDATE_PRODUCT_SUCCESS":
         message.success(notifs.notifications.success);
+        history.push("/products");
         fetchCurrentProduct(currentProduct.id);
-        setLoading(false);
         break;
       case "UPDATE_PRODUCT_FAILED":
         clearNotifications();
@@ -172,18 +167,14 @@ const UpdateProductForm = ({
             ? notifs.notifications
             : "There was an error on processing your request"
         );
-        setLoading(false);
         break;
       default:
         return;
     }
-
-    setIsDisabled(true);
     //eslint-disable-next-line
   }, [notifs.id, notifs.notifications]);
 
   const saveStatus = val => {
-    setLoading(true);
     const id = currentProduct.id;
     const values = {
       status: val
@@ -192,11 +183,118 @@ const UpdateProductForm = ({
   };
 
   const callback = key => {
-    console.log(key);
+    let newValue = key;
+    switch (+key) {
+      case 1:
+        newValue = key + "_" + "main";
+        break;
+      case 2:
+        newValue = key + "_" + "prescribing";
+        break;
+      case 3:
+        newValue = key + "_" + "clinical";
+        break;
+      case 4:
+        newValue = key + "_" + "other";
+        break;
+      default:
+        break;
+    }
+    setCurTabKey(newValue);
+  };
+
+  const removeUploadedImg = removed => {
+    /* removed */
+    let images = [];
+    let blobOnly = [];
+    let objOnly = [];
+    let imageUid = null;
+
+    try {
+      productImages.forEach(image => {
+        if (image instanceof Blob) blobOnly.push(image);
+        else objOnly.push(image);
+      });
+      // deleted by Blob
+      if (removed instanceof Blob) {
+        blobOnly.forEach((image, idx) => {
+          if (image.uid === removed.uid) {
+            imageUid = removed.uid;
+            blobOnly.splice(idx, 1);
+          }
+        });
+        images = objOnly.concat(blobOnly);
+        // deleted by object
+      } else {
+        objOnly.forEach((image, idx) => {
+          if (image.uid === removed.uid) {
+            imageUid = removed.uid;
+            objOnly.splice(idx, 1);
+          }
+        });
+        images = objOnly.concat(blobOnly);
+        // only when uploaded already.
+        setServerSideLoader(true);
+        removeProductImageById(imageUid);
+      }
+      setImageError(null);
+      setProductImages(images);
+      // [3] sabit lang sa props
+      addProductImages({ productImages: images });
+    } catch (error) {
+      throw Error("Blob not supported in your device.");
+    }
+  };
+
+  const addUploadImg = (file, fileList, event) => {
+    const { type, size } = file;
+    const images = productImages.map(image => image);
+    //
+    if (size / 1000 / 1000 > 24) {
+      return setImageError(
+        "Invalid attachment, image should not more than 25mb."
+      );
+    } else {
+      setImageError(null);
+    }
+    //
+    if (
+      type.indexOf("png") !== -1 ||
+      type.indexOf("jpeg") !== -1 ||
+      type.indexOf("jpg") !== -1
+    ) {
+      images.push(file);
+      setProductImages(images);
+      // [2] sabit lang sa props
+      addProductImages({
+        productImages: images
+      });
+      setImageError(null);
+    } else {
+      setImageError("Invalid attachment, only (png,jpeg) format is allowed.");
+    }
+  };
+
+  const bulkRemoveUploadedImg = () => {
+    try {
+      productImages.forEach((image, idx) => {
+        if (!(image instanceof Blob)) {
+          // every time it delete one by one
+          setServerSideLoader(true);
+          removeProductImageById(image.uid);
+        }
+        if (idx === productImages.length - 1) {
+          setProductImages([]);
+          addProductImages({ productImages: [] });
+        }
+      });
+    } catch (error) {
+      throw Error("Blob not supported in your device.");
+    }
   };
 
   return (
-    <Spin spinning={loading}>
+    <Spin spinning={props.serverSideLoader}>
       <Row gutter={24} className="change-status-row">
         <Col>
           <Formik
@@ -204,6 +302,8 @@ const UpdateProductForm = ({
             initialValues={{
               status: props.values.status
             }}
+            validateOnChange={false}
+            validateOnBlur={false}
           >
             {props => (
               <Form>
@@ -212,11 +312,11 @@ const UpdateProductForm = ({
                   options={statusOptions}
                   name="status"
                   onChange={props.setFieldValue}
-                  disabled={isDisabled}
+                  disabled={statusChangeFormDisable}
                   style={{ width: 200 }}
                 />
 
-                {!isDisabled ? (
+                {!statusChangeFormDisable ? (
                   <div className="set-status-form-control">
                     <Button
                       type="primary"
@@ -228,7 +328,7 @@ const UpdateProductForm = ({
                     </Button>
                     <Button
                       onClick={() => {
-                        setIsDisabled(true);
+                        setStatusChangeFormDisable(true);
                         props.values.status = currentProduct.status;
                       }}
                     >
@@ -237,7 +337,10 @@ const UpdateProductForm = ({
                   </div>
                 ) : (
                   <div className="set-status-form-control">
-                    <Button type="primary" onClick={() => setIsDisabled(false)}>
+                    <Button
+                      type="primary"
+                      onClick={() => setStatusChangeFormDisable(false)}
+                    >
                       Change
                     </Button>
                   </div>
@@ -250,7 +353,18 @@ const UpdateProductForm = ({
 
       <Tabs onChange={callback} type="card" style={{ marginTop: 30 }}>
         <TabPane tab="Main Product Info" key="1">
-          <form className="product-form" onSubmit={props.handleSubmit}>
+          <form
+            className="product-form"
+            onSubmit={evt => {
+              evt.preventDefault();
+              if (props.productImages.length < 3) {
+                setImageError("You must upload a minimum of 3 images.");
+              } else {
+                setImageError(null);
+                props.handleSubmit.bind(props.handleSubmit)();
+              }
+            }}
+          >
             <Row gutter={24} className="form-section">
               <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
               <Col xs={24} md={8}>
@@ -266,33 +380,47 @@ const UpdateProductForm = ({
                   label="Other tags"
                   name="other_tags"
                   onChange={props.setFieldValue}
+                  requiredlabel="true"
                 />
               </Col>
               <Col xs={24} md={7}>
                 <SelectTagsFormField
+                  rawSpecialization={
+                    (currentProduct && currentProduct.specializations) || null
+                  }
                   options={props.specializations}
                   label="Specializations"
+                  requiredlabel="true"
                   name="specializations"
                   onChange={props.setFieldValue}
                   placeholder="Please select a specialization"
                   allSelected={props.values.tag_all}
+                  values={props.values.specializations}
                   onEditMode={true}
                 />
               </Col>
               <Col xs={24} md={9}>
-                <TextFormField
-                  name="short_description"
-                  type="text"
-                  label="Short Description"
-                  requiredlabel="true"
-                  placeholder="Enter a short description"
-                />
-                <TextFormField
+                <TextAreaFormField
                   name="product_name"
                   type="text"
                   label="Product Name"
                   requiredlabel="true"
                   placeholder="Enter a product name"
+                  values={props.values.product_name}
+                  onChange={props.setFieldValue}
+                  maxCountAllowed={100}
+                  rows={1}
+                />
+                <TextAreaFormField
+                  name="short_description"
+                  type="text"
+                  label="Product Description"
+                  requiredlabel="true"
+                  placeholder="Enter a product description"
+                  values={props.values.short_description}
+                  onChange={props.setFieldValue}
+                  maxCountAllowed={1000}
+                  rows={4}
                 />
 
                 <label
@@ -300,35 +428,20 @@ const UpdateProductForm = ({
                     display: "block",
                     margin: "15px 0"
                   }}
+                  className="ant-form-item-required"
                 >
-                  <span>Zinc Code </span>{" "}
+                  <span>Zinc Code </span>
                   <Tooltip placement="top" title={sampleZincFormat}>
                     <Icon type="info-circle" style={{ color: "#1890ff" }} />
                   </Tooltip>
                 </label>
-                <ZincCodeFormField
-                  className="zinc-code-field1"
-                  name="zinc_code1"
+                <TextFormField
+                  name="zinc_code"
                   type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="AAAA.AAA.11.11.1111"
                   size="small"
-                />
-                <ZincCodeFormField
-                  className="zinc-code-field2"
-                  name="zinc_code2"
-                  type="text"
+                  placeholder="Enter the zinc code"
                   onChange={props.setFieldValue}
-                  maskValidation="Version 1.1"
-                  size="small"
-                />
-                <ZincCodeFormField
-                  className="zinc-code-field3"
-                  name="zinc_code3"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="11 A** 1111"
-                  size="small"
+                  maxCountAllowed={150}
                 />
               </Col>
             </Row>
@@ -342,13 +455,20 @@ const UpdateProductForm = ({
                   label="Page Title"
                   requiredlabel="true"
                   placeholder="Enter a page title"
+                  values={props.values.page_title}
+                  onChange={props.setFieldValue}
+                  maxCountAllowed={60}
                 />
-                <TextFormField
+                <TextAreaFormField
                   name="meta_description"
                   type="text"
                   label="Meta Description"
                   requiredlabel="true"
                   placeholder="Enter a meta description"
+                  values={props.values.meta_description}
+                  onChange={props.setFieldValue}
+                  maxCountAllowed={150}
+                  rows={4}
                 />
               </Col>
 
@@ -358,12 +478,16 @@ const UpdateProductForm = ({
                   type="text"
                   label="Page Slug(Optional - system will generate if empty"
                   placeholder="Enter a page slug"
+                  values={props.values.slug}
+                  onChange={props.setFieldValue}
                 />
                 <TextFormField
                   name="meta_keywords"
                   type="text"
                   label="Meta Keywords(Optional)"
                   placeholder="Enter meta keywords"
+                  values={props.values.meta_keywords}
+                  onChange={props.setFieldValue}
                 />
               </Col>
             </Row>
@@ -374,11 +498,58 @@ const UpdateProductForm = ({
                 <h3 className="ant-form-item-required">
                   Gallery Images <small>(required)</small>
                 </h3>
-                <ImageUploader data={defaultList} />
+
+                <Fragment>
+                  <Upload
+                    customRequest={() => {}}
+                    accept="image/*"
+                    fileList={productImages}
+                    beforeUpload={addUploadImg}
+                    onRemove={removeUploadedImg}
+                  >
+                    <Button disabled={productImages.length >= 5}>
+                      <Icon type="upload" />
+                      <span>Select File</span>
+                    </Button>
+                  </Upload>
+                  <div
+                    className={
+                      "ant-form-item-control " + (imageError ? "has-error" : "")
+                    }
+                  >
+                    {imageError && (
+                      <div className="ant-form-explain">{imageError}</div>
+                    )}
+                  </div>
+
+                  <br />
+                  <br />
+
+                  <ul className="image-details">
+                    <li>You can only upload png/jpeg format</li>
+                    <li>Minimum of 3 and a maximum of 5 attachments</li>
+                    <li>Maximum file size of 25mb</li>
+                  </ul>
+
+                  <br />
+
+                  <p style={{ textAlign: "right" }}>
+                    <a
+                      href="javascript:void(0);"
+                      type="default"
+                      type="danger"
+                      disabled={productImages.length < 3}
+                      onClick={bulkRemoveUploadedImg}
+                    >
+                      Clear Images
+                    </a>
+                  </p>
+                </Fragment>
               </Col>
               <Col xs={24} md={16}>
-                <h3>Product Description</h3>
-                <TextEditorFormField
+                <h3 className="ant-form-item-required">Product Description</h3>
+                <Field
+                  as={TextEditorFormField}
                   name="body"
                   values={props.values.body}
                   onChange={props.setFieldValue}
@@ -386,29 +557,40 @@ const UpdateProductForm = ({
               </Col>
             </Row>
 
-            {/* <Row>
-                            <DisplayFormikState {...props.values} />
-                        </Row> */}
-
             <div className="form-actions">
-              <Button style={{ marginRight: 10 }}>
+              <Button
+                disabled={props.serverSideLoader}
+                style={{ marginRight: 10 }}
+              >
                 <Link to="/products">Cancel</Link>
               </Button>
-              <Button htmlType="submit" type="primary">
+
+              <Button
+                htmlType="submit"
+                loading={props.serverSideLoader}
+                type="primary"
+                onClick={() => {
+                  // alert(1);
+                }}
+              >
                 Save
               </Button>
             </div>
 
             <RouteLeavingGuard
-              when={props.dirty}
+              when={isFormDirty}
               navigate={path => props.history.push(path)}
-              shouldBlockNavigation={location => (props.dirty ? true : false)}
+              shouldBlockNavigation={location => (isFormDirty ? true : false)}
             />
           </form>
         </TabPane>
 
-        <TabPane tab="Prescription Info" key="2">
-          <PrescriptionInfoComponent auth={auth} id={currentProductId} />
+        <TabPane tab="Prescribing Information" key="2">
+          <PrescriptionInfoComponent
+            auth={auth}
+            tabKey={curTabKey}
+            id={currentProductId}
+          />
         </TabPane>
 
         <TabPane
@@ -417,8 +599,8 @@ const UpdateProductForm = ({
           // disabled={isClinalTrialsTabDisabled}
         >
           <ClinicalTrialsComponent
-            categoryId={35}
             auth={auth}
+            tabKey={curTabKey}
             id={currentProductId}
           />
         </TabPane>
@@ -428,7 +610,11 @@ const UpdateProductForm = ({
           key="4"
           // disabled={isOtherReferencesDisabled}
         >
-          <OtherReferencesComponent auth={auth} id={currentProductId} />
+          <OtherReferencesComponent
+            auth={auth}
+            tabKey={curTabKey}
+            id={currentProductId}
+          />
         </TabPane>
       </Tabs>
     </Spin>
@@ -439,9 +625,8 @@ const formikEnhancer = withFormik({
   mapPropsToValues: props => props.data,
   validationSchema: schema,
   enableReinitialize: true,
-  handleSubmit: (values, { props, setSubmitting, resetForm }) => {
+  handleSubmit: (values, { props }) => {
     let formData = new FormData();
-
     formData.append("product_info[category_id]", values.category_id);
     formData.append("product_info[other_tags]", values.other_tags);
     formData.append(
@@ -453,10 +638,7 @@ const formikEnhancer = withFormik({
       "product_info[short_description]",
       values.short_description
     );
-    formData.append(
-      "product_info[zinc_code]",
-      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
-    );
+    formData.append("product_info[zinc_code]", values.zinc_code);
     formData.append("product_info[page_title]", values.page_title);
     formData.append("product_info[meta_description]", values.meta_description);
     formData.append(
@@ -468,15 +650,18 @@ const formikEnhancer = withFormik({
     formData.append("product_info[category_id]", values.category_id);
     formData.append("_method", "PUT");
 
-    //if theres an uploaded image include these field on our form data
-    if (values.image_gallery) {
-      for (let i = 0; i < values.image_gallery.length; i++) {
-        if (values.image_gallery[i] instanceof Blob)
-          formData.append("image_gallery[]", values.image_gallery[i]);
-      }
+    try {
+      props.productImages.forEach(image => {
+        if (image instanceof Blob) formData.append("image_gallery[]", image);
+      });
+    } catch (error) {
+      throw Error("Blob not supported in your device.");
     }
 
-    props.updateProduct(props.currentProduct.id, formData);
+    // [save]
+    props.setServerSideLoader(true);
+
+    props.updateProduct(props.currentProduct.id, props.history, formData);
   },
   displayName: "UpdateProductForm"
 })(UpdateProductForm);
@@ -486,13 +671,31 @@ const mapStateToProps = state => {
     auth: state.authReducer,
     notifs: state.notificationReducer,
     currentProduct: state.productManagementReducer.currentProduct,
-    postManagement: state.postManagementReducer
+    postManagement: state.postManagementReducer,
+    isFormDirty: state.postManagementReducer.isFormDirty,
+    // TODO: Refactor
+    productImages: state.productManagementReducer.productImages,
+    serverSideLoader: state.productManagementReducer.serverSideLoader,
+    loading: state.productManagementReducer.requestInProgress,
+    statusChangeFormDisable:
+      state.productManagementReducer.statusChangeFormDisable
   };
+};
+
+const mapDispatchToProps = {
+  updateProduct,
+  fetchCurrentProduct,
+  changeProductStatus,
+  // TODO: Refactor
+  addProductImages,
+  removeProductImageById,
+  setServerSideLoader,
+  setStatusChangeFormDisable
 };
 
 const UpdateProductFormWrapper = connect(
   mapStateToProps,
-  { updateProduct, fetchCurrentProduct, changeProductStatus }
+  mapDispatchToProps
 )(formikEnhancer);
 
 export default UpdateProductFormWrapper;

@@ -24,9 +24,9 @@ const CreateArticlePage = ({ history, ...props }) => {
     featured: "",
     masthead: "",
     thumbnail: "",
-    zinc_code1: "",
-    zinc_code2: "",
-    zinc_code3: "",
+    // zinc_code1: "",
+    // zinc_code2: "",
+    // zinc_code3: "",
     tag_all: ""
   });
 

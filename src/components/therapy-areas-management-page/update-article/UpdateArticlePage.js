@@ -1,14 +1,29 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { PageHeader, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
-
+import { bindActionCreators } from "redux";
 import UpdateArticleFormWrapper from "./UpdateArticleForm";
+
+import {
+  fetchCategories,
+  fetchSpecializations,
+  fetchSubCategories
+} from "../../../redux/actions/post-management-actions/postManagementActions";
 
 const pageTitle = "Update article";
 
 // Component
-const UpdateArticlePage = ({ match, auth, postManagement, ...props }) => {
+const UpdateArticlePage = ({
+  match,
+  auth,
+  postManagement,
+  fetchCategories,
+  fetchSpecializations,
+  fetchSubCategories,
+  notifs,
+  ...props
+}) => {
   const [data, setData] = useState({
     status: "",
     category_id: "",
@@ -22,9 +37,10 @@ const UpdateArticlePage = ({ match, auth, postManagement, ...props }) => {
     slug: "",
     meta_keywords: "",
     body: "",
-    zinc_code1: "",
-    zinc_code2: "",
-    zinc_code3: "",
+    zinc_code: "",
+    // zinc_code1: "",
+    // zinc_code2: "",
+    // zinc_code3: "",
     featured: "",
     masthead: "",
     thumbnail: "",
@@ -57,9 +73,9 @@ const UpdateArticlePage = ({ match, auth, postManagement, ...props }) => {
       meta_description: data.meta_description,
       meta_keywords: data.meta_keywords,
       zinc_code: data.zinc_code,
-      zinc_code1: str[0].trim(),
-      zinc_code2: str[1].trim(),
-      zinc_code3: str[2].trim(),
+      // zinc_code1: str[0].trim(),
+      // zinc_code2: str[1].trim().replace("Version ", ""),
+      // zinc_code3: str[2].trim(),
       masthead: data.masthead_image,
       featured: data.featured_image,
       thumbnail: data.thumbnail_image,
@@ -68,6 +84,34 @@ const UpdateArticlePage = ({ match, auth, postManagement, ...props }) => {
 
     setData(formatData); // set our formated obj to formik values
   };
+
+  const [specializations, setSpecializations] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchSpecializations();
+    fetchSubCategories();
+    //eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    switch (notifs.id) {
+      case "FETCH_SPECIALIZATIONS_SUCCESS":
+        setSpecializations(postManagement.specializations);
+        break;
+      case "FETCH_SUBCATEGORIES_SUCCESS":
+        setSubCategories(postManagement.subCategories.results);
+        break;
+      case "FETCH_CATEGORIES_SUCCESS":
+        setCategories(postManagement.categories.results);
+        break;
+      default:
+        return;
+    }
+    //eslint-disable-next-line
+  }, [notifs.id, notifs.notifications]);
 
   return (
     <Fragment>
@@ -93,6 +137,9 @@ const UpdateArticlePage = ({ match, auth, postManagement, ...props }) => {
           match={match}
           data={data}
           getData={getData}
+          categories={categories}
+          specializations={specializations}
+          subCategories={subCategories}
         />
       </div>
     </Fragment>
@@ -108,7 +155,18 @@ const mapStateToProps = state => {
   };
 };
 
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators(
+    {
+      fetchCategories: fetchCategories,
+      fetchSpecializations: fetchSpecializations,
+      fetchSubCategories: fetchSubCategories
+    },
+    dispatch
+  );
+};
+
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(UpdateArticlePage);

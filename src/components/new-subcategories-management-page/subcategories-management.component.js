@@ -27,7 +27,7 @@ class SubCategoriesManagementComponent extends Component {
     };
     this.Vars = {
       delay: null,
-      charLimit: 25
+      charLimit: 100
     };
     this.triggerSaveNewCategory = this.triggerSaveNewCategory.bind(this);
     this.triggerSaveSortedCategories = this.triggerSaveSortedCategories.bind(
@@ -155,7 +155,7 @@ class SubCategoriesManagementComponent extends Component {
                   <div className="ant-form-explain">
                     {this.state.editName.length === 0
                       ? "This field is required"
-                      : "Name should be not more than 25 characters."}
+                      : "Name should be not more than 100 characters."}
                   </div>
                 )}
               </div>
@@ -189,7 +189,7 @@ class SubCategoriesManagementComponent extends Component {
                 </Button>
               ) : (
                 <Button type="primary" onClick={this.triggerEditSaveCategory}>
-                  <Icon type={"save"} />
+                  <Icon type={"check"} />
                 </Button>
               )}
             </Fragment>
@@ -235,7 +235,7 @@ class SubCategoriesManagementComponent extends Component {
               <div className="ant-form-explain not-bold">
                 {this.state.category.length === 0
                   ? "This field is required"
-                  : "Name should be not more than 25 characters."}
+                  : "Name should be not more than 100 characters."}
               </div>
             )}
           </div>

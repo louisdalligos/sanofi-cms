@@ -18,8 +18,6 @@ import * as Yup from "yup";
 //import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
-import axios from "axios";
-import { API } from "../../../utils/api";
 import moment from "moment";
 
 // Form elements
@@ -27,13 +25,13 @@ import TextFormField from "../../smart-form/TextFormField";
 import SelectFormField from "../../smart-form/SelectFormField";
 import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
-import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 import DatePickerFormField from "../../smart-form/DatePickerFormField";
 import TextEditorFormField from "../../smart-form/TextEditorFormField";
 import EventTypeField from "../../smart-form/EventTypeField";
+import TextAreaFormField from "../../smart-form/TextAreaFormField";
 
 // Other components
-import ImageUploader from "./ImageUploader";
+import ImageUploader from "../../smart-components/ImageUploader";
 import EventHighlightsFormWrapper from "./EventHighlightsForm";
 
 // utils
@@ -43,43 +41,36 @@ import { sampleZincFormat } from "../../../utils/constant";
 import {
   fetchCurrentEvent,
   changeEventStatus,
-  featureEvent
+  featureEvent,
+  updateEvent,
+  setStatusChangeFormDisable
 } from "../../../redux/actions/cme-actions/cmeActions";
 
 // validation schema
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
   event_name: Yup.string()
-    .required("This field is required")
-    .max(60, "Event name is too long"),
+    .max(100, "Maximum of 100 characters allowed only")
+    .required("This field is required"),
   event_description: Yup.string()
+    .max(1000, "Maximum of 1000 characters allowed only")
+    .required("This field is required"),
+  zinc_code: Yup.string()
     .required("This field is required")
-    .max(150, "Event description is too long"),
+    .max(150, "Maximum of 150 characters allowed only"),
   event_date: Yup.string().required("This field is required"),
   event_type: Yup.string().required("This field is required"),
   event_location: Yup.string().required("This field is required"),
   specializations: Yup.string().required("This field is required"),
   other_tags: Yup.string().required("This field is required"),
   page_title: Yup.string()
-    .required("This field is required")
-    .max(60, "Page title is too long"),
-  meta_description: Yup.string().required("This field is required"),
+    .max(60, "Maximum of 60 characters allowed only")
+    .required("This field is required"),
+  meta_description: Yup.string()
+    .max(150, "Maximum of 150 characters allowed only")
+    .required("This field is required"),
   event_body: Yup.string().required("This field is required"),
-  zinc_code1: Yup.string()
-    .required("Required field")
-    .matches(
-      /[A-Z]{4}.[A-Z]{3}.[0-9]{2}.[0-9]{2}.[0-9]{4}/,
-      "Please complete the code"
-    ),
-  zinc_code2: Yup.string()
-    .required("Required field")
-    .matches(/[Version][ ][0-9]{1}.[0-9]{1}/, "Please complete version"),
-  zinc_code3: Yup.string()
-    .required("Required field")
-    .matches(
-      /[0-9]{2}[ ][A-Z]{1}[a-z]{1}[a-z]{1}[ ][0-9]{4}/,
-      "Please complete the date"
-    )
+  featured: Yup.string().required("This field is required")
 });
 
 const { TabPane } = Tabs;
@@ -90,6 +81,12 @@ const UpdateCMEForm = ({
   fetchCurrentEvent,
   featureEvent,
   notifs,
+  history,
+  updateEvent,
+  isFormDirty,
+  loading,
+  statusChangeFormDisable,
+  setStatusChangeFormDisable,
   ...props
 }) => {
   // Event Id
@@ -103,20 +100,15 @@ const UpdateCMEForm = ({
 
   const [currentEventSelection, setCurrentEventSelection] = useState(null);
 
-  // loading state
-  const [loading, setLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(true);
-
   const [thumbnailImageInfo, setthumbnailImageInfo] = useState("");
   const [featuredImageInfo, setfeaturedImageInfo] = useState("");
   const [statusOptions, setStatusOptions] = useState([
-    { id: "unpublished", name: "unpublished" },
-    { id: "published", name: "published" },
-    { id: "archived", name: "archived" }
+    { id: "unpublished", name: "Unpublished" },
+    { id: "published", name: "Published" },
+    { id: "archived", name: "Archived" }
   ]);
 
   useEffect(() => {
-    setLoading(true);
     fetchCurrentEvent(currentEventId);
 
     return () => {
@@ -137,8 +129,6 @@ const UpdateCMEForm = ({
       props.getData(
         currentEvent.specializations === "0" ? shapeData : currentEvent
       ); // pass our data to parent for it to set the initial values of formik
-
-      setLoading(false);
     }
 
     return () => {
@@ -147,47 +137,6 @@ const UpdateCMEForm = ({
     //eslint-disable-next-line
   }, [currentEvent]);
 
-  // Notifications listener
-  useEffect(() => {
-    switch (notifs.id) {
-      case "FEATURE_EVENT_FAILED":
-        message.error(
-          notifs.notifications
-            ? notifs.notifications
-            : "There was an error on processing your request"
-        );
-        break;
-      case "FETCH_CURRENT_EVENT_FAILED":
-        setLoading(false);
-        message.error(
-          notifs.notifications
-            ? notifs.notifications.error
-            : "There was an error on processing your request"
-        );
-        break;
-      case "CHANGE_EVENT_STATUS_SUCCESS":
-        setLoading(false);
-        setIsDisabled(true);
-        message.success(
-          notifs.notifications
-            ? notifs.notifications.success
-            : "Success in changing event status"
-        );
-        break;
-      case "CHANGE_EVENT_STATUS_FAILED":
-        setLoading(false);
-        message.error(
-          notifs.notifications
-            ? notifs.notifications.error
-            : "There was an error on processing your request"
-        );
-        break;
-      default:
-        return;
-    }
-    //eslint-disable-next-line
-  }, [notifs.id, notifs.notifications]);
-
   // Tabs callback on change
   const callback = key => {
     console.log(key);
@@ -195,7 +144,6 @@ const UpdateCMEForm = ({
 
   // Save action changing of status
   const saveStatus = val => {
-    setLoading(true);
     const id = currentEvent.id;
 
     const values = {
@@ -207,12 +155,12 @@ const UpdateCMEForm = ({
   };
 
   function disabledDate(current) {
-    return current && current < moment().endOf("day");
+    return current && current < moment().startOf("day");
   }
 
   function disabledFutureDate(current) {
     // Can not select days before today and today
-    return current && current > moment().endOf("day");
+    return current && current > moment().startOf("day");
   }
 
   // Handle event type change
@@ -242,11 +190,11 @@ const UpdateCMEForm = ({
                   options={statusOptions}
                   name="status"
                   onChange={props.setFieldValue}
-                  disabled={isDisabled}
+                  disabled={statusChangeFormDisable}
                   style={{ width: 200 }}
                 />
 
-                {!isDisabled ? (
+                {!statusChangeFormDisable ? (
                   <div className="set-status-form-control">
                     <Button
                       type="primary"
@@ -258,7 +206,7 @@ const UpdateCMEForm = ({
                     </Button>
                     <Button
                       onClick={() => {
-                        setIsDisabled(true);
+                        setStatusChangeFormDisable(true);
                         props.values.status = currentEvent.status;
                       }}
                     >
@@ -267,7 +215,10 @@ const UpdateCMEForm = ({
                   </div>
                 ) : (
                   <div className="set-status-form-control">
-                    <Button type="primary" onClick={() => setIsDisabled(false)}>
+                    <Button
+                      type="primary"
+                      onClick={() => setStatusChangeFormDisable(false)}
+                    >
                       Change
                     </Button>
                   </div>
@@ -295,7 +246,7 @@ const UpdateCMEForm = ({
         </Col> */}
       </Row>
       <Tabs onChange={callback} type="card" style={{ marginTop: 30 }}>
-        <TabPane tab="Main Product Info" key="1">
+        <TabPane tab="Main Event Info" key="1">
           <form className="therapy-article-form" onSubmit={props.handleSubmit}>
             <Row gutter={24} className="form-section">
               <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
@@ -336,7 +287,8 @@ const UpdateCMEForm = ({
                   }
                 />
 
-                <TextFormField
+                <Field
+                  as={TextFormField}
                   name="event_location"
                   type="text"
                   values={
@@ -347,11 +299,16 @@ const UpdateCMEForm = ({
                   label="Event Location"
                   requiredlabel="true"
                   placeholder="Enter an event location"
+                  onChange={props.setFieldValue}
+                  maxCountAllowed={100}
                 />
               </Col>
               <Col xs={24} md={7}>
                 <Field
                   as={SelectTagsFormField}
+                  rawSpecialization={
+                    (currentEvent && currentEvent.specializations) || null
+                  }
                   name="specializations"
                   onChange={props.setFieldValue}
                   values={props.values.specializations}
@@ -373,22 +330,28 @@ const UpdateCMEForm = ({
                 />
               </Col>
               <Col xs={24} md={9}>
-                <TextFormField
+                <TextAreaFormField
                   name="event_name"
                   type="text"
                   values={props.values.event_name}
                   label="Event Name"
                   requiredlabel="true"
                   placeholder="Enter an event name"
+                  onChange={props.setFieldValue}
+                  maxCountAllowed={100}
+                  rows={1}
                 />
 
-                <TextFormField
+                <TextAreaFormField
                   name="event_description"
                   type="text"
                   values={props.values.event_description}
                   label="Event Description"
                   requiredlabel="true"
                   placeholder="Enter an event description"
+                  onChange={props.setFieldValue}
+                  maxCountAllowed={1000}
+                  rows={4}
                 />
 
                 <label
@@ -403,29 +366,13 @@ const UpdateCMEForm = ({
                     <Icon type="info-circle" style={{ color: "#1890ff" }} />
                   </Tooltip>
                 </label>
-                <ZincCodeFormField
-                  className="zinc-code-field1"
-                  name="zinc_code1"
+                <TextFormField
+                  name="zinc_code"
                   type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="AAAA.AAA.11.11.1111"
                   size="small"
-                />
-                <ZincCodeFormField
-                  className="zinc-code-field2"
-                  name="zinc_code2"
-                  type="text"
+                  placeholder="Enter the zinc code"
                   onChange={props.setFieldValue}
-                  maskValidation="Version 1.1"
-                  size="small"
-                />
-                <ZincCodeFormField
-                  className="zinc-code-field3"
-                  name="zinc_code3"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="11 A** 1111"
-                  size="small"
+                  maxCountAllowed={150}
                 />
               </Col>
             </Row>
@@ -440,14 +387,19 @@ const UpdateCMEForm = ({
                   requiredlabel="true"
                   placeholder="Enter a page title"
                   values={props.values.page_title}
+                  onChange={props.setFieldValue}
+                  maxCountAllowed={60}
                 />
-                <TextFormField
+                <TextAreaFormField
                   name="meta_description"
                   type="text"
                   label="Meta Description"
                   requiredlabel="true"
                   placeholder="Enter a meta description"
                   values={props.values.meta_description}
+                  onChange={props.setFieldValue}
+                  maxCountAllowed={150}
+                  rows={4}
                 />
               </Col>
 
@@ -458,6 +410,7 @@ const UpdateCMEForm = ({
                   label="Page Slug(Optional - system will generate if empty"
                   placeholder="Enter a page slug"
                   values={props.values.slug}
+                  onChange={props.setFieldValue}
                 />
                 <TextFormField
                   name="meta_keywords"
@@ -465,6 +418,7 @@ const UpdateCMEForm = ({
                   label="Meta Keywords(Optional)"
                   placeholder="Enter meta keywords"
                   values={props.values.meta_keywords}
+                  onChange={props.setFieldValue}
                 />
               </Col>
             </Row>
@@ -475,7 +429,12 @@ const UpdateCMEForm = ({
                 <h3 className="ant-form-item-required">
                   Feature Image <small>(required)</small>
                 </h3>
-                <ImageUploader />
+                <ImageUploader
+                  mastHeadLabel="Featured"
+                  hideImage={true}
+                  isOnEditMode={true}
+                  name="featured"
+                />
               </Col>
               <Col xs={24} md={16}>
                 <h3 className="ant-form-item-required">Event Body</h3>
@@ -501,30 +460,23 @@ const UpdateCMEForm = ({
             </div>
 
             <RouteLeavingGuard
-              when={props.dirty}
-              navigate={path => props.history.push(path)}
-              shouldBlockNavigation={location => (props.dirty ? true : false)}
+              when={isFormDirty}
+              navigate={path => history.push(path)}
+              shouldBlockNavigation={location => (isFormDirty ? true : false)}
             />
           </form>
         </TabPane>
 
-        <TabPane
-          tab="Event Highlights"
-          key="4"
-          disabled={
-            props.values.event_type === "Upcoming" ||
-            props.values.event_type === 0
-              ? true
-              : false
-          }
-        >
-          <Row>
-            <Col>
-              <h3>Event Hightlights</h3>
-              <EventHighlightsFormWrapper auth={props.auth} />
-            </Col>
-          </Row>
-        </TabPane>
+        {props.values.event_type === "Past" || props.values.event_type === 1 ? (
+          <TabPane tab="Event Highlights" key="4">
+            <Row>
+              <Col>
+                <h3>Event Hightlights</h3>
+                <EventHighlightsFormWrapper auth={props.auth} />
+              </Col>
+            </Row>
+          </TabPane>
+        ) : null}
       </Tabs>
     </Spin>
   );
@@ -534,13 +486,24 @@ const formikEnhancer = withFormik({
   mapPropsToValues: props => props.data,
   validationSchema: schema,
   enableReinitialize: true,
+  validateOnChange: false,
+  validateOnBlur: false,
   handleSubmit: (values, { props, setSubmitting, resetForm }) => {
     let formData = new FormData();
 
-    //let eventType = values.event_type === "Upcoming" ? 0 : 1; // format our type
+    // format our event type
+    let eventType;
+
+    if (values.event_type === "Upcoming" || values.event_type === 0) {
+      eventType = 0;
+    }
+
+    if (values.event_type === "Past" || values.event_type === 1) {
+      eventType = 1;
+    }
 
     formData.append("event_name", values.event_name);
-    formData.append("event_type", values.event_type);
+    formData.append("event_type", eventType);
     formData.append("event_date", values.event_date);
     formData.append("event_description", values.event_description);
     formData.append("category_id", values.category_id);
@@ -549,15 +512,13 @@ const formikEnhancer = withFormik({
       "specializations",
       values.tag_all ? 0 : values.specializations
     );
-    formData.append(
-      "zinc_code",
-      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
-    );
+    formData.append("zinc_code", values.zinc_code);
     formData.append("page_title", values.page_title);
     formData.append("meta_description", values.meta_description);
     formData.append("slug", values.slug);
     formData.append("meta_keywords", values.meta_keywords);
     formData.append("event_body", values.event_body);
+    formData.append("event_location", values.event_location);
     formData.append("_method", "PUT");
 
     //if theres an uploaded image include these field on our form data
@@ -565,39 +526,8 @@ const formikEnhancer = withFormik({
       formData.append("featured", values.featured);
       formData.append("thumbnail", values.thumbnail);
     }
-    axios({
-      url: `${API}/cme/update/${values.id}`,
-      method: "post",
-      headers: {
-        "Content-Type": "application/form",
-        Authorization: `Bearer ${props.auth.access_token}`
-      },
-      data: formData
-    })
-      .then(res => {
-        setSubmitting(false);
-        message.success(
-          res.data.success ? res.data.success : "Updated event successfully"
-        );
-        resetForm();
-        fetchCurrentEvent(props.currentEventId);
-        //props.history.push("/cme"); // redirect to table
-      })
-      .catch(err => {
-        setSubmitting(false);
 
-        const errorMsg = err.response.data;
-
-        if (errorMsg.errors) {
-          errorMsg.errors.forEach(element => {
-            message.error(element);
-          });
-        }
-
-        if (errorMsg.error) {
-          message.error(errorMsg.error);
-        }
-      });
+    props.updateEvent(values.id, props.history, formData); // redux action
   },
   displayName: "UpdateCMEForm"
 })(UpdateCMEForm);
@@ -605,7 +535,10 @@ const formikEnhancer = withFormik({
 const mapStateToProps = state => {
   return {
     currentEvent: state.cmeReducer.currentEvent,
-    notifs: state.notificationReducer
+    notifs: state.notificationReducer,
+    isFormDirty: state.cmeReducer.isFormDirty,
+    loading: state.cmeReducer.requestInProgress,
+    statusChangeFormDisable: state.cmeReducer.statusChangeFormDisable
   };
 };
 
@@ -614,7 +547,9 @@ const mapDispatchToProps = dispatch => {
     {
       fetchCurrentEvent: fetchCurrentEvent,
       changeEventStatus: changeEventStatus,
-      featureEvent: featureEvent
+      featureEvent: featureEvent,
+      updateEvent: updateEvent,
+      setStatusChangeFormDisable: setStatusChangeFormDisable
     },
     dispatch
   );

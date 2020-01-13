@@ -11,7 +11,7 @@ import {
   fetchSpecializations
 } from "../../../redux/actions/post-management-actions/postManagementActions";
 
-const pageTitle = "Update CME";
+const pageTitle = "Update Event";
 
 // Component
 const UpdateCMEPage = ({
@@ -39,9 +39,6 @@ const UpdateCMEPage = ({
     slug: "",
     meta_description: "",
     meta_keywords: "",
-    zinc_code1: "",
-    zinc_code2: "",
-    zinc_code3: "",
     zinc_code: "",
     featured: "",
     thumbnail: "",
@@ -49,7 +46,7 @@ const UpdateCMEPage = ({
   });
 
   const getData = data => {
-    const str = data.zinc_code.split("|"); // split our zinc code
+    //const str = data.zinc_code.split("|"); // split our zinc code
     const tags = data.other_tags.split(",");
     const momentDate = moment(data.event_date).format("YYYY/MM/DD");
     const allStatus = data.tag_all ? true : false;
@@ -80,9 +77,6 @@ const UpdateCMEPage = ({
       meta_description: data.meta_description,
       meta_keywords: data.meta_keywords,
       zinc_code: data.zinc_code,
-      zinc_code1: str[0].trim(),
-      zinc_code2: str[1].trim(),
-      zinc_code3: str[2].trim(),
       featured: data.featured_image,
       thumbnail: data.thumbnail_image,
       tag_all: allStatus
@@ -125,7 +119,7 @@ const UpdateCMEPage = ({
               <Breadcrumb.Item key="cme">
                 <Link to="/cme">CME</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item key="cme-create">Update CME</Breadcrumb.Item>
+              <Breadcrumb.Item key="cme-create">Update Event</Breadcrumb.Item>
             </Breadcrumb>
           </div>
         </div>

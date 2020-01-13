@@ -27,6 +27,7 @@ const VideoListTable = ({
       title: "Title",
       dataIndex: "video_title",
       rowKey: "id",
+      width: 350,
       render: (text, record) => (
         <Fragment>
           <img
@@ -34,7 +35,12 @@ const VideoListTable = ({
               record.video_thumbnail_url ? record.video_thumbnail_url : noImage
             }
             alt=""
-            style={{ width: 70, marginRight: 10 }}
+            style={{
+              width: 70,
+              marginRight: 10,
+              display: "block",
+              float: "left"
+            }}
           />
           {record.video_title}
         </Fragment>
@@ -48,18 +54,19 @@ const VideoListTable = ({
     {
       title: "Actions",
       rowKey: "id",
+      width: 200,
       render: (text, record) => (
         <Fragment>
-          <Tooltip placement="right" title="Edit the video">
+          <Tooltip placement="top" title="Edit the video">
             <Button
               type="primary"
               onClick={e => showEditModal(record.id, e)}
               style={{ marginRight: 10 }}
             >
-              <Icon type="edit" /> Edit
+              <Icon type="edit" />
             </Button>
           </Tooltip>
-          <Tooltip placement="right" title="Delete this video?">
+          <Tooltip placement="top" title="Delete this video?">
             <Button
               type="danger"
               onClick={e => showDeleteConfirm(record.id, e)}

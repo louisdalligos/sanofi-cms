@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useField, useFormikContext, Field } from "formik";
 import { Select, Checkbox } from "antd";
 const { Option } = Select;
@@ -9,13 +9,71 @@ const SelectTagsFormField = ({
   options,
   allSelected,
   onEditMode,
+  rawSpecialization,
   ...props
 }) => {
   const [field, meta] = useField(props);
   const { setFieldValue, values } = useFormikContext();
+  const [autoSelect, setAutoSelect] = useState(false);
+  const [selectedOpts, setSelectedOpts] = useState([]);
+  const [viewOnlyOpts, setViewOnlyOpts] = useState([]);
+
+  useEffect(() => {
+    if (options.length !== 0) setViewOnlyOpts(options);
+    if (allSelected === true) {
+      // Hooks
+      setAutoSelect(true);
+      // Formik
+      setFieldValue("tag_all", true);
+    }
+  }, [options, allSelected]);
+
+  useEffect(() => {
+    // alert(JSON.stringify(rawSpecialization));
+
+    if (
+      rawSpecialization &&
+      rawSpecialization === "0" &&
+      options.length !== 0
+    ) {
+      const ids = options.map(option => {
+        return option.id;
+      });
+      // Formik
+      setFieldValue(field.name, ids);
+      // Hooks
+      setSelectedOpts(ids);
+    }
+
+    if (
+      rawSpecialization &&
+      rawSpecialization !== "0" &&
+      options.length !== 0
+    ) {
+      const ids = options.map(option => {
+        return option.id;
+      });
+      let toArray =
+        rawSpecialization.indexOf(",") === -1
+          ? +rawSpecialization
+          : rawSpecialization.split(",");
+      const toNums = !isNaN(toArray) ? toArray : toArray.map(str => +str);
+      // Hooks
+      setSelectedOpts(toNums);
+      setAutoSelect(false);
+      // Formik
+      setFieldValue(field.name, toNums);
+      setFieldValue("tag_all", false);
+    }
+  }, [rawSpecialization, options]);
 
   const handleSelectChange = value => {
-    props.onChange(field.name, value);
+    // Formik
+    setFieldValue("tag_all", false);
+    setFieldValue(field.name, value);
+    // hooks
+    setAutoSelect(false);
+    setSelectedOpts(value);
   };
 
   const handleSelectBlur = value => {
@@ -25,20 +83,27 @@ const SelectTagsFormField = ({
   // on select all settings
   function onChange(e) {
     console.log(`checked = ${e.target.checked}`);
-    console.log(field, meta);
+    // console.log(field, meta);
     if (e.target.checked) {
-      const ids = options.map(option => {
+      const ids = viewOnlyOpts.map(option => {
         return option.id;
       });
 
-      console.log(ids);
-
-      setFieldValue(field.name, ids); // update our formik props
+      // formik
+      setFieldValue(field.name, ids);
       setFieldValue("tag_all", true);
+      // hooks
+      setSelectedOpts(ids);
     } else {
+      // hooks
+      setSelectedOpts([]);
+      // Formik
       setFieldValue(field.name, []);
       setFieldValue("tag_all", false);
     }
+
+    // // hooks
+    setAutoSelect(e.target.checked);
   }
 
   return (
@@ -59,6 +124,8 @@ const SelectTagsFormField = ({
       <Select
         {...field}
         {...props}
+        // update yung select
+        value={selectedOpts}
         mode="multiple"
         placeholder={placeholder}
         onChange={handleSelectChange}
@@ -67,8 +134,8 @@ const SelectTagsFormField = ({
         maxTagCount={5}
         maxTagTextLength={20}
       >
-        {options
-          ? options.map(c => (
+        {viewOnlyOpts.length !== 0
+          ? viewOnlyOpts.map(c => (
               <Option key={c.id} value={c.id} label={c.title}>
                 {c.title}
               </Option>
@@ -85,7 +152,7 @@ const SelectTagsFormField = ({
           as={Checkbox}
           name="tag_all"
           onChange={onChange}
-          checked={allSelected}
+          checked={autoSelect}
         >
           Select all specializations
         </Field>

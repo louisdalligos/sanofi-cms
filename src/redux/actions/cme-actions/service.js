@@ -3,7 +3,7 @@ import axiosInstance from "../../../utils/axiosInstance";
 function createEventRequest(body) {
   return axiosInstance({
     method: "post",
-    url: "/cme",
+    url: "/cme/create",
     data: body
   });
 }
@@ -25,7 +25,7 @@ function fetchCurrentEventRequest(id) {
 
 function updateEventRequest(id, body) {
   return axiosInstance({
-    method: "put",
+    method: "post",
     url: `/cme/update/${id}`,
     data: body
   });
@@ -39,11 +39,18 @@ function createEventHeadingRequest(body) {
   });
 }
 
-function deleteEventHeadingRequest(id, body) {
+function renameEventHeadingRequest(id, body) {
+  return axiosInstance({
+    method: "put",
+    url: `/cme/heading/update/${id}`,
+    data: body
+  });
+}
+
+function deleteEventHeadingRequest(id) {
   return axiosInstance({
     method: "delete",
-    url: `/cme/heading/delete/${id}`,
-    data: body
+    url: `/cme/heading/delete/${id}`
   });
 }
 
@@ -84,6 +91,7 @@ const CMEManagementServices = {
   fetchCurrentEventRequest,
   updateEventRequest,
   createEventHeadingRequest,
+  renameEventHeadingRequest,
   deleteEventHeadingRequest,
   createEventHeadingVideoRequest,
   deleteEventHeadingVideoRequest,

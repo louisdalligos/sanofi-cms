@@ -75,7 +75,7 @@ const Dashboard = ({
     fetchSpecializations();
     fetchCategories();
     fetchSubCategories();
-    console.log(props);
+    console.log(dashboardData);
 
     //setRole(props.role);
     return () => {
@@ -87,8 +87,6 @@ const Dashboard = ({
     if (currentUser) {
       setRole(currentUser.role);
     }
-
-    console.log("Current user from profile page: ", currentUser);
     // eslint-disable-next-line
   }, [currentUser]);
 
@@ -99,7 +97,7 @@ const Dashboard = ({
     setTotalBlockedDoctors(dashboardData.totalBlockedDoctors);
     setTotalActiveAdmins(dashboardData.totalActiveAdmins);
     setTotalBlockedAdmins(dashboardData.totalBlockedAdmins);
-    setTotalArticles(dashboardData.totalArticles);
+    setTotalArticles(dashboardData.totalTherapyArticles);
     setTotalProducts(dashboardData.totalProducts);
     setTotalEvents(dashboardData.totalEvents);
     setTotalCategories(dashboardData.totalCategories);
@@ -176,7 +174,7 @@ const Dashboard = ({
                     dataSource={newDoctors}
                     renderItem={item => (
                       <List.Item>
-                        <List.Item.Meta title={<a href="#">{item.label}</a>} />
+                        <List.Item.Meta title={<span>{item.label}</span>} />
                         {console.log(item.value)}
                         <Badge
                           count={item.value}
@@ -199,9 +197,7 @@ const Dashboard = ({
                       dataSource={totalDoctorsData}
                       renderItem={item => (
                         <List.Item>
-                          <List.Item.Meta
-                            title={<a href="#">{item.label}</a>}
-                          />
+                          <List.Item.Meta title={<span>{item.label}</span>} />
                           <Badge
                             count={item.value}
                             style={{
@@ -226,9 +222,7 @@ const Dashboard = ({
                       dataSource={totalAdminsData}
                       renderItem={item => (
                         <List.Item>
-                          <List.Item.Meta
-                            title={<a href="#">{item.label}</a>}
-                          />
+                          <List.Item.Meta title={<span>{item.label}</span>} />
                           <Badge
                             count={item.value}
                             style={{
@@ -247,7 +241,12 @@ const Dashboard = ({
             </Col>
           ) : null}
 
-          <Col xs={24} md={17}>
+          <Col
+            xs={role !== "editor" || role !== "editor" ? 24 : null}
+            md={role !== "editor" || role !== "editor" ? 17 : null}
+            span={role === "editor" ? 24 : null}
+            //offset={role === "editor" ? 3 : null}
+          >
             <Card title="Quick Links" bordered={false}>
               <Row gutter={24}>
                 <Col md={6}>
@@ -299,10 +298,12 @@ const Dashboard = ({
                   </div>
                 </Col>
                 <Col md={6}>
-                  <div className="dashboard-card-item">
-                    <h3>Other tags</h3>
-                    <span className="data-count">No data</span>
-                  </div>
+                  {/* <div className="dashboard-card-item">
+                                        <h3>Other tags</h3>
+                                        <span className="data-count">
+                                            No data
+                                        </span>
+                                    </div> */}
                 </Col>
               </Row>
             </Card>

@@ -9,11 +9,11 @@ const SelectFormField = ({ label, placeholder, options, ...props }) => {
 
   const handleSelectChange = value => {
     props.onChange(name, value);
-    //console.log(value);
+    console.log(value);
   };
 
   const handleSelectBlur = value => {
-    //console.log(value);
+    console.log(value);
   };
 
   return (

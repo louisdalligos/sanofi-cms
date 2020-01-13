@@ -23,7 +23,8 @@ class ClinicalTrialsComponent extends Component {
       addedItem: null,
       dndList: [],
       prevDndList: [],
-      MANUAL_CHECK_NO_SELECTED: false
+      MANUAL_CHECK_NO_SELECTED: false,
+      tabKeyPrev: null
     };
     this.onSelectItem = this.onSelectItem.bind(this);
     this.handleSaveSelectedArticle = this.handleSaveSelectedArticle.bind(this);
@@ -37,10 +38,21 @@ class ClinicalTrialsComponent extends Component {
 
   // NEW: componentWillReceiveprops()
   static getDerivedStateFromProps(props, state) {
-    if (props.dndList !== state.prevDndList) {
+    if (
+      props.dndList !== state.prevDndList ||
+      props.tabKey !== state.tabKeyPrev
+    ) {
+      // reset selected articles
+      if (props.tabKey.toString().indexOf("clinical") !== -1) {
+        props.setClinicalTrialsArticle("");
+      }
       return {
         prevDndList: props.dndList,
-        dndList: props.dndList
+        dndList: props.dndList,
+        tabKeyPrev: props.tabKey,
+        // resets
+        addedItem: null,
+        MANUAL_CHECK_NO_SELECTED: false
       };
     }
     return null;
@@ -70,11 +82,14 @@ class ClinicalTrialsComponent extends Component {
 
   handleSaveSelectedArticle() {
     if (this.state.addedItem) {
+      // set to global store
       this.props.setClinicalTrialsArticle("");
+      // set to server
       this.props.addItemClinicalTrialsArticle(
         this.state.addedItem,
         this.props.id
       );
+      // set to local state
       this.setState({
         addedItem: null
       });
@@ -83,6 +98,7 @@ class ClinicalTrialsComponent extends Component {
         MANUAL_CHECK_NO_SELECTED: true
       });
     }
+
     this.props.setProductDirty({ dirty: true });
   }
 
@@ -113,6 +129,8 @@ class ClinicalTrialsComponent extends Component {
         {d.page_title}
       </Option>
     ));
+
+    // const options = [];
 
     const renderItems = dndList.map((clinicalTrial, idx) => (
       <div key={idx} data-id={clinicalTrial.sort} className="dnd-table">
@@ -146,9 +164,8 @@ class ClinicalTrialsComponent extends Component {
 
     return (
       <Fragment>
-        <p>
-          <strong>Select Articles</strong>
-        </p>
+        <h3>Select Articles</h3>
+        <br />
 
         <div className="clinical-trials-editor">
           <div className="custom-wrapper">
@@ -170,6 +187,9 @@ class ClinicalTrialsComponent extends Component {
                 );
               }}
               style={{ width: "500px" }}
+              // locale={{ emptyText: "No data found" }}
+              // placeholder="Plese select an article"
+              // optionLabelProp="page_title"
             >
               {options}
             </Select>

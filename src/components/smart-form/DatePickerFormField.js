@@ -22,6 +22,10 @@ const DatePickerFormField = ({ label, disabledDate, disabled, ...props }) => {
     console.log(dateString);
   };
 
+  const handleBlur = e => {
+    console.log(e);
+  };
+
   return (
     <div
       className={
@@ -41,6 +45,7 @@ const DatePickerFormField = ({ label, disabledDate, disabled, ...props }) => {
 
       <DatePicker
         onChange={handleChange}
+        onBluer={handleBlur}
         format={dateFormat}
         value={date !== "" ? moment(`${date}`) : ""}
         disabledDate={disabledDate}

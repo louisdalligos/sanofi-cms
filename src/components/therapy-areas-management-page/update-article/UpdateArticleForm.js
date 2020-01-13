@@ -11,60 +11,47 @@ import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 import {
   updateArticle,
   changeArticleStatus,
-  fetchCurrentArticle
+  fetchCurrentArticle,
+  setStatusChangeFormDisable
 } from "../../../redux/actions/post-management-actions/postManagementActions";
-import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
+
+import { setFormDirty } from "../../../redux/actions/form-actions/formActions";
 
 // Form elements
 import TextFormField from "../../smart-form/TextFormField";
 import SelectFormField from "../../smart-form/SelectFormField";
 import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
-import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
+import TextEditorFormField from "../../smart-form/TextEditorFormField";
+import TextAreaFormField from "../../smart-form/TextAreaFormField";
 
 // Other components
-import ImageUploader from "./ImageUploader";
+import ImageUploader from "../../smart-components/ImageUploader";
 
 import { sampleZincFormat } from "../../../utils/constant";
-import TextEditorFormField from "../../smart-form/TextEditorFormField";
 
 // validation schema
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
   subcategory_id: Yup.string().required("This field is required"),
-  //specializations: Yup.string().required("This field is required"),
+  specializations: Yup.string().required("This field is required"),
   short_details: Yup.string()
-    .min(1, "Short descriptions too short")
-    .max(150, "Short description is too long")
+    .max(1000, "Maximum of 1000 characters allowed only")
     .required("This field is required"),
   headline: Yup.string()
-    .min(1, "Headline is too short")
-    .max(150, "Headline is too long")
+    .max(150, "Maximum of 100 characters allowed only")
     .required("This field is required"),
-  //zinc_code: Yup.string().required("This field is required"),
+  zinc_code: Yup.string()
+    .required("This field is required")
+    .max(150, "Maximum of 150 characters allowed only"),
   page_title: Yup.string()
-    .min(1, "Page title is too short")
-    .max(60, "Page title is too long")
+    .max(60, "Maximum of 60 characters allowed only")
     .required("This field is required"),
   meta_description: Yup.string()
-    .max(150, "Meta description is too long")
+    .max(150, "Maximum of 150 characters allowed only")
     .required("This field is required"),
   body: Yup.string().required("This field is required"),
-  zinc_code1: Yup.string()
-    .required("Required field")
-    .matches(
-      /[A-Z]{4}.[A-Z]{3}.[0-9]{2}.[0-9]{2}.[0-9]{4}/,
-      "Please complete the code"
-    ),
-  zinc_code2: Yup.string()
-    .required("Required field")
-    .matches(/[Version][ ][0-9]{1}.[0-9]{1}/, "Please complete version"),
-  zinc_code3: Yup.string()
-    .required("Required field")
-    .matches(
-      /[0-9]{2}[ ][A-Z]{1}[a-z]{1}[a-z]{1}[ ][0-9]{4}/,
-      "Please complete the date"
-    )
+  featured: Yup.string().required("This field is required")
 });
 
 const UpdateArticleForm = ({
@@ -73,28 +60,35 @@ const UpdateArticleForm = ({
   updateArticle,
   currentArticle,
   changeArticleStatus,
+  isFormDirty,
+  loading,
+  statusChangeFormDisable,
+  setStatusChangeFormDisable,
+  setFormDirty,
   ...props
 }) => {
+  const { resetForm } = props;
+
   // article Id
   const [currentArticleId, setCurrentArticleId] = useState(
     props.match.params.id
   );
-
-  const [loading, setLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(true);
 
   // Fetch data state
   const [specializationOptions, setSpecializationOptions] = useState([]);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [subCategoryOptions, setSubCategoryOptions] = useState([]);
   const [statusOptions, setStatusOptions] = useState([
-    { id: "unpublished", name: "unpublished" },
-    { id: "published", name: "published" },
-    { id: "archived", name: "archived" }
+    { id: "unpublished", name: "Unpublished" },
+    { id: "published", name: "Published" },
+    { id: "archived", name: "Archived" }
   ]);
 
   useEffect(() => {
-    setLoading(true);
+    console.log(isFormDirty, "IS FORM DIRTY?");
+  }, [isFormDirty]);
+
+  useEffect(() => {
     fetchCurrentArticle(currentArticleId);
 
     setSpecializationOptions(
@@ -113,8 +107,12 @@ const UpdateArticleForm = ({
         : []
     );
 
+    // set our form
+    setFormDirty(false);
+
     return () => {
       console.log("unmount -------->");
+      setFormDirty(false);
     };
     //eslint-disable-next-line
   }, []);
@@ -123,7 +121,7 @@ const UpdateArticleForm = ({
     if (currentArticle) {
       const shapeData = {
         ...currentArticle,
-        specializations: props.postManagement.specializations.map(item => {
+        specializations: props.specializations.map(item => {
           return item.id;
         }),
         tag_all: true
@@ -132,7 +130,6 @@ const UpdateArticleForm = ({
       props.getData(
         currentArticle.specializations === "0" ? shapeData : currentArticle
       ); // pass our data to parent for it to set the initial values of formik
-      setLoading(false);
     }
 
     return () => {
@@ -143,30 +140,11 @@ const UpdateArticleForm = ({
 
   useEffect(() => {
     switch (notifs.id) {
-      case "FETCH_CURRENT_ARTICLE_SUCCESS":
-        setLoading(false);
-        break;
-      case "CHANGE_ARTICLE_STATUS_SUCCESS":
-        setLoading(false);
-        message.success(
-          notifs.notifications
-            ? notifs.notifications.success
-            : "Article successfully publised"
-        );
-        break;
-      case "CHANGE_ARTICLE_STATUS_FAILED":
-        setLoading(false);
-        message.error(
-          notifs.notifications
-            ? notifs.notifications.error
-            : "There was an error on processing your request"
-        );
-        break;
-
       case "UPDATE_ARTICLE_SUCCESS":
+        resetForm();
         message.success(notifs.notifications.success);
         fetchCurrentArticle(currentArticle.id);
-        setLoading(false);
+        props.history.push("/therapy-areas");
         break;
       case "UPDATE_ARTICLE_FAILED":
         message.error(
@@ -174,18 +152,14 @@ const UpdateArticleForm = ({
             ? notifs.notifications.message
             : "There was an error on processing your request"
         );
-        setLoading(false);
         break;
       default:
         return;
     }
-
-    setIsDisabled(true);
     //eslint-disable-next-line
   }, [notifs.id, notifs.notifications]);
 
   const saveStatus = val => {
-    setLoading(true);
     const id = currentArticle.id;
     const values = {
       status: val
@@ -202,6 +176,8 @@ const UpdateArticleForm = ({
             initialValues={{
               status: props.values.status
             }}
+            validateOnChange={false}
+            validateOnBlur={false}
           >
             {props => (
               <Form>
@@ -210,11 +186,11 @@ const UpdateArticleForm = ({
                   options={statusOptions}
                   name="status"
                   onChange={props.setFieldValue}
-                  disabled={isDisabled}
+                  disabled={statusChangeFormDisable}
                   style={{ width: 200 }}
                 />
 
-                {!isDisabled ? (
+                {!statusChangeFormDisable ? (
                   <div className="set-status-form-control">
                     <Button
                       type="primary"
@@ -226,7 +202,7 @@ const UpdateArticleForm = ({
                     </Button>
                     <Button
                       onClick={() => {
-                        setIsDisabled(true);
+                        setStatusChangeFormDisable(true);
                         props.values.status = currentArticle.status;
                       }}
                     >
@@ -235,7 +211,10 @@ const UpdateArticleForm = ({
                   </div>
                 ) : (
                   <div className="set-status-form-control">
-                    <Button type="primary" onClick={() => setIsDisabled(false)}>
+                    <Button
+                      type="primary"
+                      onClick={() => setStatusChangeFormDisable(false)}
+                    >
                       Change
                     </Button>
                   </div>
@@ -251,7 +230,7 @@ const UpdateArticleForm = ({
           <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
           <Col xs={24} md={8}>
             <SelectFormField
-              options={categoryOptions}
+              options={props.categories}
               label="Category"
               name="category_id"
               onChange={props.setFieldValue}
@@ -259,7 +238,7 @@ const UpdateArticleForm = ({
               values={props.values.category_id}
             />
             <SelectFormField
-              options={subCategoryOptions}
+              options={props.subCategories}
               label="Sub Category"
               name="subcategory_id"
               onChange={props.setFieldValue}
@@ -272,11 +251,15 @@ const UpdateArticleForm = ({
               name="other_tags"
               onChange={props.setFieldValue}
               values={props.values.other_tags}
+              requiredlabel="true"
             />
           </Col>
           <Col xs={24} md={7}>
             <SelectTagsFormField
-              options={specializationOptions}
+              rawSpecialization={
+                (currentArticle && currentArticle.specializations) || null
+              }
+              options={props.specializations}
               label="Specializations"
               name="specializations"
               onChange={props.setFieldValue}
@@ -288,21 +271,27 @@ const UpdateArticleForm = ({
             />
           </Col>
           <Col xs={24} md={9}>
-            <TextFormField
+            <TextAreaFormField
               name="headline"
               type="text"
-              label="Headline"
+              label="Article Name"
               requiredlabel="true"
-              placeholder="Enter a headline"
+              placeholder="Enter an article name"
               values={props.values.headline}
+              onChange={props.setFieldValue}
+              maxCountAllowed={100}
+              rows={1}
             />
-            <TextFormField
+            <TextAreaFormField
               name="short_details"
               type="text"
-              label="Short Details"
+              label="Article Description"
               requiredlabel="true"
-              placeholder="Enter a short detail"
+              placeholder="Enter an article description"
               values={props.values.short_details}
+              onChange={props.setFieldValue}
+              maxCountAllowed={1000}
+              rows={4}
             />
             <label
               style={{
@@ -310,34 +299,18 @@ const UpdateArticleForm = ({
                 margin: "15px 0"
               }}
             >
-              <span>Zinc Code </span>{" "}
+              <span className="ant-form-item-required">Zinc Code </span>{" "}
               <Tooltip placement="top" title={sampleZincFormat}>
                 <Icon type="info-circle" style={{ color: "#1890ff" }} />
               </Tooltip>
             </label>
-            <ZincCodeFormField
-              className="zinc-code-field1"
-              name="zinc_code1"
+            <TextFormField
+              name="zinc_code"
               type="text"
-              onChange={props.setFieldValue}
-              maskValidation="AAAA.AAA.11.11.1111"
               size="small"
-            />
-            <ZincCodeFormField
-              className="zinc-code-field2"
-              name="zinc_code2"
-              type="text"
+              placeholder="Enter the zinc code"
               onChange={props.setFieldValue}
-              maskValidation="Version 1.1"
-              size="small"
-            />
-            <ZincCodeFormField
-              className="zinc-code-field3"
-              name="zinc_code3"
-              type="text"
-              onChange={props.setFieldValue}
-              maskValidation="11 A** 1111"
-              size="small"
+              maxCountAllowed={150}
             />
           </Col>
         </Row>
@@ -352,14 +325,19 @@ const UpdateArticleForm = ({
               requiredlabel="true"
               placeholder="Enter a page title"
               values={props.values.page_title}
+              onChange={props.setFieldValue}
+              maxCountAllowed={60}
             />
-            <TextFormField
+            <TextAreaFormField
               name="meta_description"
               type="text"
               label="Meta Description"
               requiredlabel="true"
               placeholder="Enter a meta description"
               values={props.values.meta_description}
+              onChange={props.setFieldValue}
+              maxCountAllowed={150}
+              rows={4}
             />
           </Col>
 
@@ -370,6 +348,7 @@ const UpdateArticleForm = ({
               label="Page Slug(Optional - system will generate if empty"
               placeholder="Enter a page slug"
               values={props.values.slug}
+              onChange={props.setFieldValue}
             />
             <TextFormField
               name="meta_keywords"
@@ -377,6 +356,7 @@ const UpdateArticleForm = ({
               label="Meta Keywords(Optional)"
               placeholder="Enter meta keywords"
               values={props.values.meta_keywords}
+              onChange={props.setFieldValue}
             />
           </Col>
         </Row>
@@ -387,14 +367,15 @@ const UpdateArticleForm = ({
             <h3 className="ant-form-item-required">
               Feature Image <small>(required)</small>
             </h3>
-            <ImageUploader />
+            <ImageUploader isOnEditMode={true} name="featured" />
           </Col>
           <Col xs={24} md={16}>
-            <h3>Article Body</h3>
+            <h3 className="ant-form-item-required">Article Body</h3>
             <Field
               as={TextEditorFormField}
               name="body"
               values={props.values.body}
+              onChange={props.setFieldValue}
             />
           </Col>
         </Row>
@@ -413,9 +394,9 @@ const UpdateArticleForm = ({
         </div>
 
         <RouteLeavingGuard
-          when={props.dirty}
+          when={isFormDirty}
           navigate={path => props.history.push(path)}
-          shouldBlockNavigation={location => (props.dirty ? true : false)}
+          shouldBlockNavigation={location => (isFormDirty ? true : false)}
         />
       </form>
     </Spin>
@@ -438,10 +419,7 @@ const formikEnhancer = withFormik({
     );
     formData.append("headline", values.headline);
     formData.append("short_details", values.short_details);
-    formData.append(
-      "zinc_code",
-      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
-    );
+    formData.append("zinc_code", values.zinc_code);
     formData.append("page_title", values.page_title);
     formData.append("meta_description", values.meta_description);
     formData.append("slug", values.slug);
@@ -465,13 +443,22 @@ const mapStateToProps = state => {
   return {
     notifs: state.notificationReducer,
     currentArticle: state.postManagementReducer.currentArticle,
-    postManagement: state.postManagementReducer
+    postManagement: state.postManagementReducer,
+    loading: state.postManagementReducer.requestInProgress,
+    isFormDirty: state.formReducer.isFormDirty,
+    statusChangeFormDisable: state.postManagementReducer.statusChangeFormDisable
   };
 };
 
 const UpdateArticleFormWrapper = connect(
   mapStateToProps,
-  { updateArticle, fetchCurrentArticle, changeArticleStatus }
+  {
+    updateArticle,
+    fetchCurrentArticle,
+    changeArticleStatus,
+    setStatusChangeFormDisable,
+    setFormDirty
+  }
 )(formikEnhancer);
 
 export default UpdateArticleFormWrapper;

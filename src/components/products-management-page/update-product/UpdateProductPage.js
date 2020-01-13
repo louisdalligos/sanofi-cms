@@ -36,9 +36,7 @@ const UpdateProductPage = ({
     slug: "",
     meta_keywords: "",
     body: "",
-    zinc_code1: "",
-    zinc_code2: "",
-    zinc_code3: "",
+    zinc_code: "",
     featured: "",
     masthead: "",
     thumbnail: "",
@@ -71,9 +69,6 @@ const UpdateProductPage = ({
       meta_description: data.meta_description,
       meta_keywords: data.meta_keywords,
       zinc_code: data.zinc_code,
-      zinc_code1: str[0].trim(),
-      zinc_code2: str[1].trim(),
-      zinc_code3: str[2].trim(),
       gallery_images: data.product_images,
       tag_all: allStatus
     };

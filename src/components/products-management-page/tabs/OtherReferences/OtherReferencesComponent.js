@@ -35,22 +35,37 @@ const style = {
 
 const VideoSchema = Yup.object().shape({
   video_title: Yup.string()
-    .required("This field is required.")
-    .max(150, "Video title is too long."),
+    .max(100, "Maximum of 100 characters allowed only")
+    .required("This field is required"),
+
   video_link: Yup.string()
-    .required("This field is required.")
-    .max(150, "Video title is too long.")
+    .max(100, "Maximum of 100 characters allowed only")
+    .required("This field is required"),
+
+  short_details: Yup.string().max(
+    1000,
+    "Maximum of 1000 characters allowed only"
+  )
+  // .required("This field is required")
 });
 
 const LinkSchema = Yup.object().shape({
   link_title: Yup.string()
-    .required("This field is required.")
-    .max(150, "Link title is too long."),
+    .max(100, "Maximum of 100 characters allowed only")
+    .required("This field is required"),
+
   link_url: Yup.string()
-    .required("This field is required.")
-    .max(150, "Video title is too long.")
+    .max(100, "Maximum of 100 characters allowed only")
+    .required("This field is required"),
+
+  short_details: Yup.string().max(
+    1000,
+    "Maximum of 1000 characters allowed only"
+  )
+  // .required("This field is required")
 });
 
+const { TextArea } = Input;
 class OtherReferencesComponent extends Component {
   constructor(props) {
     super(props);
@@ -58,16 +73,27 @@ class OtherReferencesComponent extends Component {
       // videos
       videoTitle: "",
       videoEmded: "",
+      videoDescription: "",
       // links
       linkUrl: "",
       linkTitle: "",
+      linkDescription: "",
       // Files
       local_fileList: [],
       local_filename: "",
+      local_fileDescription: "",
       MANUAL_CHECK_NO_FILE: false,
       MANUAL_CHECK_NO_FILENAME: false,
+      // MANUAL_CHECK_NO_FILE_DESCRIPTION: false,
       isMoreThan25Mb: false,
-      isTooLong: false
+      isTooLong: false,
+      isTooLongDesc: false,
+      errorMessage: null,
+
+      tabKeyPrev: null,
+
+      fileDocNameCtr: 0,
+      fileDocDescCtr: 0
     };
     this.runtime = {
       action: "save"
@@ -96,7 +122,9 @@ class OtherReferencesComponent extends Component {
         width: 300,
         render: text => {
           return (
-            <div className="custom-document-name-title-wrapper">{text}</div>
+            <div className="text-truncate-300 custom-document-name-title-wrapper">
+              {text}
+            </div>
           );
         }
       },
@@ -104,7 +132,7 @@ class OtherReferencesComponent extends Component {
         title: "Attachment",
         dataIndex: "section",
         rowKey: "id",
-        width: 768,
+        width: 300,
         render: (text, { type, filename, path, video_link, link }, index) => {
           let caption = "default";
           switch (type) {
@@ -119,7 +147,21 @@ class OtherReferencesComponent extends Component {
               caption = link;
               break;
           }
-          return <div className="custom-attachment-wrapper">{caption}</div>;
+          return (
+            <div className="text-truncate-300 custom-attachment-wrapper">
+              {caption}
+            </div>
+          );
+        }
+      },
+      {
+        title: "Description",
+        dataIndex: "description",
+        rowKey: "id",
+        width: 300,
+        render: (text, row, index) => {
+          const description = text || "Not set";
+          return <p className="text-truncate-300">{description}</p>;
         }
       },
       {
@@ -149,6 +191,41 @@ class OtherReferencesComponent extends Component {
     this.handleFileEntrySubmit = this.handleFileEntrySubmit.bind(this);
   }
 
+  static getDerivedStateFromProps(props, state) {
+    if (props.tabKey !== state.tabKeyPrev) {
+      if (props.tabKey.toString().indexOf("other") !== -1) {
+        // resets
+        state.videoTitle = "";
+        state.videoEmded = "";
+        state.videoDescription = "";
+        state.linkUrl = "";
+        state.linkTitle = "";
+        state.linkDescription = "";
+
+        state.local_fileList = [];
+        state.local_filename = "";
+        state.local_fileDescription = "";
+
+        state.MANUAL_CHECK_NO_FILE = false;
+        state.MANUAL_CHECK_NO_FILENAME = false;
+        // state.MANUAL_CHECK_NO_FILE_DESCRIPTION = false;
+        state.isMoreThan25Mb = false;
+        state.isTooLong = false;
+        state.isTooLongDesc = false;
+        state.errorMessage = null;
+
+        state.fileDocNameCtr = 0;
+        state.fileDocDescCtr = 0;
+
+        props.selectType("file");
+      }
+      return {
+        tabKeyPrev: props.tabKey
+      };
+    }
+    return null;
+  }
+
   componentDidMount() {
     const id = this.props.id;
     this.props.fetchOtherReferences(id);
@@ -160,6 +237,7 @@ class OtherReferencesComponent extends Component {
     this.setState({
       MANUAL_CHECK_NO_FILE: false,
       MANUAL_CHECK_NO_FILENAME: false
+      // MANUAL_CHECK_NO_FILE_DESCRIPTION: false
     });
   }
 
@@ -169,6 +247,7 @@ class OtherReferencesComponent extends Component {
         {
           video_link: values.video_link,
           title: values.video_title,
+          description: values.short_details,
           type: "1"
         }
       ]
@@ -186,6 +265,7 @@ class OtherReferencesComponent extends Component {
         {
           link: values.link_url,
           title: values.link_title,
+          description: values.short_details,
           type: "3"
         }
       ]
@@ -202,22 +282,28 @@ class OtherReferencesComponent extends Component {
       {
         MANUAL_CHECK_NO_FILE: this.state.local_fileList.length === 0,
         MANUAL_CHECK_NO_FILENAME: this.state.local_filename.length === 0
+        // MANUAL_CHECK_NO_FILE_DESCRIPTION: this.state.local_fileDescription.length === 0
       },
       () => {
         if (
           !this.state.MANUAL_CHECK_NO_FILE &&
           !this.state.MANUAL_CHECK_NO_FILENAME &&
+          // !this.state.MANUAL_CHECK_NO_FILE_DESCRIPTION &&
           !this.state.isMoreThan25Mb &&
           !this.state.isTooLong &&
+          !this.state.isTooLongDesc &&
           (this.state.local_fileList.length !== 0 ||
-            this.state.local_filename.length !== 0)
+            this.state.local_filename.length !== 0 ||
+            this.state.local_fileDescription.length !== 0)
         ) {
           let formData = new FormData();
           let fileList = this.state.local_fileList[0];
           let filename = this.state.local_filename;
+          let fileDescription = this.state.local_fileDescription;
 
           formData.append("document_name", filename);
           formData.append("other_resources_file", fileList);
+          formData.append("description", fileDescription);
           formData.append("_method", "PUT");
           this.props.saveFilePostOtherReferences(this.props.id, formData);
           // after
@@ -233,7 +319,12 @@ class OtherReferencesComponent extends Component {
       MANUAL_CHECK_NO_FILE: false,
       MANUAL_CHECK_NO_FILENAME: false,
       local_fileList: [],
-      local_filename: ""
+      local_filename: "",
+      local_fileDescription: "",
+
+      // new implem
+      fileDocDescCtr: 0,
+      fileDocNameCtr: 0
     });
   }
 
@@ -243,12 +334,18 @@ class OtherReferencesComponent extends Component {
 
   render() {
     const { type } = this.props;
-    const { videoTitle, videoEmded, linkUrl, linkTitle } = this.state;
+    const {
+      videoTitle,
+      videoEmded,
+      videoDescription,
+      linkUrl,
+      linkTitle,
+      linkDescription
+    } = this.state;
 
     return (
       <div>
         {/* <CentralizeToastr issuer={this} /> */}
-
         <h3>Select the type of Resource</h3>
         <br />
 
@@ -258,8 +355,8 @@ class OtherReferencesComponent extends Component {
             value={type}
             style={{ width: "200px" }}
           >
-            <Select.Option value="video">Video</Select.Option>
             <Select.Option value="file">File</Select.Option>
+            <Select.Option value="video">Video</Select.Option>
             <Select.Option value="link">Link</Select.Option>
           </Select>
           <br />
@@ -277,30 +374,36 @@ class OtherReferencesComponent extends Component {
                   <Formik
                     initialValues={{
                       video_title: videoTitle,
-                      video_link: videoEmded
+                      video_link: videoEmded,
+                      description: videoDescription
                     }}
                     onSubmit={this.handleVideoEntrySubmit}
                     validationSchema={VideoSchema}
                     validateOnChange={true}
                     validateOnBlur={true}
                   >
-                    {({ errors, touched, setFieldValue, field, resetForm }) => (
+                    {({
+                      errors,
+                      touched,
+                      // setFieldValue,
+                      field,
+                      resetForm
+                    }) => (
                       <Form>
-                        <CustomTextField
+                        <CustomInputField
                           name="video_link"
                           label={"Video Link"}
-                          setFieldValue={(name, value) => {
-                            setFieldValue(name, value);
-                            this.props.setProductDirty({ dirty: true });
-                          }}
+                          rows={1}
                         />
-                        <CustomField
+                        <CustomInputField
                           name="video_title"
                           label={"Video Title"}
-                          setFieldValue={(name, value) => {
-                            setFieldValue(name, value);
-                            this.props.setProductDirty({ dirty: true });
-                          }}
+                        />
+                        <CustomTextArea
+                          name="short_details"
+                          label={"Video Description (optional)"}
+                          required={false}
+                          rows={4}
                         />
                         <div className="generic-btn-wrapper">
                           <Button
@@ -347,20 +450,35 @@ class OtherReferencesComponent extends Component {
                       fileList={this.state.local_fileList}
                       beforeUpload={(file, fileList) => {
                         const newList = [file];
-
+                        // #1
                         if (this.bytesToMegabytes(file.size) > 24) {
                           this.setState({
                             isMoreThan25Mb: true,
                             local_fileList: []
                           });
-                          // false
                         } else {
                           this.setState({
                             local_fileList: newList,
                             isMoreThan25Mb: false,
                             MANUAL_CHECK_NO_FILE: false
                           });
-                          // true
+                        }
+
+                        if (
+                          file.type.indexOf("png") !== -1 ||
+                          file.type.indexOf("jpeg") !== -1 ||
+                          file.type.indexOf("jpg") !== -1 ||
+                          file.type.indexOf("pdf") !== -1
+                        ) {
+                          this.setState({
+                            errorMessage: null
+                          });
+                        } else {
+                          this.setState({
+                            errorMessage:
+                              "Invalid attachment, only (pdf,png,jpeg) format is allowed.",
+                            local_fileList: []
+                          });
                         }
                       }}
                       onRemove={removedFile => {
@@ -373,7 +491,8 @@ class OtherReferencesComponent extends Component {
                       }}
                     >
                       <Button>
-                        <Icon type="upload" /> SelectFile
+                        <Icon type="upload" />
+                        <span>Select File</span>
                       </Button>
 
                       {this.state.MANUAL_CHECK_NO_FILE && (
@@ -384,7 +503,15 @@ class OtherReferencesComponent extends Component {
 
                       {this.state.isMoreThan25Mb && (
                         <div className="font-red ant-form-explain">
-                          {"File is more than 25mb."}
+                          {
+                            "Invalid attachment, image should not more than 25mb."
+                          }
+                        </div>
+                      )}
+
+                      {this.state.errorMessage && (
+                        <div className="font-red ant-form-explain">
+                          {this.state.errorMessage}
                         </div>
                       )}
                     </Upload>
@@ -411,17 +538,21 @@ class OtherReferencesComponent extends Component {
                         }
                       }}
                       onChange={evt => {
-                        this.setState({
-                          local_filename: evt.target.value,
-                          MANUAL_CHECK_NO_FILENAME: false,
-                          isTooLong: false
-                        });
-                        // SetDirty
-                        this.props.setProductDirty({
-                          dirty: true
-                        });
+                        const value = evt.target.value;
+                        if (value.length <= runtime.charLimitInput) {
+                          this.setState({
+                            local_filename: value,
+                            MANUAL_CHECK_NO_FILENAME: false,
+                            isTooLong: false,
+                            fileDocNameCtr: value.length
+                          });
+                        }
                       }}
                     />
+
+                    <div className="character-counter">
+                      {`${this.state.fileDocNameCtr} of remaining ${runtime.charLimitInput} allowed`}
+                    </div>
 
                     {this.state.MANUAL_CHECK_NO_FILENAME && (
                       <div className="ant-form-explain">
@@ -435,6 +566,54 @@ class OtherReferencesComponent extends Component {
                       </div>
                     )}
 
+                    {/* Refactor to YUP/Formik - Temp fix for #SCSW2-406*/}
+                    {/* <div className="ant-form-item-required"> */}
+                    <div className="">Document Description (optional)</div>
+
+                    <TextArea
+                      className="optional-field"
+                      name="short_details"
+                      rows={4}
+                      value={this.state.local_fileDescription}
+                      onBlur={() => {
+                        if (!this.state.local_fileDescription.length) {
+                          /*this.setState({
+                                                        MANUAL_CHECK_NO_FILE_DESCRIPTION: true
+                                                    });*/
+                          this.props.setProductDirty({
+                            dirty: true
+                          });
+                        }
+                      }}
+                      onChange={evt => {
+                        const value = evt.target.value;
+                        if (value.length <= runtime.charLimitTextField) {
+                          this.setState({
+                            local_fileDescription: value,
+                            // MANUAL_CHECK_NO_FILE_DESCRIPTION: false,
+                            isTooLongDesc: false,
+                            fileDocDescCtr: value.length
+                          });
+                        }
+                      }}
+                    />
+
+                    {/*this.state.MANUAL_CHECK_NO_FILE_DESCRIPTION && (
+                                            <div className="ant-form-explain">
+                                                {"This field is required."}
+                                            </div>
+                                        )*/}
+
+                    {this.state.isTooLong && (
+                      <div className="font-red ant-form-explain">
+                        {"Maximum of 1000 characters allowed only"}
+                      </div>
+                    )}
+
+                    <div className="character-counter">
+                      {`${this.state.fileDocDescCtr} of remaining ${runtime.charLimitTextField} allowed`}
+                    </div>
+
                     <div className="generic-btn-wrapper">
                       <Button
                         loading={
@@ -443,9 +622,15 @@ class OtherReferencesComponent extends Component {
                         htmlType="submit"
                         type="primary"
                         onClick={() => {
-                          if (this.state.local_filename.length >= 150) {
+                          if (this.state.local_filename.length > 100) {
                             this.setState({
                               isTooLong: true
+                            });
+                          } else if (
+                            this.state.local_fileDescription.length > 1000
+                          ) {
+                            this.setState({
+                              isTooLongDesc: true
                             });
                           } else {
                             this.handleFileEntrySubmit();
@@ -460,6 +645,7 @@ class OtherReferencesComponent extends Component {
                           this.setState({
                             local_fileList: [],
                             local_filename: "",
+                            local_fileDescription: "",
                             isTooLong: false,
                             MANUAL_CHECK_NO_FILE: false,
                             MANUAL_CHECK_NO_FILENAME: false
@@ -483,7 +669,8 @@ class OtherReferencesComponent extends Component {
                   <Formik
                     initialValues={{
                       link_url: linkUrl,
-                      link_title: linkTitle
+                      link_title: linkTitle,
+                      description: linkDescription
                     }}
                     onSubmit={this.handleLinkEntrySubmit}
                     validationSchema={LinkSchema}
@@ -492,21 +679,16 @@ class OtherReferencesComponent extends Component {
                   >
                     {({ errors, touched, setFieldValue, field, resetForm }) => (
                       <Form>
-                        <CustomField
-                          name="link_url"
-                          label={"Link"}
-                          setFieldValue={(name, value) => {
-                            setFieldValue(name, value);
-                            this.props.setProductDirty({ dirty: true });
-                          }}
-                        />
-                        <CustomField
+                        <CustomInputField name="link_url" label={"Link"} />
+                        <CustomInputField
                           name="link_title"
                           label={"Link Title"}
-                          setFieldValue={(name, value) => {
-                            setFieldValue(name, value);
-                            this.props.setProductDirty({ dirty: true });
-                          }}
+                        />
+                        <CustomTextArea
+                          name="short_details"
+                          rows={4}
+                          label={"Link Description (optional)"}
+                          required={false}
                         />
                         <div className="generic-btn-wrapper">
                           <Button
@@ -560,24 +742,38 @@ class OtherReferencesComponent extends Component {
 const formGroupStyle = {
   margin: "3px 0 15px"
 };
+const runtime = {
+  charLimitInput: 100,
+  charLimitTextField: 1000
+};
 
-const CustomField = function({ name, label, setFieldValue }) {
+const CustomInputField = function({ name, label, setFieldValue }) {
   return (
-    <Field
-      name={name}
-      onChange={evt => {
-        const { name, value } = evt.target;
-        setFieldValue(name, value);
-      }}
-    >
-      {({ field, meta }) => {
+    <Field name={name}>
+      {props => {
+        const { field, meta } = props;
         const dirty = meta.touched && meta.error;
+
         const classnames = "ant-form-item-control " + (dirty && "has-error");
         return (
           <div style={formGroupStyle} className={classnames}>
             <div className="ant-form-item-required">{label}</div>
-            <Input {...field} className={classnames} />
+            {/* <Input {...field} className={classnames} /> */}
+            <Input
+              name={field.name}
+              value={field.value}
+              className={classnames}
+              onChange={evt => {
+                const value = evt.target.value;
+                if (value.length <= runtime.charLimitInput) field.onChange(evt);
+              }}
+            />
             {dirty && <div className="ant-form-explain">{meta.error}</div>}
+            <div className="character-counter">
+              <p>{`${field.value ? field.value.length : 0} of remaining ${
+                runtime.charLimitInput
+              } allowed`}</p>
+            </div>
           </div>
         );
       }}
@@ -585,24 +781,45 @@ const CustomField = function({ name, label, setFieldValue }) {
   );
 };
 
-const CustomTextField = function({ name, label, setFieldValue }) {
+const CustomTextArea = function({
+  name,
+  label,
+  setFieldValue,
+  rows,
+  required = true
+}) {
   const { TextArea } = Input;
   return (
-    <Field
-      name={name}
-      onChange={evt => {
-        const { name, value } = evt.target;
-        setFieldValue(name, value);
-      }}
-    >
-      {({ field, meta }) => {
+    <Field name={name}>
+      {props => {
+        const { field, meta } = props;
         const dirty = meta.touched && meta.error;
+
         const classnames = "ant-form-item-control " + (dirty && "has-error");
         return (
           <div style={formGroupStyle} className={classnames}>
-            <div className="ant-form-item-required">{label}</div>
-            <TextArea {...field} className={classnames} />
+            <div className={(required && "ant-form-item-required") || ""}>
+              {label}
+            </div>
+            <TextArea
+              name={field.name}
+              value={field.value}
+              className={classnames}
+              rows={rows}
+              onChange={evt => {
+                const value = evt.target.value;
+                if (value.length <= runtime.charLimitTextField)
+                  field.onChange(evt);
+              }}
+            />
             {dirty && <div className="ant-form-explain">{meta.error}</div>}
+            <div className="character-counter">
+              <div className="character-counter">
+                <p>{`${field.value ? field.value.length : 0} of remaining ${
+                  runtime.charLimitTextField
+                } allowed`}</p>
+              </div>
+            </div>
           </div>
         );
       }}

@@ -15,15 +15,20 @@ import VideoListTable from "./VideoListTable";
 // redux actions
 import {
   createEventHeading,
+  renameEventHeading,
   fetchCurrentEvent,
   deleteEventHeading,
   clearCurrentVideo,
+  clearSelectedHeading,
   setSelectedHeading
 } from "../../../redux/actions/cme-actions/cmeActions";
+
+const { confirm } = Modal;
 
 const EventHighlightsForm = ({
   auth,
   createEventHeading,
+  renameEventHeading,
   deleteEventHeading,
   fetchCurrentEvent,
   clearCurrentVideo,
@@ -31,13 +36,14 @@ const EventHighlightsForm = ({
   notifs,
   inProgress,
   isVideoOnEditMode,
+  isHeadingOnEditMode,
   setSelectedHeading,
+  currentSelectedHeading,
   ...props
 }) => {
   const { values, validateField, setFieldValue } = useFormikContext();
   const [modalVisible, setModalVisible] = useState(false);
-  //const [currentSelectedHeading, setCurrentSelectedHeading] = useState(null);
-  const [currentSelectedVideo, setCurrentSelectedVideo] = useState(null);
+  const addVideoButtonRef = useRef(null);
 
   const blankHeading = {
     heading: "",
@@ -49,8 +55,6 @@ const EventHighlightsForm = ({
 
   const addHeading = () => {
     setMapData([...mapData, { ...blankHeading }]);
-
-    console.log(mapData);
   };
 
   const handleOnChange = e => {
@@ -62,10 +66,7 @@ const EventHighlightsForm = ({
   };
 
   useEffect(() => {
-    // const { current } = refInput;
-    // console.log(current, "<======= USE REF");
-
-    return () => {};
+    setMapData(currentEvent.sections ? currentEvent.sections : []); // update our data state
   }, []);
 
   // Notifications listener
@@ -86,6 +87,20 @@ const EventHighlightsForm = ({
               message.error(element);
             })
           : message.error("Oops something went wrong!");
+        break;
+      case "RENAME_EVENT_HEADING_SUCCESS":
+        message.success(
+          notifs.notifications
+            ? notifs.notifications.success
+            : "Successfully renamed the event heading"
+        );
+        break;
+      case "RENAME_EVENT_HEADING_FAILED":
+        message.error(
+          notifs.notifications
+            ? notifs.notifications.error
+            : "Failed to rename the event heading"
+        );
         break;
       case "DELETE_EVENT_HEADING_SUCCESS":
         fetchCurrentEvent(currentEvent.id); // fetch again to get updated data
@@ -113,20 +128,13 @@ const EventHighlightsForm = ({
     //eslint-disable-next-line
   }, [notifs.id, notifs.notifications]);
 
-  // Component actions
-  function handleDelete(id, e) {
-    e.stopPropagation();
-
+  function deleteHeadingAction(id) {
     const updatedHeadings = [...mapData]; // get our array from the state
 
     const newArray = updatedHeadings.filter((item, index) => {
       if (index === id) {
-        const values = {
-          event_section_id: item.id
-        };
-
         // redux action
-        deleteEventHeading(item.id, values);
+        deleteEventHeading(item.id);
       }
 
       // return new state
@@ -139,29 +147,96 @@ const EventHighlightsForm = ({
     setMapData(newArray);
   }
 
-  function saveEntry(id, e) {
+  // Component actions
+  function handleDelete(id, e) {
     e.stopPropagation();
+
+    confirm({
+      title: "Are you sure you want to delete this event heading section?",
+      okText: "Yes",
+      okType: "primary",
+      cancelText: "No",
+      onOk() {
+        deleteHeadingAction(id);
+      },
+      onCancel() {
+        console.log("Cancel");
+      }
+    });
+  }
+
+  function saveEntry(id, e, inputHeadingRef, saveButtonRef, editButtonRef) {
+    e.stopPropagation();
+
+    let inputEl = document.getElementById(`${inputHeadingRef.props.id}`);
+
+    if (inputEl.value.length < 1) {
+      console.log(inputEl.value);
+      message.error("Please input a heading name");
+      return;
+    }
+
+    // set state for input
+    document.getElementById(`${inputHeadingRef.props.id}`).disabled = true;
+    document
+      .getElementById(`${inputHeadingRef.props.id}`)
+      .classList.add("ant-input-disabled");
+
+    // set state for button
+    document.getElementById(`${saveButtonRef.props.id}`).style.display = "none";
+    document.getElementById(`${editButtonRef.props.id}`).style.display =
+      "block";
 
     const updatedHeadings = [...mapData]; // get our array from the state
 
     // if our id matches the entry on the state
     updatedHeadings.filter((item, index) => {
       if (index === id) {
-        const data = {
-          event_id: currentEvent.id,
-          heading: item.heading
-        };
+        // check if on edit mode
+        if (isHeadingOnEditMode) {
+          const data = {
+            event_id: currentEvent.id,
+            heading: item.heading
+          };
 
-        // redux action
-        createEventHeading(JSON.stringify(data));
+          renameEventHeading(item.id, data);
+        } else {
+          const data = {
+            event_id: currentEvent.id,
+            heading: item.heading
+          };
+
+          // redux action
+          createEventHeading(data);
+        }
       }
     });
   }
 
-  function handleRename(id, e) {
+  function handleRename(id, e, inputHeadingRef, saveButtonRef, editButtonRef) {
     e.stopPropagation();
 
-    console.log(id);
+    console.log(saveButtonRef);
+    // set state for input
+    document.getElementById(`${inputHeadingRef.props.id}`).disabled = false;
+    document
+      .getElementById(`${inputHeadingRef.props.id}`)
+      .classList.remove("ant-input-disabled");
+
+    // set state for button
+    document.getElementById(`${saveButtonRef.props.id}`).style.display =
+      "block";
+    document.getElementById(`${editButtonRef.props.id}`).style.display = "none";
+
+    const updatedHeadings = [...mapData]; // get our array from the state
+
+    // if our id matches the entry on the state
+    updatedHeadings.filter((item, index) => {
+      if (index === id) {
+        console.log(item);
+        setSelectedHeading(item); // set the current heading selection first
+      }
+    });
   }
 
   function handleModal(id) {
@@ -172,7 +247,6 @@ const EventHighlightsForm = ({
     // if our id matches the entry on the state
     updatedHeadings.filter((item, index) => {
       if (index === id) {
-        //setCurrentSelectedHeadingx(item);
         setSelectedHeading(item); // redux action
       }
     });
@@ -195,34 +269,12 @@ const EventHighlightsForm = ({
                 idx={idx}
                 data={mapData}
                 handleOnChange={handleOnChange}
+                handleRename={handleRename}
+                saveEntry={saveEntry}
+                handleDelete={handleDelete}
+                stateData={mapData}
+                videoAddRef={addVideoButtonRef}
               />
-
-              <div
-                className="headingListActions"
-                style={{
-                  display: "flex",
-                  marginBottom: 20
-                }}
-              >
-                {/* <Button onClick={e => handleRename(idx, e)}>
-                                        <Icon type="edit" />
-                                        Rename
-                                    </Button> */}
-
-                <Button
-                  type="primary"
-                  onClick={e => {
-                    saveEntry(idx, e);
-                  }}
-                >
-                  <Icon type="save" />
-                  Save
-                </Button>
-
-                <Button type="danger" onClick={e => handleDelete(idx, e)}>
-                  <Icon type="delete" />
-                </Button>
-              </div>
 
               <VideoListTable
                 videosData={mapData[idx].videos}
@@ -234,6 +286,8 @@ const EventHighlightsForm = ({
                 type="primary"
                 onClick={() => handleModal(idx)}
                 style={{ marginTop: 20 }}
+                id={`btn-add-video-${idx}`}
+                ref={addVideoButtonRef}
               >
                 Add video
               </Button>
@@ -280,7 +334,9 @@ const mapStateToProps = state => {
     currentEvent: state.cmeReducer.currentEvent,
     notifs: state.notificationReducer,
     inProgress: state.cmeReducer.requestInProgress,
-    isVideoOnEditMode: state.cmeReducer.editVideoMode
+    isVideoOnEditMode: state.cmeReducer.editVideoMode,
+    isHeadingOnEditMode: state.cmeReducer.editHeadingMode,
+    currentSelectedHeading: state.cmeReducer.currentSelectedHeading
   };
 };
 
@@ -288,10 +344,12 @@ const mapDispatchToProps = dispatch => {
   return bindActionCreators(
     {
       createEventHeading: createEventHeading,
+      renameEventHeading: renameEventHeading,
       fetchCurrentEvent: fetchCurrentEvent,
       deleteEventHeading: deleteEventHeading,
       clearCurrentVideo: clearCurrentVideo,
-      setSelectedHeading: setSelectedHeading
+      setSelectedHeading: setSelectedHeading,
+      clearSelectedHeading: clearSelectedHeading
     },
     dispatch
   );

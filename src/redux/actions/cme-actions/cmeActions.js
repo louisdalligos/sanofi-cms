@@ -14,6 +14,9 @@ import {
   CREATE_EVENT_HEADING_REQUEST,
   CREATE_EVENT_HEADING_SUCCESS,
   CREATE_EVENT_HEADING_FAILED,
+  RENAME_EVENT_HEADING_REQUEST,
+  RENAME_EVENT_HEADING_SUCCESS,
+  RENAME_EVENT_HEADING_FAILED,
   DELETE_EVENT_HEADING_REQUEST,
   DELETE_EVENT_HEADING_SUCCESS,
   DELETE_EVENT_HEADING_FAILED,
@@ -29,12 +32,21 @@ import {
   UPDATE_EVENT_HEADING_VIDEO_SUCCESS,
   UPDATE_EVENT_HEADING_VIDEO_FAILED,
   SET_SELECTED_HEADING,
+  CLEAR_SELECTED_HEADING,
   FEATURE_EVENT_REQUEST,
   FEATURE_EVENT_SUCCESS,
-  FEATURE_EVENT_FAILED
+  FEATURE_EVENT_FAILED,
+  SET_STATUS_CHANGE_FORM_DISABLE
 } from "./types";
 
 import CMEManagementServices from "./service";
+
+import { CENTRALIZE_TOASTR_SET } from "../../../components/utility-components/CentralizeToastr/centralize-toastr.types";
+
+import {
+  filterTableWithParams,
+  setPageNumber
+} from "../table-actions/tableActions";
 
 import { returnNotifications } from "../notification-actions/notificationActions";
 
@@ -96,27 +108,34 @@ export function changeEventStatus(id, values) {
         payload: res.data
       });
 
-      dispatch(
-        returnNotifications(
-          res.data,
-          "success",
-          res.status,
-          "CHANGE_EVENT_STATUS_SUCCESS"
-        )
-      );
+      dispatch(filterTableWithParams(null, "/cme")); // reload updated data
+      dispatch(setPageNumber(1)); // set to default page number
+
+      // return message toastr
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: res
+      });
     } catch (err) {
-      dispatch(
-        returnNotifications(
-          err.response.data,
-          "error",
-          err.response.status,
-          "CHANGE_EVENT_STATUS_FAILED"
-        )
-      );
       dispatch({
         type: CHANGE_EVENT_STATUS_FAILED
       });
+
+      // return message toastr
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: err
+      });
     }
+  };
+}
+
+export function setStatusChangeFormDisable(value) {
+  return async dispatch => {
+    await dispatch({
+      type: SET_STATUS_CHANGE_FORM_DISABLE,
+      payload: value
+    });
   };
 }
 
@@ -160,47 +179,71 @@ export function fetchCurrentEvent(id) {
   };
 }
 
-// Update event
-// export function updateEvent(id, values) {
-//     return async dispatch => {
-//         await dispatch({
-//             type: UPDATE_ARTICLE_REQUEST
-//         });
+//Update event
+export function updateEvent(id, historyRef, values) {
+  return async dispatch => {
+    await dispatch({
+      type: UPDATE_EVENT_REQUEST
+    });
 
-//         try {
-//             const res = await CMEManagementServices.updateEventRequest(
-//                 id,
-//                 values
-//             ); // PUT request
+    try {
+      const res = await CMEManagementServices.updateEventRequest(id, values); // PUT request
 
-//             await dispatch({
-//                 type: UPDATE_ARTICLE_SUCCESS,
-//                 payload: res.data
-//             });
+      await dispatch({
+        type: UPDATE_EVENT_SUCCESS,
+        payload: res.data
+      });
 
-//             dispatch(
-//                 returnNotifications(
-//                     res.data,
-//                     "success",
-//                     res.status,
-//                     "UPDATE_ARTICLE_SUCCESS"
-//                 )
-//             );
-//         } catch (err) {
-//             dispatch({
-//                 type: UPDATE_ARTICLE_FAILED
-//             });
-//             dispatch(
-//                 returnNotifications(
-//                     err.data,
-//                     "success",
-//                     err.status,
-//                     "UPDATE_ARTICLE_FAILED"
-//                 )
-//             );
-//         }
-//     };
-// }
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: res
+      });
+
+      historyRef.push("/cme");
+
+      // dispatch(
+      //     returnNotifications(
+      //         res.data,
+      //         "success",
+      //         res.status,
+      //         "UPDATE_EVENT_SUCCESS"
+      //     )
+      // );
+    } catch (exception) {
+      const { status, errors, error } = exception.response.data;
+      if (status !== 401 && status !== 429) {
+        errors &&
+          errors.map((err, idx, arr) => {
+            dispatch({
+              type: CENTRALIZE_TOASTR_SET,
+              payload: {
+                data: { error: err }
+              }
+            });
+          });
+
+        error &&
+          dispatch({
+            type: CENTRALIZE_TOASTR_SET,
+            payload: {
+              data: { error }
+            }
+          });
+      }
+      // dispatch({
+      //     type: UPDATE_EVENT_FAILED
+      // });
+      // dispatch(
+      //     returnNotifications(
+      //         err.data,
+      //         "success",
+      //         err.status,
+      //         "UPDATE_EVENT_FAILED"
+      //     )
+      // );
+    }
+  };
+}
 
 // create an event heading action
 export function createEventHeading(values) {
@@ -242,21 +285,62 @@ export function createEventHeading(values) {
   };
 }
 
+// Rename event heading
+export function renameEventHeading(id, values) {
+  return async dispatch => {
+    await dispatch({
+      type: RENAME_EVENT_HEADING_REQUEST
+    });
+
+    try {
+      const res = await CMEManagementServices.renameEventHeadingRequest(
+        id,
+        values
+      ); // PUT request
+      await dispatch({
+        type: RENAME_EVENT_HEADING_SUCCESS,
+        payload: res.data
+      });
+
+      dispatch(
+        returnNotifications(
+          res.data,
+          "success",
+          res.status,
+          "RENAME_EVENT_HEADING_SUCCESS"
+        )
+      );
+    } catch (err) {
+      dispatch({
+        type: RENAME_EVENT_HEADING_FAILED
+      });
+      dispatch(
+        returnNotifications(
+          err.response.data.errors
+            ? err.response.data.errors
+            : err.response.data.error,
+          "error",
+          err.status,
+          "RENAME_EVENT_HEADING_FAILED"
+        )
+      );
+    }
+  };
+}
+
 // Delete event heading
-export function deleteEventHeading(id, values) {
+export function deleteEventHeading(id) {
   return async dispatch => {
     await dispatch({
       type: DELETE_EVENT_HEADING_REQUEST
     });
     try {
       const response = await CMEManagementServices.deleteEventHeadingRequest(
-        id,
-        values
+        id
       ); // DELETE request
 
       await dispatch({
-        type: DELETE_EVENT_HEADING_SUCCESS,
-        payload: response.data
+        type: DELETE_EVENT_HEADING_SUCCESS
       });
 
       dispatch(
@@ -377,7 +461,7 @@ export function setSelectedVideo(values) {
   };
 }
 
-// Fetch the video
+// clear the selected video
 export function clearCurrentVideo() {
   return async dispatch => {
     await dispatch({
@@ -417,9 +501,7 @@ export function updateEventHeadingVideo(id, values) {
       });
       dispatch(
         returnNotifications(
-          err.response.data.errors
-            ? err.response.data.errors
-            : err.response.data.error,
+          err.response.data ? err.response.data : err.response.data,
           "error",
           err.status,
           "UPDATE_EVENT_HEADING_VIDEO_FAILED"
@@ -439,6 +521,15 @@ export function setSelectedHeading(values) {
   };
 }
 
+// Clear the current selected heading
+export function clearSelectedHeading() {
+  return async dispatch => {
+    await dispatch({
+      type: CLEAR_SELECTED_HEADING
+    });
+  };
+}
+
 // Feature an event action
 export function featureEvent(id, values) {
   return async dispatch => {
@@ -448,33 +539,30 @@ export function featureEvent(id, values) {
 
     try {
       const res = await CMEManagementServices.featureEventRequest(id, values); // POST request
+
       await dispatch({
         type: FEATURE_EVENT_SUCCESS,
         payload: res.data
       });
 
-      dispatch(
-        returnNotifications(
-          res.data,
-          "success",
-          res.status,
-          "FEATURE_EVENT_SUCCESS"
-        )
-      );
+      dispatch(filterTableWithParams(null, "/cme")); // reload updated data
+      dispatch(setPageNumber(1)); // set to default page number
+
+      // return message toastr
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: res
+      });
     } catch (err) {
       dispatch({
         type: FEATURE_EVENT_FAILED
       });
-      dispatch(
-        returnNotifications(
-          err.response.data.errors
-            ? err.response.data.errors
-            : err.response.data.error,
-          "error",
-          err.status,
-          "FEATURE_EVENT_FAILED"
-        )
-      );
+
+      // return message toastr
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: err
+      });
     }
   };
 }

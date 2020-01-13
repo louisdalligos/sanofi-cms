@@ -11,7 +11,7 @@ import {
   fetchSpecializations
 } from "../../../redux/actions/post-management-actions/postManagementActions";
 
-const pageTitle = "Create a new CME";
+const pageTitle = "Create a new Event";
 
 // Component
 const CreateCMEPage = ({
@@ -37,9 +37,6 @@ const CreateCMEPage = ({
     slug: "",
     meta_description: "",
     meta_keywords: "",
-    zinc_code1: "",
-    zinc_code2: "",
-    zinc_code3: "",
     zinc_code: "",
     featured: "",
     thumbnail: "",
@@ -80,7 +77,9 @@ const CreateCMEPage = ({
               <Breadcrumb.Item key="cme">
                 <Link to="/cme">CME</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item key="cme-create">Create CME</Breadcrumb.Item>
+              <Breadcrumb.Item key="cme-create">
+                Create New Event
+              </Breadcrumb.Item>
             </Breadcrumb>
           </div>
         </div>

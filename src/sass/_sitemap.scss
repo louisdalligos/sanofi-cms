@@ -22,3 +22,20 @@
     margin-right: 5px;
   }
 }
+
+.zinc-code-version {
+  position: relative;
+  max-width: 100px;
+  width: 100%;
+  .number {
+    float: right !important;
+  }
+  .version {
+    margin-top: 5px;
+    float: left !important;
+  }
+  &::after {
+    content: "";
+    clear: both;
+  }
+}

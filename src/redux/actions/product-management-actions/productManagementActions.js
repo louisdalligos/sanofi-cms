@@ -19,15 +19,21 @@ import {
   CHANGE_PRODUCT_STATUS_FAILED,
   NEW_PRODUCT_REQUEST,
   NEW_PRODUCT_SUCCESS,
-  NEW_PRODUCT_FAILED
+  NEW_PRODUCT_FAILED,
+  SET_STATUS_CHANGE_FORM_DISABLE
 } from "./types";
 
 import ProductManagementServices from "./service";
-
 import { returnNotifications } from "../notification-actions/notificationActions";
+import { CENTRALIZE_TOASTR_SET } from "../../../components/utility-components/CentralizeToastr/centralize-toastr.types";
+
+import {
+  filterTableWithParams,
+  setPageNumber
+} from "../table-actions/tableActions";
 
 // Create product
-export function createProduct(values) {
+export function createProduct(values, historyRef) {
   return async dispatch => {
     await dispatch({
       type: CREATE_PRODUCT_REQUEST
@@ -35,40 +41,56 @@ export function createProduct(values) {
 
     try {
       const res = await ProductManagementServices.createProductRequest(values); // POST request
-      console.log(res);
-      await dispatch({
-        type: CREATE_PRODUCT_SUCCESS,
-        payload: res.data
+      dispatch({
+        type: "SERVER_SIDE_LOADER",
+        payload: {
+          loader: false
+        }
+      });
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: res
       });
 
-      dispatch(
-        returnNotifications(
-          res.data,
-          "success",
-          res.status,
-          "CREATE_PRODUCT_SUCCESS"
-        )
-      );
-    } catch (err) {
+      historyRef.push("/products");
+    } catch (exception) {
+      /* |----------------------------
+               | 401 = Token expired
+               | 429 = Too Many Attempts
+               |---------------------------- */
+      const { status, errors, error } = exception.response.data;
+      if (status !== 401 && status !== 429) {
+        errors &&
+          errors.map((err, idx, arr) => {
+            dispatch({
+              type: CENTRALIZE_TOASTR_SET,
+              payload: {
+                data: { error: err }
+              }
+            });
+          });
+
+        error &&
+          dispatch({
+            type: CENTRALIZE_TOASTR_SET,
+            payload: {
+              data: { error }
+            }
+          });
+      }
+
       dispatch({
-        type: CREATE_PRODUCT_FAILED
+        type: "SERVER_SIDE_LOADER",
+        payload: {
+          loader: false
+        }
       });
-      dispatch(
-        returnNotifications(
-          err.response.data.errors
-            ? err.response.data.errors
-            : err.response.data.error,
-          "error",
-          err.status,
-          "CREATE_PRODUCT_FAILED"
-        )
-      );
     }
   };
 }
 
 // Update product
-export function updateProduct(id, values) {
+export function updateProduct(id, historyRef, values) {
   return async dispatch => {
     await dispatch({
       type: UPDATE_PRODUCT_REQUEST
@@ -80,31 +102,92 @@ export function updateProduct(id, values) {
         values
       ); // PUT request
 
-      await dispatch({
-        type: UPDATE_PRODUCT_SUCCESS,
-        payload: res.data
+      dispatch({
+        type: "SERVER_SIDE_LOADER",
+        payload: {
+          loader: false
+        }
+      });
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: res
       });
 
-      dispatch(
-        returnNotifications(
-          res.data,
-          "success",
-          res.status,
-          "UPDATE_PRODUCT_SUCCESS"
-        )
-      );
-    } catch (err) {
+      historyRef.push("/products");
+
+      // console.log("[WARNING]", res);
+
+      // await dispatch({
+      //     type: UPDATE_PRODUCT_SUCCESS,
+      //     payload: res.data
+      // });
+
+      // dispatch(
+      //     returnNotifications(
+      //         res.data,
+      //         "success",
+      //         res.status,
+      //         "UPDATE_PRODUCT_SUCCESS"
+      //     )
+      // );
+
+      // dispatch({
+      //     type: "SERVER_SIDE_LOADER",
+      //     payload: {
+      //         loader: false
+      //     }
+      // });
+    } catch (exception) {
+      /* |----------------------------
+               | 401 = Token expired
+               | 429 = Too Many Attempts
+               |---------------------------- */
+      const { status, errors, error } = exception.response.data;
+      if (status !== 401 && status !== 429) {
+        errors &&
+          errors.map((err, idx, arr) => {
+            dispatch({
+              type: CENTRALIZE_TOASTR_SET,
+              payload: {
+                data: { error: err }
+              }
+            });
+          });
+
+        error &&
+          dispatch({
+            type: CENTRALIZE_TOASTR_SET,
+            payload: {
+              data: { error }
+            }
+          });
+      }
+
+      // dispatch({
+      //     type: UPDATE_PRODUCT_FAILED
+      // });
+      // dispatch(
+      //     returnNotifications(
+      //         err.response.data.error,
+      //         "success",
+      //         err.status,
+      //         "UPDATE_PRODUCT_FAILED"
+      //     )
+      // );
+
+      // dispatch({
+      //     type: "SERVER_SIDE_LOADER",
+      //     payload: {
+      //         loader: false
+      //     }
+      // });
+
       dispatch({
-        type: UPDATE_PRODUCT_FAILED
+        type: "SERVER_SIDE_LOADER",
+        payload: {
+          loader: false
+        }
       });
-      dispatch(
-        returnNotifications(
-          err.response.data.error,
-          "success",
-          err.status,
-          "UPDATE_PRODUCT_FAILED"
-        )
-      );
     }
   };
 }
@@ -150,6 +233,13 @@ export function archiveProduct(id) {
           "ARCHIVE_PRODUCT_FAILED"
         )
       );
+
+      dispatch({
+        type: "SERVER_SIDE_LOADER",
+        payload: {
+          loader: false
+        }
+      });
     }
   };
 }
@@ -181,6 +271,13 @@ export function fetchCurrentProduct(id) {
       dispatch({
         type: FETCH_CURRENT_PRODUCT_FAILED
       });
+
+      dispatch({
+        type: "SERVER_SIDE_LOADER",
+        payload: {
+          loader: false
+        }
+      });
     }
   };
 }
@@ -203,27 +300,34 @@ export function changeProductStatus(id, values) {
         payload: res.data
       });
 
-      dispatch(
-        returnNotifications(
-          res.data,
-          "success",
-          res.status,
-          "CHANGE_PRODUCT_STATUS_SUCCESS"
-        )
-      );
+      dispatch(filterTableWithParams(null, "/products")); // reload updated data
+      dispatch(setPageNumber(1)); // set to default page number
+
+      // return message toastr
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: res
+      });
     } catch (err) {
-      dispatch(
-        returnNotifications(
-          err.response.data,
-          "error",
-          err.response.status,
-          "CHANGE_PRODUCT_STATUS_FAILED"
-        )
-      );
       dispatch({
         type: CHANGE_PRODUCT_STATUS_FAILED
       });
+
+      // return message toastr
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: err
+      });
     }
+  };
+}
+
+export function setStatusChangeFormDisable(value) {
+  return async dispatch => {
+    await dispatch({
+      type: SET_STATUS_CHANGE_FORM_DISABLE,
+      payload: value
+    });
   };
 }
 
@@ -254,6 +358,13 @@ export function fetchCurrentProductArticlesByCategoryId(id) {
       dispatch({
         type: FETCH_CURRENT_PRODUCT_ARTICLES_BY_CATEGORY_FAILED
       });
+
+      dispatch({
+        type: "SERVER_SIDE_LOADER",
+        payload: {
+          loader: false
+        }
+      });
     }
   };
 }
@@ -272,28 +383,70 @@ export function newProduct(id, values) {
         payload: res.data
       });
 
-      dispatch(
-        returnNotifications(
-          res.data,
-          "success",
-          res.status,
-          "NEW_PRODUCT_SUCCESS"
-        )
-      );
+      dispatch(filterTableWithParams(null, "/products")); // reload updated data
+      dispatch(setPageNumber(1)); // set to default page number
+
+      // return message toastr
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: res
+      });
     } catch (err) {
       dispatch({
         type: NEW_PRODUCT_FAILED
       });
-      dispatch(
-        returnNotifications(
-          err.response.data.errors
-            ? err.response.data.errors
-            : err.response.data.error,
-          "error",
-          err.status,
-          "NEW_PRODUCT_FAILED"
-        )
-      );
+      // return message toastr
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: err
+      });
     }
+  };
+}
+
+// TODO: Refactor
+export function addProductImages(payload) {
+  return dispatch => {
+    dispatch({
+      type: "ADD_PRODUCT_IMAGES",
+      payload
+    });
+  };
+}
+export function removeProductImageById(uid) {
+  return async dispatch => {
+    try {
+      // this.setServerSideLoader(true);
+
+      const res = await ProductManagementServices.removeProductImageById(uid);
+      console.log(res);
+
+      dispatch({
+        type: "SERVER_SIDE_LOADER",
+        payload: {
+          loader: false
+        }
+      });
+    } catch (error) {
+      console.log(error.message);
+
+      dispatch({
+        type: "SERVER_SIDE_LOADER",
+        payload: {
+          loader: false
+        }
+      });
+    }
+  };
+}
+
+export function setServerSideLoader(bool) {
+  return dispatch => {
+    dispatch({
+      type: "SERVER_SIDE_LOADER",
+      payload: {
+        loader: bool
+      }
+    });
   };
 }

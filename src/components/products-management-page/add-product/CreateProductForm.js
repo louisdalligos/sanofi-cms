@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
-import { Button, Row, Col, message, Icon, Tooltip } from "antd";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import { Button, Row, Col, message, Upload, Icon, Spin, Tooltip } from "antd";
 import * as Yup from "yup";
 //import { DisplayFormikState } from "../../../utils/formikPropDisplay";
-import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
+//import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
 
 // redux actions
 import {
@@ -22,15 +20,16 @@ import TextFormField from "../../smart-form/TextFormField";
 import SelectFormField from "../../smart-form/SelectFormField";
 import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
-import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
-
-// Other components
-import ImageUploader from "./ImageUploader";
+import TextEditorFormField from "../../smart-form/TextEditorFormField";
+import TextAreaFormField from "../../smart-form/TextAreaFormField";
 
 import { sampleZincFormat } from "../../../utils/constant";
 
-import axios from "axios";
-import { API } from "../../../utils/api";
+// TODO: Refactor
+import {
+  setServerSideLoader,
+  addProductImages
+} from "../../../redux/actions/product-management-actions/productManagementActions";
 
 // validation schema
 const schema = Yup.object().shape({
@@ -38,38 +37,21 @@ const schema = Yup.object().shape({
   specializations: Yup.string().required("This field is required"),
   other_tags: Yup.string().required("This field is required"),
   short_description: Yup.string()
-    .min(1, "Short description is too short")
-    .max(150, "Short description is too long")
+    .max(1000, "Maximum of 1000 characters allowed only")
     .required("This field is required"),
   product_name: Yup.string()
-    .min(1, "Product name is too short")
-    .max(60, "Product name is too long")
+    .max(100, "Maximum of 100 characters allowed only")
     .required("This field is required"),
-  //zinc_code: Yup.string().required("This field is required"),
+  zinc_code: Yup.string()
+    .required("This field is required")
+    .max(150, "Maximum of 150 characters allowed only"),
   page_title: Yup.string()
-    .min(1, "Page title is too short")
-    .max(60, "Page title is too long")
+    .max(60, "Maximum of 60 characters allowed only")
     .required("This field is required"),
   meta_description: Yup.string()
-    .min(1, "Meta description is too short")
-    .max(150, "Meta description is too long")
+    .max(150, "Maximum of 150 characters allowed only")
     .required("This field is required"),
-  body: Yup.string().required("This field is required"),
-  zinc_code1: Yup.string()
-    .required("Required field")
-    .matches(
-      /[A-Z]{4}.[A-Z]{3}.[0-9]{2}.[0-9]{2}.[0-9]{4}/,
-      "Please complete the code"
-    ),
-  zinc_code2: Yup.string()
-    .required("Required field")
-    .matches(/[Version][ ][0-9]{1}.[0-9]{1}/, "Please complete version"),
-  zinc_code3: Yup.string()
-    .required("Required field")
-    .matches(
-      /[0-9]{2}[ ][A-Z]{1}[a-z]{1}[a-z]{1}[ ][0-9]{4}/,
-      "Please complete the date"
-    )
+  body: Yup.string().required("This field is required")
 });
 
 const CreateProductForm = ({
@@ -81,11 +63,19 @@ const CreateProductForm = ({
   createProduct,
   history,
   data,
+  // TODO: Refactor
+  setServerSideLoader,
+  addProductImages,
+  serverSideLoader,
   ...props
 }) => {
   const [categories, setCategories] = useState([]);
   const [specializations, setSpecializations] = useState([]);
   const [imageGalleryFiles, setImageGalleryFiles] = useState([]);
+
+  // TODO: Refactor
+  const [productImages, setProductImages] = useState([]);
+  const [imageError, setImageError] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -102,7 +92,10 @@ const CreateProductForm = ({
         setCategories(postManagement.categories.results);
         break;
       case "CREATE_PRODUCT_SUCCESS":
+        // NAKIKINIG TO
         clearNotifications();
+        history.push("/products");
+
         break;
       case "CREATE_PRODUCT_FAILED":
         clearNotifications();
@@ -125,8 +118,97 @@ const CreateProductForm = ({
     }
   };
 
+  // TODO: Refactor
+  const removeUploadedImg = removed => {
+    /* removed */
+    let images = [];
+    let blobOnly = [];
+    let objOnly = [];
+    let imageUid = null;
+
+    try {
+      productImages.forEach(image => {
+        if (image instanceof Blob) blobOnly.push(image);
+        else objOnly.push(image);
+      });
+      // deleted by Blob
+      if (removed instanceof Blob) {
+        blobOnly.forEach((image, idx) => {
+          if (image.uid === removed.uid) {
+            imageUid = removed.uid;
+            blobOnly.splice(idx, 1);
+          }
+        });
+        images = objOnly.concat(blobOnly);
+        // deleted by object
+      } else {
+        objOnly.forEach((image, idx) => {
+          if (image.uid === removed.uid) {
+            imageUid = removed.uid;
+            objOnly.splice(idx, 1);
+          }
+        });
+        images = objOnly.concat(blobOnly);
+        // only when uploaded already.
+        setServerSideLoader(true);
+      }
+      setImageError(null);
+      setProductImages(images);
+      // [3] sabit lang sa props
+      addProductImages({ productImages: images });
+    } catch (error) {
+      throw Error("Blob not supported in your device.");
+    }
+  };
+
+  const addUploadImg = (file, fileList, event) => {
+    const { type, size } = file;
+    const images = productImages.map(image => image);
+    //
+    if (size / 1000 / 1000 > 24) {
+      return setImageError(
+        "Invalid attachment, image should not be more than 25mb."
+      );
+    } else {
+      setImageError(null);
+    }
+    //
+    if (
+      type.indexOf("png") !== -1 ||
+      type.indexOf("jpeg") !== -1 ||
+      type.indexOf("jpg") !== -1
+    ) {
+      images.push(file);
+      setProductImages(images);
+      // [2] sabit lang sa props
+      addProductImages({
+        productImages: images
+      });
+      setImageError(null);
+    } else {
+      setImageError("Invalid attachment, only (png,jpeg) format is allowed.");
+    }
+  };
+
+  const bulkRemoveUploadedImg = () => {
+    try {
+      productImages.forEach((image, idx) => {
+        if (!(image instanceof Blob)) {
+          // every time it delete one by one
+          setServerSideLoader(true);
+        }
+        if (idx === productImages.length - 1) {
+          setProductImages([]);
+          addProductImages({ productImages: [] });
+        }
+      });
+    } catch (error) {
+      throw Error("Blob not supported in your device.");
+    }
+  };
+
   const submitForm = (values, action) => {
-    action.setSubmitting(true);
+    // action.setSubmitting(true);
 
     let formData = new FormData();
 
@@ -137,10 +219,7 @@ const CreateProductForm = ({
       : formData.set("specializations", values.specializations);
     formData.append("product_name", values.product_name);
     formData.append("short_description", values.short_description);
-    formData.append(
-      "zinc_code",
-      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
-    );
+    formData.append("zinc_code", values.zinc_code);
     formData.append("page_title", values.page_title);
     formData.append("meta_description", values.meta_description);
     formData.append("slug", values.slug);
@@ -148,274 +227,320 @@ const CreateProductForm = ({
     formData.append("body", values.body);
 
     //if theres an uploaded image include these field on our form data
-    if (values.image_gallery) {
-      //formData.set("image_gallery[]", imageGalleryFiles);
-      for (let i = 0; i < imageGalleryFiles.length; i++) {
-        formData.append("image_gallery[]", imageGalleryFiles[i]);
-      }
+    try {
+      productImages.forEach(image => {
+        if (image instanceof Blob) formData.append("image_gallery[]", image);
+      });
+    } catch (error) {
+      throw Error("Blob not supported in your device.");
     }
 
-    axios({
-      url: `${API}/products/create`,
-      method: "post",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${auth.access_token}`
-      },
-      data: formData
-    })
-      .then(res => {
-        action.resetForm();
-        action.setSubmitting(false);
-        console.log(res);
-        message.success(
-          res.data.success ? res.data.success : "Updated product successfully"
-        );
-        history.push("/products");
-      })
-      .catch(err => {
-        action.setSubmitting(false);
-        console.log(err);
-        message.error(
-          err.response.data.error
-            ? err.response.data.error
-            : "There was an error on processing your request"
-        );
-      });
+    createProduct(formData, history);
+
+    /*
+        axios({
+            url: `${API}/products/create`,
+            method: "post",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${auth.access_token}`
+            },
+            data: formData
+        })
+            .then(res => {
+                action.resetForm();
+                action.setSubmitting(false);
+                console.log(res);
+                message.success(
+                    res.data.success
+                        ? res.data.success
+                        : "Updated product successfully"
+                );
+                history.push("/products");
+            })
+            .catch(err => {
+                action.setSubmitting(false);
+                console.log(err);
+                message.error(
+                    err.response.data.error
+                        ? err.response.data.error
+                        : "There was an error on processing your request"
+                );
+            });*/
   };
 
+  // http://127.0.0.1:8000/products/create
+
   return (
-    <>
-      <Formik
-        enableReinitialize={true}
-        initialValues={data}
-        onSubmit={submitForm}
-        validationSchema={schema}
-        validateOnChange={false}
-        validateOnBlur={false}
-      >
-        {props => (
-          <Form className="product-form">
-            <Row gutter={24} className="form-section">
-              <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
-              <Col xs={24} md={8}>
-                <SelectFormField
-                  options={categories}
-                  label="Category"
-                  name="category_id"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                />
-                <TagsSuggestionFormField
-                  placeholder={"Select a tag"}
-                  label="Other tags"
-                  name="other_tags"
-                  onChange={props.setFieldValue}
-                  requiredlabel="true"
-                />
-              </Col>
-              <Col xs={24} md={7}>
-                <SelectTagsFormField
-                  options={specializations}
-                  label="Specializations"
-                  name="specializations"
-                  onChange={props.setFieldValue}
-                  placeholder="Please select a specialization"
-                  requiredlabel="true"
-                />
-              </Col>
-              <Col xs={24} md={9}>
-                <TextFormField
-                  name="product_name"
-                  type="text"
-                  label="Product Name"
-                  requiredlabel="true"
-                  placeholder="Enter a product name"
-                />
-                <TextFormField
-                  name="short_description"
-                  type="text"
-                  label="Short Description"
-                  requiredlabel="true"
-                  placeholder="Enter a short description"
-                />
+    <Spin spinning={serverSideLoader}>
+      <>
+        <Formik
+          enableReinitialize={true}
+          initialValues={data}
+          onSubmit={(values, actions) => {
+            actions.setSubmitting(false);
 
-                <label
-                  style={{
-                    display: "block",
-                    margin: "15px 0"
-                  }}
-                  className="ant-form-item-required"
-                >
-                  <span>Zinc Code </span>
-                  <Tooltip placement="top" title={sampleZincFormat}>
-                    <Icon type="info-circle" style={{ color: "#1890ff" }} />
-                  </Tooltip>
-                </label>
-                <ZincCodeFormField
-                  className="zinc-code-field1"
-                  name="zinc_code1"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="AAAA.AAA.11.11.1111"
-                  size="small"
-                />
-                <ZincCodeFormField
-                  className="zinc-code-field2"
-                  name="zinc_code2"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="Version 1.1"
-                  size="small"
-                />
-                <ZincCodeFormField
-                  className="zinc-code-field3"
-                  name="zinc_code3"
-                  type="text"
-                  onChange={props.setFieldValue}
-                  maskValidation="11 A** 1111"
-                  size="small"
-                />
-              </Col>
-            </Row>
+            if (productImages.length < 3) {
+              actions.setSubmitting(false);
+              //  setImageError("You must upload a minimum of 3 images.");
+            } else {
+              setImageError(null);
+              setServerSideLoader(true);
+              submitForm(values, actions);
+            }
+          }}
+          validationSchema={schema}
+          validateOnChange={false}
+          validateOnBlur={false}
+        >
+          {props => (
+            <Form className="product-form">
+              <Row gutter={24} className="form-section">
+                <h3 style={{ marginLeft: 10 }}>Page Organization</h3>
+                <Col xs={24} md={8}>
+                  <SelectFormField
+                    options={categories}
+                    label="Category"
+                    name="category_id"
+                    onChange={props.setFieldValue}
+                    requiredlabel="true"
+                  />
+                  <TagsSuggestionFormField
+                    placeholder={"Select a tag"}
+                    label="Other tags"
+                    name="other_tags"
+                    onChange={props.setFieldValue}
+                    requiredlabel="true"
+                  />
+                </Col>
+                <Col xs={24} md={7}>
+                  <SelectTagsFormField
+                    // create
+                    options={specializations}
+                    label="Specializations"
+                    name="specializations"
+                    onChange={props.setFieldValue}
+                    placeholder="Please select a specialization"
+                    requiredlabel="true"
+                  />
+                </Col>
+                <Col xs={24} md={9}>
+                  <TextAreaFormField
+                    name="product_name"
+                    type="text"
+                    label="Product Name"
+                    requiredlabel="true"
+                    placeholder="Enter a product name"
+                    onChange={props.setFieldValue}
+                    maxCountAllowed={100}
+                    rows={1}
+                  />
+                  <TextAreaFormField
+                    name="short_description"
+                    type="text"
+                    label="Product Description"
+                    requiredlabel="true"
+                    placeholder="Enter a product description"
+                    onChange={props.setFieldValue}
+                    maxCountAllowed={1000}
+                    rows={4}
+                  />
 
-            <Row gutter={24} className="form-section">
-              <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
-              <Col xs={24} md={12}>
-                <TextFormField
-                  name="page_title"
-                  type="text"
-                  label="Page Title"
-                  requiredlabel="true"
-                  placeholder="Enter a page title"
-                />
-                <TextFormField
-                  name="meta_description"
-                  type="text"
-                  label="Meta Description"
-                  requiredlabel="true"
-                  placeholder="Enter a meta description"
-                />
-              </Col>
+                  <label
+                    style={{
+                      display: "block",
+                      margin: "15px 0"
+                    }}
+                    className="ant-form-item-required"
+                  >
+                    <span>Zinc Code </span>
+                    <Tooltip placement="top" title={sampleZincFormat}>
+                      <Icon type="info-circle" style={{ color: "#1890ff" }} />
+                    </Tooltip>
+                  </label>
+                  <TextFormField
+                    name="zinc_code"
+                    type="text"
+                    size="small"
+                    placeholder="Enter the zinc code"
+                    onChange={props.setFieldValue}
+                    maxCountAllowed={150}
+                  />
+                </Col>
+              </Row>
 
-              <Col xs={24} md={12}>
-                <TextFormField
-                  name="slug"
-                  type="text"
-                  label="Page Slug(Optional - system will generate if empty"
-                  placeholder="Enter a page slug"
-                />
-                <TextFormField
-                  name="meta_keywords"
-                  type="text"
-                  label="Meta Keywords(Optional)"
-                  placeholder="Enter meta keywords"
-                />
-              </Col>
-            </Row>
+              <Row gutter={24} className="form-section">
+                <h3 style={{ marginLeft: 10 }}>Page Optimization</h3>
+                <Col xs={24} md={12}>
+                  <TextFormField
+                    name="page_title"
+                    type="text"
+                    label="Page Title"
+                    requiredlabel="true"
+                    placeholder="Enter a page title"
+                    onChange={props.setFieldValue}
+                    maxCountAllowed={60}
+                  />
+                  <TextAreaFormField
+                    name="meta_description"
+                    type="text"
+                    label="Meta Description"
+                    requiredlabel="true"
+                    placeholder="Enter a meta description"
+                    onChange={props.setFieldValue}
+                    maxCountAllowed={150}
+                    rows={4}
+                  />
+                </Col>
 
-            {/* 3nd row */}
-            <Row gutter={24} className="form-section last">
-              <Col xs={24} md={8}>
-                <h3 className="ant-form-item-required">
-                  Gallery Images <small>(required)</small>
-                </h3>
-                <ImageUploader getImage={getImage} />
-              </Col>
-              <Col xs={24} md={16}>
-                <h3 className="ant-form-item-required">Product Description</h3>
-                <Field name="body">
-                  {({ field, form: { touched, errors }, meta }) => (
+                <Col xs={24} md={12}>
+                  <TextFormField
+                    name="slug"
+                    type="text"
+                    label="Page Slug(Optional - system will generate if empty"
+                    placeholder="Enter a page slug"
+                    onChange={props.setFieldValue}
+                  />
+                  <TextFormField
+                    name="meta_keywords"
+                    type="text"
+                    label="Meta Keywords(Optional)"
+                    placeholder="Enter meta keywords"
+                    onChange={props.setFieldValue}
+                  />
+                </Col>
+              </Row>
+
+              {/* 3nd row */}
+              <Row gutter={24} className="form-section last">
+                <Col xs={24} md={8}>
+                  <h3 className="ant-form-item-required">
+                    Gallery Images <small>(required)</small>
+                  </h3>
+
+                  <Fragment>
+                    {/* <Spin
+                                        spinning={serverSideLoader}
+                                        indicator={
+                                            <Icon
+                                                type="loading"
+                                                style={{ fontSize: 24 }}
+                                                spin
+                                            />
+                                        }
+                                    > */}
+                    <Upload
+                      customRequest={() => {}}
+                      accept="image/*"
+                      fileList={productImages}
+                      beforeUpload={addUploadImg}
+                      onRemove={removeUploadedImg}
+                    >
+                      <Button disabled={productImages.length >= 5}>
+                        <Icon type="upload" />
+                        <span>Select File</span>
+                      </Button>
+                    </Upload>
                     <div
                       className={
-                        meta.touched && meta.error
-                          ? "has-feedback has-error ant-form-item-control"
-                          : "ant-form-item-control"
+                        "ant-form-item-control " +
+                        (imageError ? "has-error" : "")
                       }
                     >
-                      <ReactQuill
-                        theme="snow"
-                        placeholder="Write something..."
-                        modules={CreateProductForm.modules}
-                        formats={CreateProductForm.formats}
-                        value={field.value}
-                        onChange={field.onChange(field.name)}
-                      />
-                      {meta.touched && meta.error ? (
-                        <div className="ant-form-explain">{meta.error}</div>
-                      ) : null}
+                      {imageError && (
+                        <div className="ant-form-explain">{imageError}</div>
+                      )}
                     </div>
-                  )}
-                </Field>
-              </Col>
-            </Row>
 
-            {/* <Row>
+                    <br />
+                    <br />
+
+                    <ul className="image-details">
+                      <li>You can only upload png/jpeg format</li>
+                      <li>Minimum of 3 and a maximum of 5 attachments</li>
+                      <li>Maximum file size of 25mb</li>
+                    </ul>
+
+                    <br />
+
+                    <p style={{ textAlign: "right" }}>
+                      <a
+                        href="javascript:void(0);"
+                        type="default"
+                        type="danger"
+                        disabled={productImages.length < 3}
+                        onClick={bulkRemoveUploadedImg}
+                      >
+                        Clear Images
+                      </a>
+                    </p>
+                    {/* </Spin> */}
+                  </Fragment>
+                </Col>
+                <Col xs={24} md={16}>
+                  <h3 className="ant-form-item-required">
+                    Product Description
+                  </h3>
+                  <Field
+                    as={TextEditorFormField}
+                    name="body"
+                    values={props.values.body}
+                    onChange={props.setFieldValue}
+                  />
+                </Col>
+              </Row>
+
+              {/* <Row>
                             <DisplayFormikState {...props} />
                         </Row> */}
 
-            <div className="form-actions">
-              <Button style={{ marginRight: 10 }}>
-                <Link to="/therapy-areas">Cancel</Link>
-              </Button>
-              <Button htmlType="submit" type="primary">
-                Save Draft
-              </Button>
-            </div>
-          </Form>
-        )}
-      </Formik>
-    </>
+              <div className="form-actions">
+                <Button style={{ marginRight: 10 }} disabled={serverSideLoader}>
+                  <Link to="/therapy-areas">Cancel</Link>
+                </Button>
+                <Button
+                  htmlType="submit"
+                  loading={serverSideLoader}
+                  type="primary"
+                  onClick={() => {
+                    if (productImages.length < 3) {
+                      setImageError("You must upload a minimum of 3 images.");
+                    }
+                  }}
+                >
+                  Save Draft
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </>
+    </Spin>
   );
 };
-
-CreateProductForm.modules = {
-  toolbar: [
-    [{ header: "1" }, { header: "2" }, { font: [] }],
-    [{ size: [] }],
-    ["bold", "italic", "underline", "strike", "blockquote"],
-    [
-      { list: "ordered" },
-      { list: "bullet" },
-      { indent: "-1" },
-      { indent: "+1" }
-    ],
-    ["link", "image", "video"],
-    ["clean"]
-  ],
-  clipboard: {
-    // toggle to add extra line breaks when pasting HTML:
-    matchVisual: false
-  }
-};
-
-CreateProductForm.formats = [
-  "header",
-  "font",
-  "size",
-  "bold",
-  "italic",
-  "underline",
-  "strike",
-  "blockquote",
-  "list",
-  "bullet",
-  "indent",
-  "link",
-  "image",
-  "video"
-];
 
 const mapStateToProps = state => {
   return {
     auth: state.authReducer,
     postManagement: state.postManagementReducer,
-    notifs: state.notificationReducer
+    notifs: state.notificationReducer,
+    // TODO: Refactor
+    productImages: state.productManagementReducer.productImages,
+    serverSideLoader: state.productManagementReducer.serverSideLoader
   };
+};
+
+const mapDispatchToProps = {
+  createProduct,
+  fetchSpecializations,
+  fetchCategories,
+  // TODO: Refactor
+  setServerSideLoader,
+  addProductImages
 };
 
 export default connect(
   mapStateToProps,
-  { createProduct, fetchSpecializations, fetchCategories }
+  mapDispatchToProps
 )(CreateProductForm);

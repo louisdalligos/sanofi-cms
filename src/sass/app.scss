@@ -1,8 +1,8 @@
 @import "./_variables.scss";
 @import "./_all.scss";
 @import "./_sitemap.scss";
-@import "./_dnd.scss";
-@import "./_products.tab.scss";
+@import "_dnd.scss";
+@import "_products.tab.scss";
 
 html {
   min-height: 100%;
@@ -169,7 +169,8 @@ body {
   //width: 100%;
   margin: 30px 20px;
   background: #fff;
-  padding: 0 20px 40px;
+  padding: 0 20px 65px;
+  position: relative;
 
   @media screen and (min-width: 1200px) {
     width: 1100px;
@@ -280,7 +281,8 @@ body {
   }
 
   .table-list-thumbnail-image {
-    width: 70px;
+    width: 100px;
+    height: 65px;
     margin-right: 10px;
   }
 }
@@ -463,8 +465,12 @@ body {
   }
 }
 
+.zinc-code-field1 input {
+  width: 150px;
+}
+
 .zinc-code-field2 input {
-  width: 80px;
+  width: 40px;
 }
 .zinc-code-field3 input {
   width: 95px;
@@ -513,6 +519,7 @@ body {
     h2 {
       border: 1px solid #eeee;
       padding: 34px;
+      line-height: 100px;
     }
   }
 
@@ -521,4 +528,30 @@ body {
     height: 1px;
     margin: 40px 0;
   }
+}
+
+.ql-formats {
+  .ql-copyright,
+  .ql-trademark,
+  .ql-registered {
+    img {
+      width: 15px;
+      height: 14px;
+    }
+  }
+}
+
+.table-row-color-red {
+  background-color: #ffcccb;
+}
+
+.cme-table-legend-info {
+  // position: absolute;
+  // bottom: 15px;
+}
+
+.inline-error-msg {
+  color: #f5222d;
+  font-size: 14px;
+  line-height: 17px;
 }

@@ -13,14 +13,20 @@ import {
 } from "antd";
 import { Link } from "react-router-dom";
 
-import axios from "axios";
-import { API } from "../../utils/api";
-
 import { noImage } from "../../utils/constant";
 
 // redux actions import
 import { changeArticleStatus } from "../../redux/actions/post-management-actions/postManagementActions";
 import { clearNotifications } from "../../redux/actions/notification-actions/notificationActions";
+import {
+  filterTableWithParams,
+  setPageSize,
+  setPageNumber,
+  setParams,
+  clearParams,
+  setParamUrl,
+  setTotalResultCount
+} from "../../redux/actions/table-actions/tableActions";
 
 // Table components
 import WrappedTherapyAreasTableFilter from "./TherapyAreasTableFilter";
@@ -30,13 +36,25 @@ import { TableAction } from "../smart-table/TableAction";
 // Import our table config settings
 import { COLUMN_ITEM_LINK, COLUMN_ITEM_SHORT_DESC } from "../../utils/config";
 
+import { capitalizeFirstChar } from "../../utils/helper";
+
 const { confirm } = Modal;
 
 const TherapyAreasTable = ({
-  notifs,
-  clearNotifications,
   changeArticleStatus,
-  auth
+  filterTableWithParams,
+  tableData,
+  loading,
+  pageSize,
+  pageNumber,
+  setPageSize,
+  setPageNumber,
+  params,
+  paramUrl,
+  setParamUrl,
+  clearParams,
+  setTotalResultCount,
+  totalResultCount
 }) => {
   const columns = [
     {
@@ -59,7 +77,7 @@ const TherapyAreasTable = ({
             }
             key={record.id}
           >
-            {text}
+            {capitalizeFirstChar(text)}
           </Tag>
           <small style={{ display: "block" }}>
             {record.deleted_at ? record.deleted_at : null}
@@ -83,7 +101,7 @@ const TherapyAreasTable = ({
     },
     {
       title: "Article Title/Thumbnail",
-      dataIndex: "page_title",
+      dataIndex: "headline",
       rowKey: "id",
       sorter: true,
       width: 400,
@@ -155,105 +173,25 @@ const TherapyAreasTable = ({
   ];
 
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
 
   useEffect(() => {
-    fetch(); // fetch initial
+    filterTableWithParams(null, "/therapy-areas"); // fetch initial
+    setParamUrl("/therapy-areas"); // set the url
+    console.log(tableData, "TABLE DATA");
 
+    return () => {
+      // cleanup filters - set to default
+      clearParams();
+    };
     //eslint-disable-next-line
   }, []);
 
-  // Table event handlers
-  const fetch = (params = {}) => {
-    setLoading(true);
-    setPageSize(params.per_page ? params.per_page : 10);
-    axios({
-      url: `${API}/therapy-areas`,
-      method: "get",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${auth.access_token}`
-      },
-      params: params
-    })
-      .then(response => {
-        setTotal(response.data.info ? response.data.info.total_count : null); // get total count from server and set to state
-        setLoading(false);
-        setData(response.data.results);
-      })
-      .catch(err => {
-        setLoading(false);
-        message.error(
-          err && err.response.data.error
-            ? err.response.data.error
-            : "There was an error in processing your request"
-        );
-      });
-  };
-
-  // this fetch is for filters @todo - refactor to redux - see the redundancy on filter function
-  const filterFetch = (params = {}) => {
-    setLoading(true);
-    axios({
-      url: `${API}/therapy-areas`,
-      method: "get",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${auth.access_token}`
-      },
-      params: params
-    })
-      .then(response => {
-        setLoading(false);
-
-        if (response.data.success === "No results found") {
-          setTotal(0);
-          message.error("No results found");
-        } else {
-          setTotal(response.data.info ? response.data.info.total_count : null); // get total count from server and set to state
-        }
-        setData(response.data.results ? response.data.results : []);
-      })
-      .catch(err => {
-        setLoading(false);
-        message.error(
-          err && err.response.data.error
-            ? err.response.data.error
-            : "There was an error in processing your request"
-        );
-      });
-  };
-
   useEffect(() => {
-    switch (notifs.id) {
-      case "CHANGE_ARTICLE_STATUS_SUCCESS":
-        message.success(
-          notifs.notifications
-            ? notifs.notifications.success
-            : "Article successfully archived!"
-        );
-        fetch(); // call our api to fetch updated data
-        clearNotifications(); // cleanup our notification object
-        setPageNumber(1);
-        break;
-      case "CHANGE_ARTICLE_STATUS_FAILED":
-        message.error(
-          notifs.notifications
-            ? notifs.notifications.error
-            : "There was an error on processing your request!"
-        );
-        clearNotifications();
-        break;
-      default:
-        return;
-    }
+    setData(tableData.results);
+    setTotalResultCount(tableData.result_count);
+
     //eslint-disable-next-line
-  }, [notifs.id]);
+  }, [tableData.results]);
 
   // table actions
   function showArchiveConfirm(id, e) {
@@ -312,24 +250,34 @@ const TherapyAreasTable = ({
 
   function onPagerChange(pageNumber) {
     let obj = { page: pageNumber, per_page: pageSize };
-    fetch({ ...obj });
+
+    filterTableWithParams({ ...obj }, paramUrl);
     setPageNumber(pageNumber);
   }
 
   function onPageSizeChange(current, pageSize) {
-    setPageSize(pageSize); // set the page size to update the state
     let obj = { per_page: pageSize };
-    fetch({ ...obj });
+
+    filterTableWithParams({ ...params, ...obj }, paramUrl);
+    setPageSize(pageSize); // set the page size - redux action
+    setParams({ ...params, per_page: pageSize });
+    setTotalResultCount(tableData.result_count);
   }
 
   // handle table sort
   const handleTableChange = (pagination, filters, sorter) => {
+    console.log(pagination, "Pagination");
+    console.log(filters, "Filters");
+    console.log(sorter, "Sorter");
+
     const obj = {
       order_by_field: sorter.field,
       order_by_sort: sorter.order && sorter.order === "ascend" ? "ASC" : "DESC",
       per_page: pageSize
     };
-    filterFetch({ ...obj });
+
+    filterTableWithParams({ ...obj }, paramUrl);
+    setData(tableData.results); // set our data local state
   };
 
   const setStatePageSize = () => {
@@ -343,7 +291,7 @@ const TherapyAreasTable = ({
 
       {/* filters */}
       <WrappedTherapyAreasTableFilter
-        filterFetch={filterFetch}
+        //filterFetch={filterFetch}
         fetch={fetch}
         setStatePageSize={setStatePageSize}
       />
@@ -352,7 +300,7 @@ const TherapyAreasTable = ({
         columns={columns}
         rowKey={record => record.id}
         dataSource={data}
-        loading={loading}
+        loading={loading ? true : false}
         pagination={false}
         onChange={handleTableChange}
         size="small"
@@ -360,14 +308,14 @@ const TherapyAreasTable = ({
         scroll={{ x: 1100 }}
       />
 
-      {!loading && total !== null ? (
+      {!loading && totalResultCount !== null ? (
         <Pagination
           showQuickJumper
           showSizeChanger
           pageSizeOptions={["10", "25", "50", "100"]}
-          total={total}
-          showTotal={(total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`
+          total={totalResultCount}
+          showTotal={(totalResultCount, range) =>
+            `${range[0]}-${range[1]} of ${totalResultCount} items`
           }
           pageSize={pageSize}
           defaultCurrent={pageNumber}
@@ -384,16 +332,27 @@ const TherapyAreasTable = ({
 
 const mapStateToProps = state => {
   return {
-    auth: state.authReducer,
-    notifs: state.notificationReducer,
-    postManagement: state.postManagementReducer
+    postManagement: state.postManagementReducer,
+    tableData: state.tableReducer,
+    loading: state.tableReducer.requestInProgress,
+    pageSize: state.tableReducer.per_page,
+    pageNumber: state.tableReducer.page_number,
+    params: state.tableReducer.params,
+    paramUrl: state.tableReducer.param_url,
+    totalResultCount: state.tableReducer.result_count
   };
 };
 
 export default connect(
   mapStateToProps,
   {
-    clearNotifications,
-    changeArticleStatus
+    changeArticleStatus,
+    filterTableWithParams,
+    setPageSize,
+    setPageNumber,
+    setParams,
+    setParamUrl,
+    clearParams,
+    setTotalResultCount
   }
 )(TherapyAreasTable);

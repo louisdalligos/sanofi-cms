@@ -7,9 +7,6 @@ import { Button, Row, Col, Tooltip, Icon, message, Tabs } from "antd";
 import * as Yup from "yup";
 //import { DisplayFormikState } from "../../../utils/formikPropDisplay";
 //import RouteLeavingGuard from "../../utility-components/RouteLeavingGuard";
-
-import axios from "axios";
-import { API } from "../../../utils/api";
 import moment from "moment";
 
 // Form elements
@@ -17,14 +14,16 @@ import TextFormField from "../../smart-form/TextFormField";
 import SelectFormField from "../../smart-form/SelectFormField";
 import SelectTagsFormField from "../../smart-form/SelectTagsFormField";
 import TagsSuggestionFormField from "../../smart-form/TagsSuggestionFormField";
-import ZincCodeFormField from "../../smart-form/ZincCodeFormField";
 import DatePickerFormField from "../../smart-form/DatePickerFormField";
 import TextEditorFormField from "../../smart-form/TextEditorFormField";
 import EventTypeField from "../../smart-form/EventTypeField";
+import TextAreaFormField from "../../smart-form/TextAreaFormField";
 
 // Other components
-import ImageUploader from "./ImageUploader";
+import ImageUploader from "../../smart-components/ImageUploader";
 
+// redux actions
+import { createEvent } from "../../../redux/actions/cme-actions/cmeActions";
 import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
 
 // utils
@@ -34,36 +33,27 @@ import { sampleZincFormat } from "../../../utils/constant";
 const schema = Yup.object().shape({
   category_id: Yup.string().required("This field is required"),
   event_name: Yup.string()
-    .required("This field is required")
-    .max(60, "Event name is too long"),
+    .max(100, "Maximum of 100 characters allowed only")
+    .required("This field is required"),
   event_description: Yup.string()
+    .max(1000, "Maximum of 1000 characters allowed only")
+    .required("This field is required"),
+  zinc_code: Yup.string()
     .required("This field is required")
-    .max(150, "Event description is too long"),
+    .max(150, "Maximum of 150 characters allowed only"),
   event_date: Yup.string().required("This field is required"),
   event_type: Yup.string().required("This field is required"),
   //event_location: Yup.string().required("This field is required"),
   specializations: Yup.string().required("This field is required"),
   other_tags: Yup.string().required("This field is required"),
   page_title: Yup.string()
-    .required("This field is required")
-    .max(60, "Page title is too long"),
-  meta_description: Yup.string().required("This field is required"),
+    .max(60, "Maximum of 60 characters allowed only")
+    .required("This field is required"),
+  meta_description: Yup.string()
+    .max(150, "Maximum of 150 characters allowed only")
+    .required("This field is required"),
   event_body: Yup.string().required("This field is required"),
-  zinc_code1: Yup.string()
-    .required("Required field")
-    .matches(
-      /[A-Z]{4}.[A-Z]{3}.[0-9]{2}.[0-9]{2}.[0-9]{4}/,
-      "Please complete the code"
-    ),
-  zinc_code2: Yup.string()
-    .required("Required field")
-    .matches(/[Version][ ][0-9]{1}.[0-9]{1}/, "Please complete version"),
-  zinc_code3: Yup.string()
-    .required("Required field")
-    .matches(
-      /[0-9]{2}[ ][A-Z]{1}[a-z]{1}[a-z]{1}[ ][0-9]{4}/,
-      "Please complete the date"
-    )
+  featured: Yup.string().required("This field is required")
 });
 
 const CreateCMEForm = ({
@@ -73,6 +63,7 @@ const CreateCMEForm = ({
   categories,
   specializations,
   clearNotifications,
+  createEvent,
   ...props
 }) => {
   // Event types
@@ -89,12 +80,12 @@ const CreateCMEForm = ({
   };
 
   function disabledDate(current) {
-    return current && current < moment().endOf("day");
+    return current && current < moment().startOf("day");
   }
 
   function disabledFutureDate(current) {
     // Can not select days before today and today
-    return current && current > moment().endOf("day");
+    return current && current > moment().startOf("day");
   }
 
   // Handle event type change
@@ -106,6 +97,29 @@ const CreateCMEForm = ({
     setCurrentEventSelection(e);
     setFieldValue("event_date", "");
   };
+
+  useEffect(() => {
+    console.log(moment().endOf("day"));
+  }, []);
+
+  useEffect(() => {
+    switch (notifs.id) {
+      case "CREATE_EVENT_SUCCESS":
+        message.success(notifs.notifications.success);
+        history.push("/cme");
+        break;
+      case "CREATE_EVENT_FAILED":
+        message.error(
+          notifs.notifications
+            ? notifs.notifications
+            : "There was an error on processing your request"
+        );
+        break;
+      default:
+        return;
+    }
+    //eslint-disable-next-line
+  }, [notifs.id, notifs.notifications]);
 
   return (
     <form className="therapy-article-form" onSubmit={props.handleSubmit}>
@@ -152,12 +166,15 @@ const CreateCMEForm = ({
               placeholder="Enter an event location"
             />
           ) : null} */}
-          <TextFormField
+          <Field
+            as={TextFormField}
             name="event_location"
             type="text"
             label="Event Location"
             requiredlabel="true"
             placeholder="Enter an event location"
+            onChange={props.setFieldValue}
+            maxCountAllowed={100}
           />
         </Col>
         <Col xs={24} md={7}>
@@ -180,20 +197,26 @@ const CreateCMEForm = ({
           />
         </Col>
         <Col xs={24} md={9}>
-          <TextFormField
+          <TextAreaFormField
             name="event_name"
             type="text"
             label="Event Name"
             requiredlabel="true"
             placeholder="Enter an event name"
+            onChange={props.setFieldValue}
+            maxCountAllowed={100}
+            rows={1}
           />
 
-          <TextFormField
+          <TextAreaFormField
             name="event_description"
             type="text"
             label="Event Description"
             requiredlabel="true"
             placeholder="Enter an event description"
+            onChange={props.setFieldValue}
+            maxCountAllowed={1000}
+            rows={4}
           />
 
           <label
@@ -208,29 +231,13 @@ const CreateCMEForm = ({
               <Icon type="info-circle" style={{ color: "#1890ff" }} />
             </Tooltip>
           </label>
-          <ZincCodeFormField
-            className="zinc-code-field1"
-            name="zinc_code1"
+          <TextFormField
+            name="zinc_code"
             type="text"
-            onChange={props.setFieldValue}
-            maskValidation="AAAA.AAA.11.11.1111"
             size="small"
-          />
-          <ZincCodeFormField
-            className="zinc-code-field2"
-            name="zinc_code2"
-            type="text"
+            placeholder="Enter the zinc code"
             onChange={props.setFieldValue}
-            maskValidation="Version 1.1"
-            size="small"
-          />
-          <ZincCodeFormField
-            className="zinc-code-field3"
-            name="zinc_code3"
-            type="text"
-            onChange={props.setFieldValue}
-            maskValidation="11 A** 1111"
-            size="small"
+            maxCountAllowed={150}
           />
         </Col>
       </Row>
@@ -244,13 +251,18 @@ const CreateCMEForm = ({
             label="Page Title"
             requiredlabel="true"
             placeholder="Enter a page title"
+            onChange={props.setFieldValue}
+            maxCountAllowed={60}
           />
-          <TextFormField
+          <TextAreaFormField
             name="meta_description"
             type="text"
             label="Meta Description"
             requiredlabel="true"
             placeholder="Enter a meta description"
+            onChange={props.setFieldValue}
+            maxCountAllowed={150}
+            rows={4}
           />
         </Col>
 
@@ -260,12 +272,14 @@ const CreateCMEForm = ({
             type="text"
             label="Page Slug(Optional - system will generate if empty"
             placeholder="Enter a page slug"
+            onChange={props.setFieldValue}
           />
           <TextFormField
             name="meta_keywords"
             type="text"
             label="Meta Keywords(Optional)"
             placeholder="Enter meta keywords"
+            onChange={props.setFieldValue}
           />
         </Col>
       </Row>
@@ -276,7 +290,11 @@ const CreateCMEForm = ({
           <h3 className="ant-form-item-required">
             Feature Image <small>(required)</small>
           </h3>
-          <ImageUploader />
+          <ImageUploader
+            mastHeadLabel="Featured"
+            hideImage={true}
+            name="featured"
+          />
         </Col>
         <Col xs={24} md={16}>
           <h3 className="ant-form-item-required">Event Body</h3>
@@ -308,6 +326,8 @@ const formikEnhancer = withFormik({
   mapPropsToValues: props => props.data,
   validationSchema: schema,
   enableReinitialize: true,
+  validateOnChange: false,
+  validateOnBlur: false,
   handleSubmit: (values, { props, setSubmitting, resetForm }) => {
     clearNotifications();
     let formData = new FormData();
@@ -321,10 +341,7 @@ const formikEnhancer = withFormik({
     values.tag_all === true
       ? formData.append("specializations", 0)
       : formData.append("specializations", values.specializations);
-    formData.append(
-      "zinc_code",
-      `${values.zinc_code1} | ${values.zinc_code2} | ${values.zinc_code3}`
-    );
+    formData.append("zinc_code", values.zinc_code);
     formData.append("page_title", values.page_title);
     formData.append("meta_description", values.meta_description);
     formData.append("slug", values.slug);
@@ -338,39 +355,7 @@ const formikEnhancer = withFormik({
       formData.append("thumbnail", values.thumbnail); // get the blob file from component state
     }
 
-    axios({
-      url: `${API}/cme/create`,
-      method: "post",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${props.auth.access_token}`
-      },
-      data: formData
-    })
-      .then(res => {
-        resetForm();
-        setSubmitting(false);
-        console.log(res);
-        message.success(
-          res.data.success ? res.data.success : "Created event successfully"
-        );
-        props.history.push("/cme");
-      })
-      .catch(err => {
-        setSubmitting(false);
-        const errorMsg = err.response.data;
-
-        if (errorMsg.errors) {
-          errorMsg.errors.forEach(element => {
-            message.error(element);
-          });
-        }
-
-        if (errorMsg.error) {
-          message.error(errorMsg.error);
-        }
-      });
+    props.createEvent(formData); // redux action
   },
   displayName: "CreateCMEForm"
 })(CreateCMEForm);
@@ -385,7 +370,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return bindActionCreators(
     {
-      clearNotifications: clearNotifications
+      clearNotifications: clearNotifications,
+      createEvent: createEvent
     },
     dispatch
   );

@@ -54,6 +54,13 @@ function newProductRequest(id, body) {
   });
 }
 
+function removeProductImageById(uid) {
+  return axiosInstance({
+    method: "DELETE",
+    url: `/products/file/delete/${uid}`
+  });
+}
+
 const ProductManagementServices = {
   createProductRequest,
   archiveProductRequest,
@@ -61,7 +68,8 @@ const ProductManagementServices = {
   fetchCurrentProductRequest,
   updateProductRequest,
   fetchCurrentProductArticlesByCategoryIdRequest,
-  newProductRequest
+  newProductRequest,
+  removeProductImageById
 };
 
 export default ProductManagementServices;

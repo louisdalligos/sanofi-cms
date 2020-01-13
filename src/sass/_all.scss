@@ -294,6 +294,7 @@ body {
   .table-list-thumbnail-image {
     width: 70px;
     margin-right: 10px;
+    height: 60px;
   }
 }
 
@@ -477,4 +478,62 @@ body {
 }
 .zinc-code-field3 input {
   width: 95px;
+}
+
+.meta-info-field-wrap {
+  display: flex;
+}
+
+.character-counter {
+  font-size: 11px;
+  color: #bbb;
+  margin-left: auto;
+  position: relative;
+  top: 2px;
+  line-height: 15px;
+  text-align: right;
+}
+
+// 1px solid #d9d9d9
+
+.has-error .optional-field:not([disabled]):hover {
+  border-color: #d9d9d9 !important;
+}
+.has-error .optional-field,
+.has-error .optional-field:hover {
+  background-color: #fff;
+  border-color: #d9d9d9 !important;
+}
+.has-error .optional-field:focus {
+  border-color: #d9d9d9 !important;
+  border-right-width: 1px !important;
+  outline: 0;
+  -webkit-box-shadow: 0 0 0 2px rgba(209, 209, 209, 0.2) !important;
+  box-shadow: 0 0 0 2px rgba(209, 209, 209, 0.2) !important;
+}
+.has-error .optional-field,
+.has-error .optional-field:hover {
+  background-color: #fff;
+  border-color: #d9d9d9 !important;
+}
+.has-error .optional-field:focus {
+  border-color: #d9d9d9 !important;
+  border-right-width: 1px !important;
+  outline: 0;
+  -webkit-box-shadow: 0 0 0 2px rgba(209, 209, 209, 0.2) !important;
+  box-shadow: 0 0 0 2px rgba(209, 209, 209, 0.2) !important;
+}
+.text-truncate-500 {
+  max-width: 500px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.text-truncate-300 {
+  max-width: 300px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

@@ -3,7 +3,13 @@ import { useField } from "formik";
 import { Select } from "antd";
 const { Option } = Select;
 
-const SelectFormField = ({ label, placeholder, options, ...props }) => {
+const SelectFormField = ({
+  label,
+  placeholder,
+  options,
+  disabled,
+  ...props
+}) => {
   const [field, meta] = useField(props);
   const name = field.name;
 
@@ -22,10 +28,15 @@ const SelectFormField = ({ label, placeholder, options, ...props }) => {
       >
         {label}
       </label>
-      <Select {...field} {...props} notFoundContent="No results found">
+      <Select
+        {...field}
+        {...props}
+        notFoundContent="No results found"
+        disabled={disabled ? disabled : false}
+      >
         {options
           ? options.map(c => (
-              <Option key={c.id} value={c.id}>
+              <Option key={c.id} value={c.id} label={c.name}>
                 {c.name}
               </Option>
             ))

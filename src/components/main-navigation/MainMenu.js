@@ -35,18 +35,19 @@ const MainMenu = ({ user, ...props }) => {
               <Link to="/doctors">Doctors</Link>
             </Menu.Item>
             {user && user.role === "superadmin" ? (
-              <Menu.Item key="cpd-management" className="third-level-menu">
-                <Link to="/cpd-management">CPD Management</Link>
+              // <Menu.Item
+              //     key="cpd-management"
+              //     className="third-level-menu"
+              // >
+              //     <Link to="/cpd-management">CPD Management</Link>
+              // </Menu.Item>
+              <Menu.Item key="doctors-audit-trail" className="third-level-menu">
+                <Link to="/doctors-audit-trail">Deleted users</Link>
               </Menu.Item>
             ) : null}
             {user && user.role === "superadmin" ? (
               <Menu.Item key="admins">
-                <Link to="/admins">Site Admins</Link>
-              </Menu.Item>
-            ) : null}
-            {user && user.role === "superadmin" ? (
-              <Menu.Item key="doctors-audit-trail">
-                <Link to="/doctors-audit-trail">Audit Trail</Link>
+                <Link to="/admins">CMS Admins</Link>
               </Menu.Item>
             ) : null}
           </SubMenu>
@@ -54,21 +55,26 @@ const MainMenu = ({ user, ...props }) => {
         <SubMenu title={<span className="submenu-title-wrapper">Content</span>}>
           <Menu.Item key="general-settings">General Settings</Menu.Item>
 
-          <Menu.Item key="doctor-specialization" className="third-level-menu">
-            <Link to="/doctor-specialization">Doctor Specialization</Link>
-          </Menu.Item>
+          {/* <Menu.Item
+                        key="doctor-specialization"
+                        className="third-level-menu"
+                    >
+                        <Link to="/doctor-specialization">
+                            Doctor Specialization
+                        </Link>
+                    </Menu.Item> */}
 
           <Menu.Item key="categories" className="third-level-menu">
-            <Link to="/categories">Categories/Illnesses</Link>
+            <Link to="/categories">Categories</Link>
           </Menu.Item>
 
           <Menu.Item key="subcategories" className="third-level-menu">
             <Link to="/sub-categories">Subcategories/Sections</Link>
           </Menu.Item>
 
-          <Menu.Item key="other-tags" className="third-level-menu">
-            <Link to="/other-tags">Other Tags</Link>
-          </Menu.Item>
+          {/* <Menu.Item key="other-tags" className="third-level-menu">
+                        <Link to="/other-tags">Other Tags</Link>
+                    </Menu.Item> */}
 
           <Menu.Item key="therapy-areas">
             <Link to="/therapy-areas">Therapy Areas</Link>
@@ -90,15 +96,23 @@ const MainMenu = ({ user, ...props }) => {
           <SubMenu
             title={<span className="submenu-title-wrapper">Settings</span>}
           >
-            <Menu.Item key="general-settings">General Settings</Menu.Item>
-            <Menu.Item key="highlights">Home Page Highlights</Menu.Item>
-            <Menu.Item key="site-header-footer">
-              Site Header &amp; Footer
-            </Menu.Item>
-            <Menu.Item key="site-logo-seo">Site Logo, General SEO</Menu.Item>
-            <Menu.Item key="email-notifications">Email Notifications</Menu.Item>
+            {/* <Menu.Item key="general-settings">
+                            General Settings
+                        </Menu.Item>
+                        <Menu.Item key="highlights">
+                            Home Page Highlights
+                        </Menu.Item>
+                        <Menu.Item key="site-header-footer">
+                            Site Header &amp; Footer
+                        </Menu.Item>
+                        <Menu.Item key="site-logo-seo">
+                            Site Logo, General SEO
+                        </Menu.Item>
+                        <Menu.Item key="email-notifications">
+                            Email Notifications
+                        </Menu.Item> */}
             <Menu.Item key="sitemap">
-              <Link to="/sitemap">Sitemap</Link>
+              <Link to="/miscellaneous-pages">Miscellaneous pages</Link>
             </Menu.Item>
           </SubMenu>
         ) : null}

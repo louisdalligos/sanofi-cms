@@ -217,7 +217,7 @@ const ImageUploader = ({ auth, ...props }) => {
         fileList={uploadedFileList}
         accept="image/*"
       >
-        <Button>
+        <Button disabled={values.featured || uploadedFileList.length > 0}>
           <Icon type="upload" /> Select File
         </Button>
       </Upload>
@@ -227,7 +227,7 @@ const ImageUploader = ({ auth, ...props }) => {
       <Button
         type="primary"
         onClick={handleUpload}
-        disabled={isDisabled}
+        disabled={values.featured}
         loading={uploading}
         style={{ marginTop: 16, marginBottom: 20 }}
       >

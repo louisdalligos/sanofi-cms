@@ -26,14 +26,30 @@ import {
   UPDATE_ARTICLE_REQUEST,
   UPDATE_ARTICLE_SUCCESS,
   UPDATE_ARTICLE_FAILED,
+  CHECK_IMAGE_REQUEST,
+  CHECK_IMAGE_SUCCESS,
+  CHECK_IMAGE_FAILED,
   CHANGE_ARTICLE_STATUS_REQUEST,
   CHANGE_ARTICLE_STATUS_SUCCESS,
-  CHANGE_ARTICLE_STATUS_FAILED
+  CHANGE_ARTICLE_STATUS_FAILED,
+  SEARCH_TAGS_REQUEST,
+  SEARCH_TAGS_SUCCESS,
+  SEARCH_TAGS_FAILED,
+  FETCH_TAGS_REQUEST,
+  FETCH_TAGS_SUCCESS,
+  FETCH_TAGS_FAILED,
+  SET_STATUS_CHANGE_FORM_DISABLE
 } from "./types";
 
 import PostManagementServices from "./service";
 
 import { returnNotifications } from "../notification-actions/notificationActions";
+import {
+  filterTableWithParams,
+  setPageNumber
+} from "../table-actions/tableActions";
+
+import { CENTRALIZE_TOASTR_SET } from "../../../components/utility-components/CentralizeToastr/centralize-toastr.types";
 
 // Fetch specializations
 export function fetchSpecializations() {
@@ -334,25 +350,140 @@ export function changeArticleStatus(id, values) {
         payload: res.data
       });
 
+      dispatch(filterTableWithParams(null, "/therapy-areas")); // reload updated data
+      dispatch(setPageNumber(1)); // set to default page number
+
+      // dispatch for edit ui
+      dispatch(fetchCurrentArticle(id));
+
+      // return message toastr
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: res
+      });
+    } catch (err) {
+      dispatch({
+        type: CHANGE_ARTICLE_STATUS_FAILED
+      });
+
+      // return message toastr
+      dispatch({
+        type: CENTRALIZE_TOASTR_SET,
+        payload: err
+      });
+    }
+  };
+}
+
+export function setStatusChangeFormDisable(value) {
+  return async dispatch => {
+    await dispatch({
+      type: SET_STATUS_CHANGE_FORM_DISABLE,
+      payload: value
+    });
+  };
+}
+
+export function checkImage(values) {
+  return async dispatch => {
+    await dispatch({
+      type: CHECK_IMAGE_REQUEST
+    });
+
+    try {
+      const res = await PostManagementServices.checkImageRequest(values); // POST request
+      await dispatch({
+        type: CHECK_IMAGE_SUCCESS,
+        payload: res.data
+      });
+
       dispatch(
         returnNotifications(
           res.data,
           "success",
           res.status,
-          "CHANGE_ARTICLE_STATUS_SUCCESS"
+          "CHECK_IMAGE_SUCCESS"
         )
       );
     } catch (err) {
+      dispatch({
+        type: CHECK_IMAGE_FAILED
+      });
       dispatch(
         returnNotifications(
           err.response.data,
           "error",
-          err.response.status,
-          "CHANGE_ARTICLE_STATUS_FAILED"
+          err.status,
+          "CHECK_IMAGE_FAILED"
         )
       );
+    }
+  };
+}
+
+export function searchTags(query) {
+  return async dispatch => {
+    await dispatch({
+      type: SEARCH_TAGS_REQUEST
+    });
+
+    try {
+      const res = await PostManagementServices.searchTagsRequest(query); // POST request
+      await dispatch({
+        type: SEARCH_TAGS_SUCCESS,
+        payload: res.data
+      });
+
+      dispatch(
+        returnNotifications(
+          res.data,
+          "success",
+          res.status,
+          "SEARCH_TAGS_SUCCESS"
+        )
+      );
+    } catch (err) {
       dispatch({
-        type: CHANGE_ARTICLE_STATUS_FAILED
+        type: SEARCH_TAGS_FAILED
+      });
+      dispatch(
+        returnNotifications(
+          err.response.data,
+          "error",
+          err.status,
+          "SEARCH_TAGS_FAILED"
+        )
+      );
+    }
+  };
+}
+
+export function fetchTags() {
+  return async dispatch => {
+    await dispatch({
+      type: FETCH_TAGS_REQUEST
+    });
+
+    try {
+      const res = await PostManagementServices.fetchTagsRequest(); // GET request
+
+      await dispatch({
+        type: FETCH_TAGS_SUCCESS,
+        payload: res.data
+      });
+
+      dispatch(
+        returnNotifications(
+          res.data,
+          "success",
+          res.status,
+          "FETCH_TAGS_SUCCESS"
+        )
+      );
+    } catch (err) {
+      console.log(err);
+      dispatch({
+        type: FETCH_TAGS_FAILED
       });
     }
   };

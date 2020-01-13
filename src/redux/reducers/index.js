@@ -22,6 +22,9 @@ import centralizeFunctionalityReducers from "./centralize-functionality.reducers
 //centralize
 import centralizeToastrReducers from "../../components/utility-components/CentralizeToastr/centralize-toastr.reducers";
 
+import tableReducer from "./tableReducer";
+import formReducer from "./formReducer";
+
 const rootReducer = combineReducers({
   authReducer,
   notificationReducer,
@@ -43,7 +46,9 @@ const rootReducer = combineReducers({
   otherReferencesProductManagementReducers,
   clinicalTrialsProductManagementReducers,
   // for dirty
-  centralizeFunctionalityReducers
+  centralizeFunctionalityReducers,
+  tableReducer,
+  formReducer
 });
 
 export default rootReducer;

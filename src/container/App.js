@@ -59,6 +59,7 @@ const token = sessionStorage.getItem("access_token");
 
 // Our MAIN APP wrapper
 const App = ({ auth, ...props }) => {
+  /* #TOKEN-004 */
   useEffect(() => {
     //console.log(props);
     //console.log(auth, "Auth store from app");
@@ -74,12 +75,12 @@ const App = ({ auth, ...props }) => {
 
   return (
     <Fragment>
-      <CentralizeToastr />
-
       {token && auth.isLoadingUser ? (
         message.info("Please wait a moment...", 1)
       ) : (
         <div className="wrapper">
+          <CentralizeToastr />
+
           {auth.isLoggedIn ? <Navbar {...props} /> : null}
           <Switch location={props.history.location}>
             <PrivateRoute exact path={"/"} component={Dashboard} />
@@ -147,17 +148,17 @@ const App = ({ auth, ...props }) => {
               roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
             />
             {/* <PrivateRoute
-                            exact
-                            path="/categories"
-                            component={CategoriesManagementContainer}
-                            roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
-                        />
-                        <PrivateRoute
-                            exact
-                            path="/sub-categories"
-                            component={SubCategoriesManagementContainer}
-                            roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
-                        /> */}
+              exact
+              path="/categories"
+              component={CategoriesManagementContainer}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
+            />
+            <PrivateRoute
+              exact
+              path="/sub-categories"
+              component={SubCategoriesManagementContainer}
+              roles={[Role.SuperAdmin, Role.Admin, Role.Editor]}
+            /> */}
             <PrivateRoute
               exact
               path="/other-tags"
@@ -215,7 +216,7 @@ const App = ({ auth, ...props }) => {
 
             <PrivateRoute
               exact
-              path="/sitemap"
+              path="/miscellaneous-pages"
               component={SitemapManagementPage}
               roles={[Role.SuperAdmin, Role.Admin]}
             />

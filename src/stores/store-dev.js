@@ -8,16 +8,16 @@ let middleware = [];
 const logger = createLogger();
 
 if (process.env.NODE_ENV === "development") {
-    middleware = [...middleware, thunk, logger];
+  middleware = [...middleware, thunk /*, #TOKEN logger*/];
 } else {
-    middleware = [...middleware, thunk];
+  middleware = [...middleware, thunk];
 }
 
 // Initialize our REDUX store
 const store = createStore(
-    rootReducer,
-    initialState,
-    compose(applyMiddleware(...middleware))
+  rootReducer,
+  initialState,
+  compose(applyMiddleware(...middleware))
 );
 
 export default store;

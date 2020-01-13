@@ -13,19 +13,20 @@ import {
   fetchCurrentEvent,
   createEventHeadingVideo,
   updateEventHeadingVideo,
-  clearCurrentVideo
+  clearCurrentVideo,
+  clearSelectedHeading
 } from "../../../redux/actions/cme-actions/cmeActions";
+
+import { clearNotifications } from "../../../redux/actions/notification-actions/notificationActions";
 
 // validation schema
 const schema = Yup.object().shape({
   video_title: Yup.string()
-    .required("This field is required")
-    .max(150, "Video title is too long"),
-  //video_embed: Yup.string().required("This field is required"),
-  //.max(150, "Video title is too long"),
+    .max(100, "Maximum of 100 characters allowed only")
+    .required("This field is required"),
   video_description: Yup.string()
-    .required("This field is required")
-    .max(150, "Video title is too long"),
+    .max(1000, "Maximum of 1000 characters allowed only")
+    .required("This field is required"),
   video_link: Yup.string()
     .required("This field is required")
     .matches(
@@ -42,7 +43,10 @@ const AddVideoForm = ({
   currentVideo,
   isVideoOnEditMode,
   updateEventHeadingVideo,
+  clearCurrentVideo,
+  clearSelectedHeading,
   notifs,
+  clearNotifications,
   ...props
 }) => {
   const {
@@ -59,8 +63,9 @@ const AddVideoForm = ({
 
     // on unmount
     return () => {
-      console.log("UNMOUNTING ________");
-      clearCurrentVideo(); // clear selected
+      console.log("UNMOUNTING VIDEO EDIT/ADD FORM ________");
+      //clearCurrentVideo(); // clear selected
+      //clearSelectedHeading();
     };
     //eslint-disable-next-line
   }, []);
@@ -89,6 +94,7 @@ const AddVideoForm = ({
             ? notifs.notifications
             : "Oops something went wrong!"
         );
+        clearNotifications();
         break;
       case "UPDATE_EVENT_HEADING_VIDEO_SUCCESS":
         fetchCurrentEvent(currentEvent.id); // fetch again to get updated data
@@ -99,11 +105,20 @@ const AddVideoForm = ({
         );
         break;
       case "UPDATE_EVENT_HEADING_VIDEO_FAILED":
-        notifs.notifications
-          ? notifs.notifications.forEach(element => {
+        const errorMsg = notifs.notifications;
+        // 3 level validation of api response - bad
+        if (errorMsg) {
+          if (errorMsg.errors) {
+            errorMsg.errors.forEach(element => {
               message.error(element);
-            })
-          : message.error("Oops something went wrong!");
+            });
+          } else if (errorMsg.error) {
+            message.error(errorMsg.error);
+          } else {
+            message.error(errorMsg);
+          }
+        }
+
         break;
       default:
         return;
@@ -113,50 +128,42 @@ const AddVideoForm = ({
 
   const handleCancel = resetForm => {
     resetForm();
+    clearCurrentVideo();
     props.handleModalClose();
   };
 
   return (
     <form className="form" onSubmit={handleSubmit}>
       <h3>Video Information</h3>
-      {/* <Field
-                as={TextAreaFormField}
-                rows={4}
-                name="video_embed"
-                onChange={handleChange}
-                values={values.video_embed}
-                label="Video Embed Code:"
-                requiredlabel="true"
-            /> */}
 
-      <Field
-        as={TextFormField}
+      <TextFormField
         name="video_link"
-        rows={1}
-        onChange={handleChange}
+        onChange={props.setFieldValue}
         values={values.video_link}
-        label="Video Link"
+        label="Vimeo Link"
         requiredlabel="true"
+        maxCountAllowed={100}
+        rows={1}
       />
 
-      <Field
-        as={TextFormField}
+      <TextFormField
         name="video_title"
-        rows={1}
-        onChange={handleChange}
+        onChange={props.setFieldValue}
         values={values.video_title}
         label="Video Title"
         requiredlabel="true"
+        maxCountAllowed={100}
+        rows={1}
       />
 
-      <Field
-        as={TextAreaFormField}
-        rows={4}
+      <TextAreaFormField
+        rows={6}
         name="video_description"
-        onChange={handleChange}
         values={values.video_description}
         label="Video Description:"
         requiredlabel="true"
+        onChange={props.setFieldValue}
+        maxCountAllowed={1000}
       />
 
       {/* <pre>{JSON.stringify(values, null, 2)}</pre> */}
@@ -183,20 +190,25 @@ const formikEnhancer = withFormik({
       id: props.currentVideo.id,
       event_section_id: props.currentVideo.event_section_id,
       video_title: props.currentVideo.video_title,
-      video_embed: props.currentVideo.video_embed,
+      //video_embed: props.currentVideo.video_embed,
       video_description: props.currentVideo.video_description,
       video_link: props.currentVideo.video_link
     };
   },
   validationSchema: schema,
   handleSubmit: (values, { props, setSubmitting, resetForm }) => {
+    clearNotifications();
+
+    const videoId = values.id; // get event video id formik values
+
     console.log(values);
     //debugger;
-    const videoId = values.id; // get event video id formik values
 
     // redux action
     if (props.isVideoOnEditMode) {
-      props.updateEventHeadingVideo(videoId, JSON.stringify(values));
+      //alert("Edit mode action");
+      props.updateEventHeadingVideo(videoId, values);
+      //debugger;
       return;
     } else {
       // data to send to add action
@@ -205,7 +217,7 @@ const formikEnhancer = withFormik({
         event_section_id: props.currentHeadingSelected.id // get selected heading from redux store
       };
 
-      props.createEventHeadingVideo(JSON.stringify(data));
+      props.createEventHeadingVideo(data);
     }
   },
   displayName: "AddVideoForm"
@@ -226,7 +238,10 @@ const mapDispatchToProps = dispatch => {
     {
       createEventHeadingVideo: createEventHeadingVideo,
       fetchCurrentEvent: fetchCurrentEvent,
-      updateEventHeadingVideo: updateEventHeadingVideo
+      updateEventHeadingVideo: updateEventHeadingVideo,
+      clearCurrentVideo: clearCurrentVideo,
+      clearSelectedHeading: clearSelectedHeading,
+      clearNotifications: clearNotifications
     },
     dispatch
   );
