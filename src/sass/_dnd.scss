@@ -1,0 +1,89 @@
+.dnd-wrapper {
+  min-height: 52px;
+  position: relative;
+  .dnd-table {
+    border-bottom: 1px solid #d9d9d9;
+  }
+  .dnd-table:last-child {
+    border-bottom: none;
+  }
+}
+.dnd-content-wrapper {
+  p {
+    margin: 0 !important;
+  }
+  position: relative;
+  .dnd-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    left: 0;
+    display: inline-block;
+  }
+  .dnd-content {
+    padding-left: 20px;
+  }
+}
+.dnd-table {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px;
+
+  &:hover {
+    // cursor: all-scroll;
+    cursor: move; /* fallback if grab cursor is unsupported */
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+  }
+
+  .dnd-btn-wrapper {
+    display: flex;
+    justify-content: space-evenly;
+  }
+
+  div {
+    box-sizing: border-box;
+  }
+  .grid-left {
+    width: 75%;
+    padding-right: 10px;
+    @extend .truncate;
+    input {
+      display: block;
+      max-width: 100%;
+      width: 100%;
+    }
+  }
+  .grid-right {
+    // width: 22%;
+    button {
+      margin-left: 10px;
+    }
+  }
+}
+.not-bold {
+  font-weight: normal !important;
+}
+.dnd-wrapper {
+  max-width: 500px;
+  width: 100%;
+  border: 1px solid #d9d9d9;
+}
+.dnd-header {
+  max-width: 500px;
+  width: 100%;
+  font-weight: bold;
+  .grid-left,
+  .grid-right {
+    text-align: left;
+  }
+}
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
